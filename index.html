@@ -578,24 +578,33 @@
         </div>
     </div>
 
+    <!-- Add Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+
     <script>
+        // Your Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyD6zrgjxQUboB14H5ysJsTnzsiTBfak1Rk",
+            authDomain: "chatcreate-5dfd6.firebaseapp.com",
+            databaseURL: "https://chatcreate-5dfd6-default-rtdb.firebaseio.com",
+            projectId: "chatcreate-5dfd6",
+            storageBucket: "chatcreate-5dfd6.firebasestorage.app",
+            messagingSenderId: "992462114118",
+            appId: "1:992462114118:web:dbb2711332b900baf36947",
+            measurementId: "G-W7SV1FY6NE"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+
         // State management
         let currentUser = null;
         let currentChannel = null;
         let captchaCompleted = false;
         let termsAccepted = false;
         let messages = {};
-
-        // Initialize default messages for channels
-        messages['#general'] = [
-            {
-                id: 1,
-                author: 'System',
-                nickname: 'System',
-                text: 'Welcome to #general! Please be respectful and follow community guidelines.',
-                timestamp: new Date()
-            }
-        ];
 
         // reCAPTCHA simulation
         document.getElementById('recaptchaCheckbox').addEventListener('click', function() {
@@ -627,7 +636,7 @@
         document.getElementById('email').addEventListener('input', checkFormValidity);
         document.getElementById('nickname').addEventListener('input', checkFormValidity);
 
-        // Login form submission
+        // Login form submission with Firebase
         document.getElementById('loginForm').addEventListener('submit', function(e) {
             e.preventDefault();
             
@@ -636,32 +645,20 @@
             const channel = document.getElementById('channel').value || '#general';
             const errorMsg = document.getElementById('errorMessage');
             
-            // Check for @usd232.org email
             if (!email.endsWith('@usd232.org')) {
                 errorMsg.textContent = 'Access restricted to @usd232.org email addresses only.';
                 errorMsg.style.display = 'block';
                 return;
             }
             
-            // Create user session
             currentUser = {
                 email: email,
                 nickname: nickname
             };
             currentChannel = channel;
             
-            // Initialize channel if it doesn't exist
-            if (!messages[channel]) {
-                messages[channel] = [
-                    {
-                        id: 1,
-                        author: 'System',
-                        nickname: 'System',
-                        text: `Welcome to ${channel}! This is a new channel.`,
-                        timestamp: new Date()
-                    }
-                ];
-            }
+            // Clear local messages for this channel
+            messages[currentChannel] = [];
             
             // Switch to chat interface
             document.getElementById('loginScreen').style.display = 'none';
@@ -669,22 +666,44 @@
             document.getElementById('channelName').textContent = channel;
             document.getElementById('userNickname').textContent = nickname;
             
-            // Add join message
-            addSystemMessage(`${nickname} joined the channel`);
-            
-            renderMessages();
-        });
-
-        // Add system message
-        function addSystemMessage(text) {
-            const message = {
-                id: Date.now(),
+            // Add join message to Firebase
+            const joinMessage = {
                 author: 'System',
                 nickname: 'System',
-                text: text,
-                timestamp: new Date()
+                text: `${nickname} joined the channel`,
+                timestamp: Date.now()
             };
-            messages[currentChannel].push(message);
+            database.ref('channels/' + currentChannel.substring(1) + '/messages').push(joinMessage);
+            
+            // Start listening for messages
+            listenForMessages();
+        });
+
+        // Listen for messages from Firebase
+        function listenForMessages() {
+            const channelRef = database.ref('channels/' + currentChannel.substring(1) + '/messages');
+            
+            // Clear previous listeners
+            channelRef.off();
+            
+            // Listen for new messages
+            channelRef.on('child_added', (snapshot) => {
+                const message = snapshot.val();
+                message.id = snapshot.key;
+                message.timestamp = new Date(message.timestamp);
+                
+                // Add to local messages array
+                if (!messages[currentChannel]) {
+                    messages[currentChannel] = [];
+                }
+                
+                // Check if message already exists (to avoid duplicates)
+                const exists = messages[currentChannel].some(m => m.id === message.id);
+                if (!exists) {
+                    messages[currentChannel].push(message);
+                    renderMessages();
+                }
+            });
         }
 
         // Render messages
@@ -725,7 +744,7 @@
             container.scrollTop = container.scrollHeight;
         }
 
-        // Send message
+        // Send message to Firebase
         function sendMessage() {
             const input = document.getElementById('messageInput');
             const text = input.value.trim();
@@ -733,16 +752,16 @@
             if (!text) return;
             
             const message = {
-                id: Date.now(),
                 author: currentUser.email,
                 nickname: currentUser.nickname,
                 text: text,
-                timestamp: new Date()
+                timestamp: Date.now()
             };
             
-            messages[currentChannel].push(message);
+            // Send to Firebase instead of local array
+            database.ref('channels/' + currentChannel.substring(1) + '/messages').push(message);
+            
             input.value = '';
-            renderMessages();
         }
 
         // Enter key to send
@@ -754,7 +773,18 @@
 
         // Logout
         function logout() {
-            addSystemMessage(`${currentUser.nickname} left the channel`);
+            // Add leave message to Firebase
+            const leaveMessage = {
+                author: 'System',
+                nickname: 'System',
+                text: `${currentUser.nickname} left the channel`,
+                timestamp: Date.now()
+            };
+            database.ref('channels/' + currentChannel.substring(1) + '/messages').push(leaveMessage);
+            
+            // Stop listening to messages
+            const channelRef = database.ref('channels/' + currentChannel.substring(1) + '/messages');
+            channelRef.off();
             
             currentUser = null;
             currentChannel = null;
