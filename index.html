@@ -680,31 +680,29 @@
         });
 
         // Listen for messages from Firebase
-        function listenForMessages() {
-            const channelRef = database.ref('channels/' + currentChannel.substring(1) + '/messages');
-            
-            // Clear previous listeners
-            channelRef.off();
-            
-            // Listen for new messages
-            channelRef.on('child_added', (snapshot) => {
-                const message = snapshot.val();
-                message.id = snapshot.key;
-                message.timestamp = new Date(message.timestamp);
-                
-                // Add to local messages array
-                if (!messages[currentChannel]) {
-                    messages[currentChannel] = [];
-                }
-                
-                // Check if message already exists (to avoid duplicates)
-                const exists = messages[currentChannel].some(m => m.id === message.id);
-                if (!exists) {
-                    messages[currentChannel].push(message);
-                    renderMessages();
-                }
-            });
+function listenForMessages() {
+    const channelRef = database.ref('channels/' + currentChannel.substring(1) + '/messages');
+    
+    // Clear previous listeners
+    channelRef.off();
+    
+    // Only load the last 100 messages
+    channelRef.limitToLast(100).on('child_added', (snapshot) => {
+        const message = snapshot.val();
+        message.id = snapshot.key;
+        message.timestamp = new Date(message.timestamp);
+        
+        if (!messages[currentChannel]) {
+            messages[currentChannel] = [];
         }
+        
+        const exists = messages[currentChannel].some(m => m.id === message.id);
+        if (!exists) {
+            messages[currentChannel].push(message);
+            renderMessages();
+        }
+    });
+}
 
         // Render messages
         function renderMessages() {
