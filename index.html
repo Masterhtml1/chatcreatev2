@@ -457,6 +457,54 @@
             transform: none;
         }
 
+        /* Admin controls */
+        .admin-controls {
+            display: none;
+            gap: 8px;
+            margin-left: auto;
+        }
+
+        .admin-btn {
+            padding: 4px 8px;
+            border: none;
+            border-radius: 4px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .edit-btn {
+            background: #4CAF50;
+            color: white;
+        }
+
+        .edit-btn:hover {
+            background: #45a049;
+        }
+
+        .ban-btn {
+            background: #f44336;
+            color: white;
+        }
+
+        .ban-btn:hover {
+            background: #da190b;
+        }
+
+        .message:hover .admin-controls {
+            display: flex;
+        }
+
+        .banned-notice {
+            color: #f44336;
+            font-weight: bold;
+            text-align: center;
+            padding: 20px;
+            background: #ffebee;
+            border-radius: 8px;
+            margin: 20px;
+        }
+
         /* Mobile responsive */
         @media (max-width: 768px) {
             .header {
@@ -525,6 +573,11 @@
                 <div class="form-group">
                     <label class="form-label" for="nickname">Nickname</label>
                     <input type="text" id="nickname" class="form-input" required>
+                </div>
+
+                <div class="form-group" id="adminPasswordGroup" style="display: none;">
+                    <label class="form-label" for="adminPassword">Admin Password</label>
+                    <input type="password" id="adminPassword" class="form-input" placeholder="Enter admin password">
                 </div>
 
                 <div class="form-group">
@@ -605,6 +658,8 @@
         let captchaCompleted = false;
         let termsAccepted = false;
         let messages = {};
+        let isAdmin = false;
+        let bannedUsers = [];
 
         // reCAPTCHA simulation
         document.getElementById('recaptchaCheckbox').addEventListener('click', function() {
@@ -634,7 +689,17 @@
 
         // Form inputs
         document.getElementById('email').addEventListener('input', checkFormValidity);
-        document.getElementById('nickname').addEventListener('input', checkFormValidity);
+        document.getElementById('nickname').addEventListener('input', function() {
+            checkFormValidity();
+            // Show admin password field if nickname is LeBron
+            const adminPasswordGroup = document.getElementById('adminPasswordGroup');
+            if (this.value === 'LeBron') {
+                adminPasswordGroup.style.display = 'block';
+            } else {
+                adminPasswordGroup.style.display = 'none';
+                document.getElementById('adminPassword').value = '';
+            }
+        });
 
         // Login form submission with Firebase
         document.getElementById('loginForm').addEventListener('submit', function(e) {
@@ -644,6 +709,19 @@
             const nickname = document.getElementById('nickname').value;
             const channel = document.getElementById('channel').value || '#general';
             const errorMsg = document.getElementById('errorMessage');
+            const adminPassword = document.getElementById('adminPassword').value;
+            
+            // Check if trying to use admin account
+            if (nickname === 'LeBron') {
+                if (adminPassword !== 'skid') {
+                    errorMsg.textContent = 'Invalid admin password.';
+                    errorMsg.style.display = 'block';
+                    return;
+                }
+                isAdmin = true;
+            } else {
+                isAdmin = false;
+            }
             
             if (!email.endsWith('@usd232.org')) {
                 errorMsg.textContent = 'Access restricted to @usd232.org email addresses only.';
@@ -653,7 +731,8 @@
             
             currentUser = {
                 email: email,
-                nickname: nickname
+                nickname: nickname,
+                isAdmin: isAdmin
             };
             currentChannel = channel;
             
@@ -664,19 +743,24 @@
             document.getElementById('loginScreen').style.display = 'none';
             document.getElementById('chatInterface').style.display = 'flex';
             document.getElementById('channelName').textContent = channel;
-            document.getElementById('userNickname').textContent = nickname;
+            document.getElementById('userNickname').textContent = nickname + (isAdmin ? ' (Admin)' : '');
             
             // Add join message to Firebase
             const joinMessage = {
                 author: 'System',
                 nickname: 'System',
-                text: `${nickname} joined the channel`,
+                text: `${nickname}${isAdmin ? ' (Admin)' : ''} joined the channel`,
                 timestamp: Date.now()
             };
             database.ref('channels/' + currentChannel.substring(1) + '/messages').push(joinMessage);
             
             // Start listening for messages
             listenForMessages();
+            listenForMessageUpdates();
+            // Load banned users if admin
+            if (isAdmin) {
+                loadBannedUsers();
+            }
         });
 
         // Listen for messages from Firebase
@@ -716,6 +800,7 @@
             messages[currentChannel].forEach(message => {
                 const messageDiv = document.createElement('div');
                 messageDiv.className = 'message';
+                messageDiv.setAttribute('data-message-id', message.id);
                 
                 if (message.nickname === currentUser.nickname && message.author !== 'System') {
                     messageDiv.classList.add('own');
@@ -727,14 +812,25 @@
                     minute: '2-digit' 
                 });
                 
+                let adminControls = '';
+                if (isAdmin && message.author !== 'System') {
+                    adminControls = `
+                        <div class="admin-controls">
+                            <button class="admin-btn edit-btn" onclick="editMessage('${message.id}')">Edit</button>
+                            <button class="admin-btn ban-btn" onclick="banUser('${message.nickname}', '${message.author}')">Ban</button>
+                        </div>
+                    `;
+                }
+                
                 messageDiv.innerHTML = `
                     <div class="message-avatar">${initial}</div>
                     <div class="message-content">
                         <div class="message-header">
                             <span class="message-author">${message.nickname}</span>
                             <span class="message-time">${time}</span>
+                            ${adminControls}
                         </div>
-                        <div class="message-text">${message.text}</div>
+                        <div class="message-text" id="text-${message.id}">${message.text}</div>
                     </div>
                 `;
                 
@@ -750,6 +846,12 @@
             const text = input.value.trim();
             
             if (!text) return;
+            
+            // Check if user is banned
+            if (bannedUsers.includes(currentUser.email)) {
+                alert('You have been banned from sending messages.');
+                return;
+            }
             
             const message = {
                 author: currentUser.email,
@@ -809,6 +911,92 @@
                 e.target.value = '#' + value;
             }
         });
+
+        // Admin functions
+        function editMessage(messageId) {
+            const messageText = document.getElementById('text-' + messageId);
+            const currentText = messageText.textContent;
+            const newText = prompt('Edit message:', currentText);
+            
+            if (newText !== null && newText.trim() !== '') {
+                // Update in Firebase
+                const channelRef = database.ref('channels/' + currentChannel.substring(1) + '/messages');
+                channelRef.orderByKey().equalTo(messageId).once('value', (snapshot) => {
+                    snapshot.forEach((childSnapshot) => {
+                        childSnapshot.ref.update({ 
+                            text: newText.trim(),
+                            edited: true,
+                            editedBy: currentUser.nickname,
+                            editedAt: Date.now()
+                        });
+                    });
+                });
+                
+                // Update locally
+                const message = messages[currentChannel].find(m => m.id === messageId);
+                if (message) {
+                    message.text = newText.trim() + ' (edited)';
+                    renderMessages();
+                }
+            }
+        }
+
+        function banUser(nickname, email) {
+            if (confirm(`Are you sure you want to ban ${nickname}?`)) {
+                // Add to banned users in Firebase
+                database.ref('bannedUsers').push({
+                    email: email,
+                    nickname: nickname,
+                    bannedBy: currentUser.nickname,
+                    bannedAt: Date.now()
+                });
+                
+                // Add to local banned list
+                if (!bannedUsers.includes(email)) {
+                    bannedUsers.push(email);
+                }
+                
+                // Send system message
+                const banMessage = {
+                    author: 'System',
+                    nickname: 'System',
+                    text: `${nickname} has been banned by ${currentUser.nickname}`,
+                    timestamp: Date.now()
+                };
+                database.ref('channels/' + currentChannel.substring(1) + '/messages').push(banMessage);
+            }
+        }
+
+        function loadBannedUsers() {
+            database.ref('bannedUsers').on('value', (snapshot) => {
+                bannedUsers = [];
+                snapshot.forEach((childSnapshot) => {
+                    const banned = childSnapshot.val();
+                    bannedUsers.push(banned.email);
+                });
+            });
+        }
+
+        // Listen for edited messages
+        function listenForMessageUpdates() {
+            const channelRef = database.ref('channels/' + currentChannel.substring(1) + '/messages');
+            
+            channelRef.on('child_changed', (snapshot) => {
+                const updatedMessage = snapshot.val();
+                updatedMessage.id = snapshot.key;
+                updatedMessage.timestamp = new Date(updatedMessage.timestamp);
+                
+                // Update local message
+                const messageIndex = messages[currentChannel].findIndex(m => m.id === updatedMessage.id);
+                if (messageIndex !== -1) {
+                    if (updatedMessage.edited) {
+                        updatedMessage.text = updatedMessage.text + ' (edited)';
+                    }
+                    messages[currentChannel][messageIndex] = updatedMessage;
+                    renderMessages();
+                }
+            });
+        }
     </script>
 </body>
 </html>
