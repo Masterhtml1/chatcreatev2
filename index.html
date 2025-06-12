@@ -759,10 +759,7 @@
             listenForMessages();
             listenForMessageUpdates();
             loadBannedWords();
-            // Load banned users if admin
-            if (isAdmin) {
-                loadBannedUsers();
-            }
+            loadBannedUsers(); // Load for everyone, not just admins
         });
 
         // Listen for messages from Firebase
@@ -800,6 +797,11 @@
             if (!messages[currentChannel]) return;
             
             messages[currentChannel].forEach(message => {
+                // Skip messages from banned users (except system messages)
+                if (message.author !== 'System' && bannedUsers.includes(message.nickname)) {
+                    return;
+                }
+                
                 const messageDiv = document.createElement('div');
                 messageDiv.className = 'message';
                 messageDiv.setAttribute('data-message-id', message.id);
@@ -984,6 +986,15 @@
                     const banned = childSnapshot.val();
                     bannedUsers.push(banned.nickname);
                 });
+                // Re-render messages to hide banned users' messages
+                renderMessages();
+                
+                // If current user is banned, show notice and disable input
+                if (bannedUsers.includes(currentUser.nickname)) {
+                    document.getElementById('messageInput').disabled = true;
+                    document.getElementById('sendButton').disabled = true;
+                    document.getElementById('messageInput').placeholder = "You have been banned from sending messages";
+                }
             });
         }
 
