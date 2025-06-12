@@ -3,8 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ChatCreate - Chat with Friends, Family and students of MT</title>
-    <link rel="icon" type="image/x-icon" href="https://i.postimg.cc/ZqX10wg2/Chat-GPT-Image-Jun-11-2025-03-56-53-PM.png">
+    <title>ChatCreate - Chat with Friends, Family</title>
     <style>
         * {
             margin: 0;
@@ -555,13 +554,13 @@
                 <a href="https://drive.google.com/file/d/1TdsU20RNHTJMepVMTlQnoN0g5XhKnZN5/view?usp=sharing" target="_blank" class="header-btn app-btn">
                     <span>Android</span> App
                 </a>
-                <button class="header-btn connect-btn">Connect</button>
+                <a href="admin.html" class="header-btn connect-btn">Admin</a>
             </div>
         </header>
 
         <div class="container">
             <div class="hero">
-                <h1>Chat with Friends and Students of MT</h1>
+                <h1>Chat with Friends, Family and students of MT</h1>
                 <p>Connect to channels and start chatting with the community at chatcreate.vercel.app</p>
             </div>
 
@@ -661,6 +660,7 @@
         let messages = {};
         let isAdmin = false;
         let bannedUsers = [];
+        let bannedWords = [];
 
         // reCAPTCHA simulation
         document.getElementById('recaptchaCheckbox').addEventListener('click', function() {
@@ -758,6 +758,7 @@
             // Start listening for messages
             listenForMessages();
             listenForMessageUpdates();
+            loadBannedWords();
             // Load banned users if admin
             if (isAdmin) {
                 loadBannedUsers();
@@ -852,6 +853,15 @@
             if (bannedUsers.includes(currentUser.email)) {
                 alert('You have been banned from sending messages.');
                 return;
+            }
+            
+            // Check for banned words
+            const textLower = text.toLowerCase();
+            for (let word of bannedWords) {
+                if (textLower.includes(word)) {
+                    alert('Your message contains a banned word and cannot be sent.');
+                    return;
+                }
             }
             
             const message = {
@@ -974,6 +984,15 @@
                 snapshot.forEach((childSnapshot) => {
                     const banned = childSnapshot.val();
                     bannedUsers.push(banned.email);
+                });
+            });
+        }
+
+        function loadBannedWords() {
+            database.ref('bannedWords').on('value', (snapshot) => {
+                bannedWords = [];
+                snapshot.forEach((wordSnapshot) => {
+                    bannedWords.push(wordSnapshot.val());
                 });
             });
         }
