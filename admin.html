@@ -1,0 +1,736 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - ChatCreate</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+            background-color: #f5f5f5;
+            min-height: 100vh;
+            color: #333;
+        }
+
+        /* Header */
+        .header {
+            padding: 20px;
+            background: #ff69b4;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .logo {
+            font-size: 28px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logout-btn {
+            padding: 10px 20px;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.2s;
+            text-decoration: none;
+        }
+
+        .logout-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        /* Login Container */
+        .login-container {
+            max-width: 400px;
+            margin: 100px auto;
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .login-title {
+            font-size: 28px;
+            color: #333;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 16px;
+            font-weight: 500;
+            color: #555;
+            margin-bottom: 8px;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #ff69b4;
+            box-shadow: 0 0 0 3px rgba(255, 105, 180, 0.1);
+        }
+
+        .login-btn {
+            width: 100%;
+            padding: 14px;
+            background: #ff69b4;
+            color: white;
+            border: none;
+            border-radius: 25px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .login-btn:hover {
+            background: #ff1493;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 105, 180, 0.3);
+        }
+
+        .error-message {
+            color: #dc3545;
+            font-size: 14px;
+            text-align: center;
+            margin-top: 15px;
+            display: none;
+        }
+
+        /* Dashboard Container */
+        .dashboard-container {
+            display: none;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 30px;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 30px;
+            margin-top: 30px;
+        }
+
+        .dashboard-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+        }
+
+        .card-title {
+            font-size: 22px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .card-icon {
+            font-size: 24px;
+        }
+
+        /* Channel Management */
+        .channel-list {
+            margin-bottom: 20px;
+        }
+
+        .channel-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+
+        .channel-name {
+            font-weight: 500;
+            color: #555;
+        }
+
+        .clear-btn {
+            padding: 6px 16px;
+            background: #f44336;
+            color: white;
+            border: none;
+            border-radius: 20px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .clear-btn:hover {
+            background: #da190b;
+            transform: scale(1.05);
+        }
+
+        .clear-all-btn {
+            width: 100%;
+            padding: 12px;
+            background: #ff5722;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .clear-all-btn:hover {
+            background: #e64a19;
+        }
+
+        /* Banned Users */
+        .banned-list {
+            max-height: 300px;
+            overflow-y: auto;
+            margin-bottom: 20px;
+        }
+
+        .banned-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px;
+            background: #ffebee;
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+
+        .banned-info {
+            flex: 1;
+        }
+
+        .banned-nickname {
+            font-weight: 600;
+            color: #c62828;
+        }
+
+        .banned-email {
+            font-size: 14px;
+            color: #666;
+        }
+
+        .unban-btn {
+            padding: 6px 16px;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 20px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .unban-btn:hover {
+            background: #45a049;
+            transform: scale(1.05);
+        }
+
+        /* Ban User Form */
+        .ban-form {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .ban-input {
+            flex: 1;
+            padding: 10px 14px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        .ban-btn {
+            padding: 10px 20px;
+            background: #f44336;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .ban-btn:hover {
+            background: #da190b;
+        }
+
+        /* Banned Words */
+        .word-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 20px;
+            max-height: 200px;
+            overflow-y: auto;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        .word-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 12px;
+            background: #ff69b4;
+            color: white;
+            border-radius: 20px;
+            font-size: 14px;
+        }
+
+        .remove-word {
+            cursor: pointer;
+            font-weight: bold;
+            opacity: 0.8;
+            transition: opacity 0.2s;
+        }
+
+        .remove-word:hover {
+            opacity: 1;
+        }
+
+        .word-form {
+            display: flex;
+            gap: 10px;
+        }
+
+        .word-input {
+            flex: 1;
+            padding: 10px 14px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        .add-word-btn {
+            padding: 10px 20px;
+            background: #ff69b4;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .add-word-btn:hover {
+            background: #ff1493;
+        }
+
+        /* Stats */
+        .stat-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 15px;
+            background: #f0f7ff;
+            border-radius: 8px;
+            margin-bottom: 12px;
+        }
+
+        .stat-label {
+            font-weight: 500;
+            color: #555;
+        }
+
+        .stat-value {
+            font-weight: 700;
+            color: #1976d2;
+            font-size: 18px;
+        }
+
+        /* Loading */
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #999;
+        }
+
+        /* Empty state */
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .header {
+                flex-direction: column;
+                gap: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Login Screen -->
+    <div id="loginScreen">
+        <header class="header">
+            <div class="logo">
+                🛡️ Admin Dashboard
+            </div>
+            <a href="index.html" class="logout-btn">Back to Chat</a>
+        </header>
+
+        <div class="login-container">
+            <h1 class="login-title">Admin Login</h1>
+            <form id="adminLoginForm">
+                <div class="form-group">
+                    <label class="form-label" for="adminPassword">Password</label>
+                    <input type="password" id="adminPassword" class="form-input" required autofocus>
+                </div>
+                <button type="submit" class="login-btn">Login</button>
+                <div class="error-message" id="errorMessage"></div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Dashboard -->
+    <div id="dashboardScreen" class="dashboard-container">
+        <header class="header">
+            <div class="logo">
+                🛡️ Admin Dashboard
+            </div>
+            <button class="logout-btn" onclick="logout()">Logout</button>
+        </header>
+
+        <div class="dashboard-grid">
+            <!-- Channel Management -->
+            <div class="dashboard-card">
+                <h2 class="card-title">
+                    <span class="card-icon">💬</span>
+                    Channel Management
+                </h2>
+                <div class="channel-list" id="channelList">
+                    <div class="loading">Loading channels...</div>
+                </div>
+                <button class="clear-all-btn" onclick="clearAllChannels()">Clear All Channels</button>
+            </div>
+
+            <!-- Banned Users -->
+            <div class="dashboard-card">
+                <h2 class="card-title">
+                    <span class="card-icon">🚫</span>
+                    Banned Users
+                </h2>
+                <div class="ban-form">
+                    <input type="email" id="banEmail" class="ban-input" placeholder="Email to ban">
+                    <button class="ban-btn" onclick="banUser()">Ban User</button>
+                </div>
+                <div class="banned-list" id="bannedList">
+                    <div class="loading">Loading banned users...</div>
+                </div>
+            </div>
+
+            <!-- Banned Words -->
+            <div class="dashboard-card">
+                <h2 class="card-title">
+                    <span class="card-icon">🔤</span>
+                    Banned Words
+                </h2>
+                <div class="word-form">
+                    <input type="text" id="bannedWord" class="word-input" placeholder="Add banned word">
+                    <button class="add-word-btn" onclick="addBannedWord()">Add Word</button>
+                </div>
+                <div class="word-list" id="wordList">
+                    <div class="loading">Loading banned words...</div>
+                </div>
+            </div>
+
+            <!-- Statistics -->
+            <div class="dashboard-card">
+                <h2 class="card-title">
+                    <span class="card-icon">📊</span>
+                    Statistics
+                </h2>
+                <div id="statsContainer">
+                    <div class="stat-item">
+                        <span class="stat-label">Total Messages</span>
+                        <span class="stat-value" id="totalMessages">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Active Channels</span>
+                        <span class="stat-value" id="activeChannels">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Banned Users</span>
+                        <span class="stat-value" id="bannedCount">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Banned Words</span>
+                        <span class="stat-value" id="wordCount">0</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+
+    <script>
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyD6zrgjxQUboB14H5ysJsTnzsiTBfak1Rk",
+            authDomain: "chatcreate-5dfd6.firebaseapp.com",
+            databaseURL: "https://chatcreate-5dfd6-default-rtdb.firebaseio.com",
+            projectId: "chatcreate-5dfd6",
+            storageBucket: "chatcreate-5dfd6.firebasestorage.app",
+            messagingSenderId: "992462114118",
+            appId: "1:992462114118:web:dbb2711332b900baf36947",
+            measurementId: "G-W7SV1FY6NE"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+
+        // Admin login
+        document.getElementById('adminLoginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const password = document.getElementById('adminPassword').value;
+            const errorMsg = document.getElementById('errorMessage');
+
+            if (password === 'skid') {
+                document.getElementById('loginScreen').style.display = 'none';
+                document.getElementById('dashboardScreen').style.display = 'block';
+                loadDashboard();
+            } else {
+                errorMsg.textContent = 'Invalid password';
+                errorMsg.style.display = 'block';
+            }
+        });
+
+        // Load dashboard data
+        function loadDashboard() {
+            loadChannels();
+            loadBannedUsers();
+            loadBannedWords();
+            loadStats();
+        }
+
+        // Load channels
+        function loadChannels() {
+            const channelList = document.getElementById('channelList');
+            
+            database.ref('channels').on('value', (snapshot) => {
+                channelList.innerHTML = '';
+                let channelCount = 0;
+                
+                if (snapshot.exists()) {
+                    snapshot.forEach((channelSnapshot) => {
+                        const channelName = '#' + channelSnapshot.key;
+                        channelCount++;
+                        
+                        const channelItem = document.createElement('div');
+                        channelItem.className = 'channel-item';
+                        channelItem.innerHTML = `
+                            <span class="channel-name">${channelName}</span>
+                            <button class="clear-btn" onclick="clearChannel('${channelSnapshot.key}')">Clear</button>
+                        `;
+                        channelList.appendChild(channelItem);
+                    });
+                    
+                    document.getElementById('activeChannels').textContent = channelCount;
+                } else {
+                    channelList.innerHTML = '<div class="empty-state">No active channels</div>';
+                }
+            });
+        }
+
+        // Clear single channel
+        function clearChannel(channel) {
+            if (confirm(`Clear all messages in #${channel}?`)) {
+                database.ref('channels/' + channel + '/messages').remove();
+                alert(`Channel #${channel} cleared`);
+            }
+        }
+
+        // Clear all channels
+        function clearAllChannels() {
+            if (confirm('Are you sure you want to clear ALL channels? This cannot be undone!')) {
+                database.ref('channels').remove();
+                alert('All channels cleared');
+            }
+        }
+
+        // Load banned users
+        function loadBannedUsers() {
+            const bannedList = document.getElementById('bannedList');
+            
+            database.ref('bannedUsers').on('value', (snapshot) => {
+                bannedList.innerHTML = '';
+                let bannedCount = 0;
+                
+                if (snapshot.exists()) {
+                    snapshot.forEach((bannedSnapshot) => {
+                        const banned = bannedSnapshot.val();
+                        const key = bannedSnapshot.key;
+                        bannedCount++;
+                        
+                        const bannedItem = document.createElement('div');
+                        bannedItem.className = 'banned-item';
+                        bannedItem.innerHTML = `
+                            <div class="banned-info">
+                                <div class="banned-nickname">${banned.nickname}</div>
+                                <div class="banned-email">${banned.email}</div>
+                            </div>
+                            <button class="unban-btn" onclick="unbanUser('${key}')">Unban</button>
+                        `;
+                        bannedList.appendChild(bannedItem);
+                    });
+                    
+                    document.getElementById('bannedCount').textContent = bannedCount;
+                } else {
+                    bannedList.innerHTML = '<div class="empty-state">No banned users</div>';
+                    document.getElementById('bannedCount').textContent = '0';
+                }
+            });
+        }
+
+        // Ban user
+        function banUser() {
+            const email = document.getElementById('banEmail').value.trim();
+            
+            if (!email) {
+                alert('Please enter an email address');
+                return;
+            }
+            
+            database.ref('bannedUsers').push({
+                email: email,
+                nickname: 'Manual Ban',
+                bannedBy: 'Admin Dashboard',
+                bannedAt: Date.now()
+            });
+            
+            document.getElementById('banEmail').value = '';
+            alert(`${email} has been banned`);
+        }
+
+        // Unban user
+        function unbanUser(key) {
+            if (confirm('Unban this user?')) {
+                database.ref('bannedUsers/' + key).remove();
+                alert('User unbanned');
+            }
+        }
+
+        // Load banned words
+        function loadBannedWords() {
+            const wordList = document.getElementById('wordList');
+            
+            database.ref('bannedWords').on('value', (snapshot) => {
+                wordList.innerHTML = '';
+                let wordCount = 0;
+                
+                if (snapshot.exists()) {
+                    snapshot.forEach((wordSnapshot) => {
+                        const word = wordSnapshot.val();
+                        const key = wordSnapshot.key;
+                        wordCount++;
+                        
+                        const wordTag = document.createElement('div');
+                        wordTag.className = 'word-tag';
+                        wordTag.innerHTML = `
+                            ${word}
+                            <span class="remove-word" onclick="removeBannedWord('${key}')">×</span>
+                        `;
+                        wordList.appendChild(wordTag);
+                    });
+                    
+                    document.getElementById('wordCount').textContent = wordCount;
+                } else {
+                    wordList.innerHTML = '<div class="empty-state">No banned words</div>';
+                    document.getElementById('wordCount').textContent = '0';
+                }
+            });
+        }
+
+        // Add banned word
+        function addBannedWord() {
+            const word = document.getElementById('bannedWord').value.trim().toLowerCase();
+            
+            if (!word) {
+                alert('Please enter a word');
+                return;
+            }
+            
+            database.ref('bannedWords').push(word);
+            document.getElementById('bannedWord').value = '';
+        }
+
+        // Remove banned word
+        function removeBannedWord(key) {
+            database.ref('bannedWords/' + key).remove();
+        }
+
+        // Load statistics
+        function loadStats() {
+            // Count total messages
+            database.ref('channels').once('value', (snapshot) => {
+                let totalMessages = 0;
+                
+                if (snapshot.exists()) {
+                    snapshot.forEach((channelSnapshot) => {
+                        const messages = channelSnapshot.child('messages').numChildren();
+                        totalMessages += messages;
+                    });
+                }
+                
+                document.getElementById('totalMessages').textContent = totalMessages;
+            });
+        }
+
+        // Logout
+        function logout() {
+            document.getElementById('loginScreen').style.display = 'block';
+            document.getElementById('dashboardScreen').style.display = 'none';
+            document.getElementById('adminPassword').value = '';
+            document.getElementById('errorMessage').style.display = 'none';
+        }
+    </script>
+</body>
+</html>
