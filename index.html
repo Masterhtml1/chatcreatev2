@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ChatCreate - Chat with Friends, Family and students of MT</title>
-        <link rel="icon" type="image/x-icon" href="https://yourimageshare.com/ib/53MgLPleiK.png">
     <style>
         * {
             margin: 0;
@@ -17,6 +16,61 @@
             background-color: #ffffff;
             min-height: 100vh;
             color: #333;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        /* Dark theme */
+        body.dark-theme {
+            background-color: #1a1a1a;
+            color: #e0e0e0;
+        }
+
+        .dark-theme .header {
+            background: #2d2d2d;
+            border-bottom-color: #444;
+        }
+
+        .dark-theme .login-form {
+            background: #2d2d2d;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .dark-theme .form-input {
+            background: #1a1a1a;
+            border-color: #444;
+            color: #e0e0e0;
+        }
+
+        .dark-theme .form-input:focus {
+            border-color: #ff69b4;
+        }
+
+        .dark-theme .recaptcha-container {
+            background: #1a1a1a;
+            border-color: #444;
+        }
+
+        .dark-theme .messages-container {
+            background: #1a1a1a;
+        }
+
+        .dark-theme .message-content {
+            background: #2d2d2d;
+        }
+
+        .dark-theme .message.own .message-content {
+            background: #3a4a5a;
+        }
+
+        .dark-theme .message-input-container {
+            background: #2d2d2d;
+            border-top-color: #444;
+        }
+
+        .dark-theme .message-input {
+            background: #1a1a1a;
+            border-color: #444;
+            color: #e0e0e0;
         }
 
         /* Header */
@@ -506,7 +560,228 @@
             margin: 20px;
         }
 
-        /* Mobile responsive */
+        /* Theme toggle */
+        .theme-toggle {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: #ff69b4;
+            color: white;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s;
+            z-index: 1000;
+        }
+
+        .theme-toggle:hover {
+            transform: scale(1.1);
+        }
+
+        /* User presence */
+        .user-status {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            margin-left: 5px;
+        }
+
+        .status-online {
+            background: #4CAF50;
+        }
+
+        .status-offline {
+            background: #999;
+        }
+
+        /* Typing indicator */
+        .typing-indicator {
+            padding: 10px 20px;
+            font-style: italic;
+            color: #666;
+            font-size: 14px;
+            min-height: 30px;
+        }
+
+        .dark-theme .typing-indicator {
+            color: #999;
+        }
+
+        /* Message reactions */
+        .message-reactions {
+            display: flex;
+            gap: 5px;
+            margin-top: 5px;
+            flex-wrap: wrap;
+        }
+
+        .reaction {
+            display: inline-flex;
+            align-items: center;
+            gap: 3px;
+            padding: 2px 8px;
+            background: rgba(0, 0, 0, 0.05);
+            border-radius: 12px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .dark-theme .reaction {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .reaction:hover {
+            background: rgba(0, 0, 0, 0.1);
+            transform: scale(1.1);
+        }
+
+        .reaction-count {
+            font-size: 11px;
+            color: #666;
+        }
+
+        .reaction-picker {
+            position: absolute;
+            bottom: 100%;
+            right: 0;
+            background: white;
+            border-radius: 8px;
+            padding: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            display: none;
+            gap: 5px;
+            z-index: 1000;
+        }
+
+        .dark-theme .reaction-picker {
+            background: #2d2d2d;
+        }
+
+        .reaction-picker.show {
+            display: flex;
+        }
+
+        .reaction-emoji {
+            font-size: 20px;
+            cursor: pointer;
+            padding: 5px;
+            border-radius: 4px;
+            transition: all 0.2s;
+        }
+
+        .reaction-emoji:hover {
+            background: rgba(0, 0, 0, 0.1);
+            transform: scale(1.2);
+        }
+
+        .react-btn {
+            opacity: 0;
+            padding: 4px 8px;
+            background: #f0f0f0;
+            border: none;
+            border-radius: 4px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-left: 5px;
+        }
+
+        .dark-theme .react-btn {
+            background: #444;
+            color: #e0e0e0;
+        }
+
+        .message:hover .react-btn {
+            opacity: 1;
+        }
+
+        /* Search bar */
+        .search-container {
+            padding: 10px 15px;
+            background: white;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .dark-theme .search-container {
+            background: #2d2d2d;
+            border-bottom-color: #444;
+        }
+
+        .search-input {
+            flex: 1;
+            padding: 8px 15px;
+            border: 1px solid #ddd;
+            border-radius: 20px;
+            font-size: 14px;
+            outline: none;
+        }
+
+        .dark-theme .search-input {
+            background: #1a1a1a;
+            border-color: #444;
+            color: #e0e0e0;
+        }
+
+        .search-input:focus {
+            border-color: #ff69b4;
+        }
+
+        .search-results {
+            background: rgba(255, 255, 255, 0.95);
+            color: #333;
+            padding: 5px 10px;
+            font-size: 12px;
+            text-align: center;
+        }
+
+        .dark-theme .search-results {
+            background: rgba(45, 45, 45, 0.95);
+            color: #e0e0e0;
+        }
+
+        .message.highlight {
+            background: rgba(255, 105, 180, 0.1);
+            border-radius: 8px;
+            padding: 5px;
+            margin: -5px;
+        }
+
+        /* Online users list */
+        .online-users {
+            padding: 10px 15px;
+            background: rgba(255, 105, 180, 0.1);
+            border-bottom: 1px solid rgba(255, 105, 180, 0.2);
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .online-user {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 4px 12px;
+            background: white;
+            border-radius: 15px;
+            font-size: 13px;
+        }
+
+        .dark-theme .online-user {
+            background: #2d2d2d;
+        }
         @media (max-width: 768px) {
             .header {
                 padding: 15px;
@@ -627,13 +902,31 @@
             </div>
         </div>
 
+        <div class="search-container">
+            <input type="text" class="search-input" id="searchInput" placeholder="Search messages...">
+            <div class="search-results" id="searchResults" style="display: none;"></div>
+        </div>
+
+        <div class="online-users" id="onlineUsers">
+            <strong>Online:</strong>
+        </div>
+
         <div class="messages-container" id="messagesContainer"></div>
+
+        <div class="typing-indicator" id="typingIndicator"></div>
 
         <div class="message-input-container">
             <input type="text" class="message-input" id="messageInput" placeholder="Type a message...">
             <button class="send-btn" id="sendButton" onclick="sendMessage()">Send</button>
         </div>
     </div>
+
+    <!-- Theme Toggle Button -->
+    <button class="theme-toggle" onclick="toggleTheme()" title="Toggle theme">
+        <svg id="themeIcon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+        </svg>
+    </button>
 
     <!-- Add Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
@@ -665,6 +958,10 @@
         let isAdmin = false;
         let bannedUsers = [];
         let bannedWords = [];
+        let typingTimer = null;
+        let isTyping = false;
+        let onlineUsers = {};
+        let messageReactions = {};
 
         // reCAPTCHA simulation
         document.getElementById('recaptchaCheckbox').addEventListener('click', function() {
@@ -764,6 +1061,11 @@
             listenForMessageUpdates();
             loadBannedWords();
             loadBannedUsers(); // Load for everyone, not just admins
+            setupPresence();
+            listenForTyping();
+            listenForOnlineUsers();
+            listenForReactions();
+            setupSearch();
         });
 
         // Listen for messages from Firebase
@@ -821,6 +1123,8 @@
                 });
                 
                 let adminControls = '';
+                let reactButton = '';
+                
                 if (isAdmin && message.author !== 'System') {
                     adminControls = `
                         <div class="admin-controls">
@@ -830,15 +1134,44 @@
                     `;
                 }
                 
+                if (message.author !== 'System') {
+                    reactButton = `<button class="react-btn" onclick="showReactionPicker('${message.id}')">😊</button>`;
+                }
+                
+                const reactions = messageReactions[message.id] || {};
+                let reactionsHtml = '';
+                if (Object.keys(reactions).length > 0) {
+                    reactionsHtml = '<div class="message-reactions">';
+                    for (const [emoji, users] of Object.entries(reactions)) {
+                        reactionsHtml += `
+                            <div class="reaction" onclick="toggleReaction('${message.id}', '${emoji}')">
+                                <span>${emoji}</span>
+                                <span class="reaction-count">${users.length}</span>
+                            </div>
+                        `;
+                    }
+                    reactionsHtml += '</div>';
+                }
+                
                 messageDiv.innerHTML = `
                     <div class="message-avatar">${initial}</div>
                     <div class="message-content">
                         <div class="message-header">
                             <span class="message-author">${message.nickname}</span>
                             <span class="message-time">${time}</span>
+                            ${reactButton}
                             ${adminControls}
                         </div>
                         <div class="message-text" id="text-${message.id}">${message.text}</div>
+                        ${reactionsHtml}
+                        <div class="reaction-picker" id="picker-${message.id}">
+                            <span class="reaction-emoji" onclick="addReaction('${message.id}', '👍')">👍</span>
+                            <span class="reaction-emoji" onclick="addReaction('${message.id}', '❤️')">❤️</span>
+                            <span class="reaction-emoji" onclick="addReaction('${message.id}', '😂')">😂</span>
+                            <span class="reaction-emoji" onclick="addReaction('${message.id}', '😮')">😮</span>
+                            <span class="reaction-emoji" onclick="addReaction('${message.id}', '😢')">😢</span>
+                            <span class="reaction-emoji" onclick="addReaction('${message.id}', '🔥')">🔥</span>
+                        </div>
                     </div>
                 `;
                 
@@ -901,6 +1234,12 @@
             };
             database.ref('channels/' + currentChannel.substring(1) + '/messages').push(leaveMessage);
             
+            // Remove presence
+            database.ref('presence/' + currentUser.nickname).remove();
+            
+            // Remove any typing indicator
+            database.ref('channels/' + currentChannel.substring(1) + '/typing/' + currentUser.nickname).remove();
+            
             // Stop listening to messages
             const channelRef = database.ref('channels/' + currentChannel.substring(1) + '/messages');
             channelRef.off();
@@ -928,6 +1267,207 @@
                 e.target.value = '#' + value;
             }
         });
+
+        // Typing indicator
+        document.getElementById('messageInput').addEventListener('input', function() {
+            if (!isTyping) {
+                isTyping = true;
+                database.ref('channels/' + currentChannel.substring(1) + '/typing/' + currentUser.nickname).set({
+                    timestamp: Date.now()
+                });
+            }
+            
+            clearTimeout(typingTimer);
+            typingTimer = setTimeout(() => {
+                isTyping = false;
+                database.ref('channels/' + currentChannel.substring(1) + '/typing/' + currentUser.nickname).remove();
+            }, 1000);
+        });
+
+        // Theme toggle
+        function toggleTheme() {
+            document.body.classList.toggle('dark-theme');
+            const isDark = document.body.classList.contains('dark-theme');
+            localStorage.setItem('theme', isDark ? 'dark' : 'light');
+            
+            // Update icon
+            const icon = document.getElementById('themeIcon');
+            if (isDark) {
+                icon.innerHTML = '<circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>';
+            } else {
+                icon.innerHTML = '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>';
+            }
+        }
+
+        // Load saved theme
+        if (localStorage.getItem('theme') === 'dark') {
+            toggleTheme();
+        }
+
+        // User presence
+        function setupPresence() {
+            const userRef = database.ref('presence/' + currentUser.nickname);
+            const presenceRef = database.ref('.info/connected');
+            
+            presenceRef.on('value', (snapshot) => {
+                if (snapshot.val()) {
+                    userRef.onDisconnect().remove();
+                    userRef.set({
+                        nickname: currentUser.nickname,
+                        channel: currentChannel,
+                        timestamp: Date.now()
+                    });
+                }
+            });
+        }
+
+        // Listen for typing
+        function listenForTyping() {
+            const typingRef = database.ref('channels/' + currentChannel.substring(1) + '/typing');
+            
+            typingRef.on('value', (snapshot) => {
+                const typing = snapshot.val() || {};
+                const typingUsers = Object.keys(typing).filter(user => {
+                    return user !== currentUser.nickname && Date.now() - typing[user].timestamp < 2000;
+                });
+                
+                const indicator = document.getElementById('typingIndicator');
+                if (typingUsers.length > 0) {
+                    indicator.textContent = typingUsers.join(', ') + (typingUsers.length === 1 ? ' is typing...' : ' are typing...');
+                } else {
+                    indicator.textContent = '';
+                }
+            });
+        }
+
+        // Listen for online users
+        function listenForOnlineUsers() {
+            database.ref('presence').on('value', (snapshot) => {
+                onlineUsers = {};
+                snapshot.forEach((childSnapshot) => {
+                    const user = childSnapshot.val();
+                    if (user.channel === currentChannel) {
+                        onlineUsers[childSnapshot.key] = user;
+                    }
+                });
+                updateOnlineUsersList();
+            });
+        }
+
+        // Update online users display
+        function updateOnlineUsersList() {
+            const container = document.getElementById('onlineUsers');
+            container.innerHTML = '<strong>Online:</strong> ';
+            
+            Object.keys(onlineUsers).forEach(nickname => {
+                const userSpan = document.createElement('span');
+                userSpan.className = 'online-user';
+                userSpan.innerHTML = `${nickname}<span class="user-status status-online"></span>`;
+                container.appendChild(userSpan);
+            });
+        }
+
+        // Message reactions
+        function showReactionPicker(messageId) {
+            // Hide all other pickers
+            document.querySelectorAll('.reaction-picker').forEach(picker => {
+                picker.classList.remove('show');
+            });
+            
+            // Toggle this picker
+            const picker = document.getElementById('picker-' + messageId);
+            picker.classList.toggle('show');
+            
+            // Hide picker when clicking outside
+            setTimeout(() => {
+                document.addEventListener('click', function hidePickerOnClick(e) {
+                    if (!e.target.closest('.reaction-picker') && !e.target.closest('.react-btn')) {
+                        picker.classList.remove('show');
+                        document.removeEventListener('click', hidePickerOnClick);
+                    }
+                });
+            }, 100);
+        }
+
+        function addReaction(messageId, emoji) {
+            database.ref('reactions/' + currentChannel.substring(1) + '/' + messageId + '/' + emoji + '/' + currentUser.nickname).set(true);
+            document.getElementById('picker-' + messageId).classList.remove('show');
+        }
+
+        function toggleReaction(messageId, emoji) {
+            const reactionRef = database.ref('reactions/' + currentChannel.substring(1) + '/' + messageId + '/' + emoji + '/' + currentUser.nickname);
+            
+            reactionRef.once('value', (snapshot) => {
+                if (snapshot.exists()) {
+                    reactionRef.remove();
+                } else {
+                    reactionRef.set(true);
+                }
+            });
+        }
+
+        function listenForReactions() {
+            database.ref('reactions/' + currentChannel.substring(1)).on('value', (snapshot) => {
+                messageReactions = {};
+                
+                snapshot.forEach((messageSnapshot) => {
+                    const messageId = messageSnapshot.key;
+                    messageReactions[messageId] = {};
+                    
+                    messageSnapshot.forEach((emojiSnapshot) => {
+                        const emoji = emojiSnapshot.key;
+                        const users = Object.keys(emojiSnapshot.val() || {});
+                        if (users.length > 0) {
+                            messageReactions[messageId][emoji] = users;
+                        }
+                    });
+                });
+                
+                renderMessages();
+            });
+        }
+
+        // Search functionality
+        function setupSearch() {
+            const searchInput = document.getElementById('searchInput');
+            const searchResults = document.getElementById('searchResults');
+            
+            searchInput.addEventListener('input', function() {
+                const query = this.value.toLowerCase().trim();
+                
+                if (query === '') {
+                    searchResults.style.display = 'none';
+                    document.querySelectorAll('.message').forEach(msg => {
+                        msg.classList.remove('highlight');
+                    });
+                    return;
+                }
+                
+                let matchCount = 0;
+                const channelMessages = messages[currentChannel] || [];
+                
+                channelMessages.forEach(message => {
+                    const messageElement = document.querySelector(`[data-message-id="${message.id}"]`);
+                    if (messageElement) {
+                        if (message.text.toLowerCase().includes(query) || message.nickname.toLowerCase().includes(query)) {
+                            messageElement.classList.add('highlight');
+                            matchCount++;
+                        } else {
+                            messageElement.classList.remove('highlight');
+                        }
+                    }
+                });
+                
+                searchResults.style.display = 'block';
+                searchResults.textContent = matchCount > 0 ? `Found ${matchCount} message${matchCount > 1 ? 's' : ''}` : 'No messages found';
+                
+                // Scroll to first result
+                const firstHighlight = document.querySelector('.message.highlight');
+                if (firstHighlight) {
+                    firstHighlight.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+            });
+        }
 
         // Admin functions
         function editMessage(messageId) {
