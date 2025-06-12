@@ -622,6 +622,32 @@
             transform: scale(1.1);
         }
 
+        /* Theme toggle in header */
+        .theme-toggle-header {
+            padding: 8px;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            width: 36px;
+            height: 36px;
+        }
+
+        .theme-toggle-header:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.1);
+        }
+
+        /* Hide floating toggle when in chat */
+        .chat-active .theme-toggle {
+            display: none;
+        }
+
         /* User presence */
         .user-status {
             display: inline-block;
@@ -935,6 +961,11 @@
                 <span class="channel-name" id="channelName">#general</span>
             </h2>
             <div class="user-info">
+                <button class="theme-toggle-header" onclick="toggleTheme()" title="Toggle theme">
+                    <svg id="themeIconHeader" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                </button>
                 <span id="userNickname"></span>
                 <button class="logout-btn" onclick="logout()">Leave</button>
             </div>
@@ -1084,6 +1115,9 @@
             document.getElementById('chatInterface').style.display = 'flex';
             document.getElementById('channelName').textContent = channel;
             document.getElementById('userNickname').textContent = nickname + (isAdmin ? ' (Admin)' : '');
+            
+            // Add chat-active class to body
+            document.body.classList.add('chat-active');
             
             // Add join message to Firebase
             const joinMessage = {
@@ -1306,6 +1340,9 @@
             // Switch back to login
             document.getElementById('loginScreen').style.display = 'block';
             document.getElementById('chatInterface').style.display = 'none';
+            
+            // Remove chat-active class from body
+            document.body.classList.remove('chat-active');
         }
 
         // Channel input formatting
@@ -1338,13 +1375,17 @@
             const isDark = document.body.classList.contains('dark-theme');
             localStorage.setItem('theme', isDark ? 'dark' : 'light');
             
-            // Update icon
-            const icon = document.getElementById('themeIcon');
-            if (isDark) {
-                icon.innerHTML = '<circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>';
-            } else {
-                icon.innerHTML = '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>';
-            }
+            // Update both icons
+            const icons = [document.getElementById('themeIcon'), document.getElementById('themeIconHeader')];
+            icons.forEach(icon => {
+                if (icon) {
+                    if (isDark) {
+                        icon.innerHTML = '<circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>';
+                    } else {
+                        icon.innerHTML = '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>';
+                    }
+                }
+            });
         }
 
         // Load saved theme
