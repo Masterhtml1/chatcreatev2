@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ChatCreate - Chat with Friends, Family</title>
+    <title>ChatCreate - Chat with Friends, Family and students of MT</title>
     <style>
         * {
             margin: 0;
@@ -552,7 +552,7 @@
             </div>
             <div class="header-buttons">
                 <a href="https://drive.google.com/file/d/1TdsU20RNHTJMepVMTlQnoN0g5XhKnZN5/view?usp=sharing" target="_blank" class="header-btn app-btn">
-                    <span>Android</span> App
+                    <span>👁</span> App
                 </a>
                 <a href="admin.html" class="header-btn connect-btn">Admin</a>
             </div>
@@ -850,7 +850,7 @@
             if (!text) return;
             
             // Check if user is banned
-            if (bannedUsers.includes(currentUser.email)) {
+            if (bannedUsers.includes(currentUser.nickname)) {
                 alert('You have been banned from sending messages.');
                 return;
             }
@@ -956,15 +956,14 @@
             if (confirm(`Are you sure you want to ban ${nickname}?`)) {
                 // Add to banned users in Firebase
                 database.ref('bannedUsers').push({
-                    email: email,
                     nickname: nickname,
                     bannedBy: currentUser.nickname,
                     bannedAt: Date.now()
                 });
                 
                 // Add to local banned list
-                if (!bannedUsers.includes(email)) {
-                    bannedUsers.push(email);
+                if (!bannedUsers.includes(nickname)) {
+                    bannedUsers.push(nickname);
                 }
                 
                 // Send system message
@@ -983,7 +982,7 @@
                 bannedUsers = [];
                 snapshot.forEach((childSnapshot) => {
                     const banned = childSnapshot.val();
-                    bannedUsers.push(banned.email);
+                    bannedUsers.push(banned.nickname);
                 });
             });
         }
