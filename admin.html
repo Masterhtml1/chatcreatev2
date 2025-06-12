@@ -455,7 +455,7 @@
                     Banned Users
                 </h2>
                 <div class="ban-form">
-                    <input type="email" id="banEmail" class="ban-input" placeholder="Email to ban">
+                    <input type="text" id="banNickname" class="ban-input" placeholder="Nickname to ban">
                     <button class="ban-btn" onclick="banUser()">Ban User</button>
                 </div>
                 <div class="banned-list" id="bannedList">
@@ -615,7 +615,7 @@
                         bannedItem.innerHTML = `
                             <div class="banned-info">
                                 <div class="banned-nickname">${banned.nickname}</div>
-                                <div class="banned-email">${banned.email}</div>
+                                <div class="banned-email">Banned by: ${banned.bannedBy || 'Unknown'}</div>
                             </div>
                             <button class="unban-btn" onclick="unbanUser('${key}')">Unban</button>
                         `;
@@ -632,22 +632,21 @@
 
         // Ban user
         function banUser() {
-            const email = document.getElementById('banEmail').value.trim();
+            const nickname = document.getElementById('banNickname').value.trim();
             
-            if (!email) {
-                alert('Please enter an email address');
+            if (!nickname) {
+                alert('Please enter a nickname');
                 return;
             }
             
             database.ref('bannedUsers').push({
-                email: email,
-                nickname: 'Manual Ban',
+                nickname: nickname,
                 bannedBy: 'Admin Dashboard',
                 bannedAt: Date.now()
             });
             
-            document.getElementById('banEmail').value = '';
-            alert(`${email} has been banned`);
+            document.getElementById('banNickname').value = '';
+            alert(`${nickname} has been banned`);
         }
 
         // Unban user
