@@ -479,29 +479,18 @@
                 </div>
             </div>
 
-            <!-- Statistics -->
+            <!-- Approved Emails -->
             <div class="dashboard-card">
                 <h2 class="card-title">
-                    <span class="card-icon">📊</span>
-                    Statistics
+                    <span class="card-icon">✉️</span>
+                    Approved Emails
                 </h2>
-                <div id="statsContainer">
-                    <div class="stat-item">
-                        <span class="stat-label">Total Messages</span>
-                        <span class="stat-value" id="totalMessages">0</span>
-                    </div>
-                    <div class="stat-item">
-                        <span class="stat-label">Active Channels</span>
-                        <span class="stat-value" id="activeChannels">0</span>
-                    </div>
-                    <div class="stat-item">
-                        <span class="stat-label">Banned Users</span>
-                        <span class="stat-value" id="bannedCount">0</span>
-                    </div>
-                    <div class="stat-item">
-                        <span class="stat-label">Banned Words</span>
-                        <span class="stat-value" id="wordCount">0</span>
-                    </div>
+                <div class="ban-form">
+                    <input type="email" id="approveEmail" class="ban-input" placeholder="email@usd232.org">
+                    <button class="ban-btn" style="background: #4CAF50;" onclick="approveEmail()">Add Email</button>
+                </div>
+                <div class="banned-list" id="approvedEmailsList">
+                    <div class="loading">Loading approved emails...</div>
                 </div>
             </div>
         </div>
@@ -549,7 +538,75 @@
             loadChannels();
             loadBannedUsers();
             loadBannedWords();
+            loadApprovedEmails();
             loadStats();
+        }
+
+        // Load approved emails
+        function loadApprovedEmails() {
+            const approvedList = document.getElementById('approvedEmailsList');
+            
+            database.ref('approvedEmails').on('value', (snapshot) => {
+                approvedList.innerHTML = '';
+                let approvedCount = 0;
+                
+                if (snapshot.exists()) {
+                    snapshot.forEach((emailSnapshot) => {
+                        const email = emailSnapshot.val();
+                        const key = emailSnapshot.key;
+                        approvedCount++;
+                        
+                        const emailItem = document.createElement('div');
+                        emailItem.className = 'banned-item';
+                        emailItem.innerHTML = `
+                            <div class="banned-info">
+                                <div class="banned-nickname">${email}</div>
+                            </div>
+                            <button class="unban-btn" onclick="removeApprovedEmail('${key}')">Remove</button>
+                        `;
+                        approvedList.appendChild(emailItem);
+                    });
+                    
+                    document.getElementById('approvedCount').textContent = approvedCount;
+                } else {
+                    approvedList.innerHTML = '<div class="empty-state">No approved emails. Add some to allow access.</div>';
+                    document.getElementById('approvedCount').textContent = '0';
+                }
+            });
+        }
+
+        // Approve email
+        function approveEmail() {
+            const email = document.getElementById('approveEmail').value.trim().toLowerCase();
+            
+            if (!email) {
+                alert('Please enter an email address');
+                return;
+            }
+            
+            if (!email.endsWith('@usd232.org')) {
+                alert('Email must be a @usd232.org address');
+                return;
+            }
+            
+            // Check if already exists
+            database.ref('approvedEmails').orderByValue().equalTo(email).once('value', (snapshot) => {
+                if (snapshot.exists()) {
+                    alert('This email is already approved');
+                } else {
+                    database.ref('approvedEmails').push(email);
+                    document.getElementById('approveEmail').value = '';
+                    alert(`${email} has been approved`);
+                }
+            });
+        }
+
+        // Remove approved email
+        function removeApprovedEmail(key) {
+            if (confirm('Remove this email from approved list?')) {
+                database.ref('approvedEmails/' + key).remove();
+                alert('Email removed from approved list');
+            }
         }
 
         // Load channels
