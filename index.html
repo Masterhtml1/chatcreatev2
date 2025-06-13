@@ -969,57 +969,45 @@
                 <div class="form-group">
                     <label class="form-label" for="schoolEmail">School Email</label>
                     <input type="email" id="schoolEmail" class="form-input" placeholder="yourname@usd232.org" required>
-                    <p class="form-hint">We'll send you a sign-in link - no password needed!</p>
+                    <p class="form-hint">Enter your USD 232 school email address</p>
                 </div>
 
-                <button type="button" class="submit-btn" id="sendLinkBtn">Send Sign-In Link</button>
-
-                <div id="waitingSection" style="display: none;">
-                    <p class="form-hint" style="text-align: center; margin: 20px 0; color: #4CAF50;">
-                        ✉️ Check your email! We sent a sign-in link to <strong id="sentToEmail"></strong>
-                    </p>
-                    <button type="button" class="submit-btn" onclick="location.reload()">Send New Link</button>
+                <div class="form-group">
+                    <label class="form-label" for="nickname">Nickname</label>
+                    <input type="text" id="nickname" class="form-input" required>
                 </div>
 
-                <div id="completeSignInSection" style="display: none;">
-                    <div class="form-group">
-                        <label class="form-label" for="nickname">Nickname</label>
-                        <input type="text" id="nickname" class="form-input" required>
-                    </div>
-
-                    <div class="form-group" id="adminPasswordGroup" style="display: none;">
-                        <label class="form-label" for="adminPassword">Admin Password</label>
-                        <input type="password" id="adminPassword" class="form-input" placeholder="Enter admin password">
-                    </div>
-
-                    <div class="form-group">
-                        <label class="form-label" for="channel">Channel</label>
-                        <input type="text" id="channel" class="form-input channel-input" value="#channel" placeholder="#channel">
-                    </div>
-
-                    <div class="recaptcha-container">
-                        <div class="recaptcha-checkbox" id="recaptchaCheckbox"></div>
-                        <span class="recaptcha-text">I'm not a robot</span>
-                        <div class="recaptcha-logo">
-                            reCAPTCHA<br>
-                            <small>Privacy - Terms</small>
-                        </div>
-                    </div>
-
-                    <div class="terms-container">
-                        <input type="checkbox" id="termsCheckbox" class="terms-checkbox">
-                        <label for="termsCheckbox" class="terms-text">
-                            I agree to the <a href="terms.html" target="_blank">Terms of Use</a> and <a href="privacy.html" target="_blank">Privacy Policy</a>
-                        </label>
-                    </div>
-
-                    <p class="terms-notice">
-                        By joining a channel, you agree to our terms of service which includes: respecting other users, no harassment, no spam, and appropriate content only. Your messages may be monitored for compliance.
-                    </p>
-
-                    <button type="submit" class="submit-btn" id="submitBtn" disabled>Join Channel</button>
+                <div class="form-group" id="adminPasswordGroup" style="display: none;">
+                    <label class="form-label" for="adminPassword">Admin Password</label>
+                    <input type="password" id="adminPassword" class="form-input" placeholder="Enter admin password">
                 </div>
-                
+
+                <div class="form-group">
+                    <label class="form-label" for="channel">Channel</label>
+                    <input type="text" id="channel" class="form-input channel-input" value="#channel" placeholder="#channel">
+                </div>
+
+                <div class="recaptcha-container">
+                    <div class="recaptcha-checkbox" id="recaptchaCheckbox"></div>
+                    <span class="recaptcha-text">I'm not a robot</span>
+                    <div class="recaptcha-logo">
+                        reCAPTCHA<br>
+                        <small>Privacy - Terms</small>
+                    </div>
+                </div>
+
+                <div class="terms-container">
+                    <input type="checkbox" id="termsCheckbox" class="terms-checkbox">
+                    <label for="termsCheckbox" class="terms-text">
+                        I agree to the <a href="terms.html" target="_blank">Terms of Use</a> and <a href="privacy.html" target="_blank">Privacy Policy</a>
+                    </label>
+                </div>
+
+                <p class="terms-notice">
+                    By joining a channel, you agree to our terms of service which includes: respecting other users, no harassment, no spam, and appropriate content only. Your messages may be monitored for compliance.
+                </p>
+
+                <button type="submit" class="submit-btn" id="submitBtn" disabled>Join Channel</button>
                 <div class="error-message" id="errorMessage"></div>
             </form>
         </div>
@@ -1110,105 +1098,25 @@
         let isTyping = false;
         let onlineUsers = {};
         let messageReactions = {};
-        let authenticatedUser = null;
+        let approvedEmails = [];
 
-        // Action code settings for email link
-        const actionCodeSettings = {
-            // URL you want to redirect back to
-            url: window.location.origin + window.location.pathname,
-            // This must be true for email link sign-in
-            handleCodeInApp: true,
-        };
+        // Load approved emails from Firebase
+        function loadApprovedEmails() {
+            database.ref('approvedEmails').once('value', (snapshot) => {
+                approvedEmails = [];
+                snapshot.forEach((childSnapshot) => {
+                    approvedEmails.push(childSnapshot.val().toLowerCase());
+                });
+                console.log(`Loaded ${approvedEmails.length} approved emails`);
+            });
+        }
 
-        // Send sign-in email link
-        document.getElementById('sendLinkBtn').addEventListener('click', async function() {
-            const email = document.getElementById('schoolEmail').value;
-            const errorMsg = document.getElementById('errorMessage');
-            errorMsg.style.display = 'none';
-            
-            if (!email) {
-                errorMsg.textContent = 'Please enter your email address.';
-                errorMsg.style.display = 'block';
-                return;
-            }
-            
-            if (!email.endsWith('@usd232.org')) {
-                errorMsg.textContent = 'Only @usd232.org email addresses are allowed.';
-                errorMsg.style.display = 'block';
-                return;
-            }
-            
-            try {
-                await auth.sendSignInLinkToEmail(email, actionCodeSettings);
-                
-                // Save the email locally
-                window.localStorage.setItem('emailForSignIn', email);
-                
-                // Show waiting message
-                document.getElementById('schoolEmail').disabled = true;
-                document.getElementById('sendLinkBtn').style.display = 'none';
-                document.getElementById('waitingSection').style.display = 'block';
-                document.getElementById('sentToEmail').textContent = email;
-                
-            } catch (error) {
-                console.error('Error sending email:', error);
-                
-                if (error.code === 'auth/invalid-email') {
-                    errorMsg.textContent = 'Invalid email address format.';
-                } else if (error.code === 'auth/missing-android-pkg-name') {
-                    errorMsg.textContent = 'Configuration error. Please contact administrator.';
-                } else if (error.code === 'auth/missing-ios-bundle-id') {
-                    errorMsg.textContent = 'Configuration error. Please contact administrator.';
-                } else if (error.code === 'auth/unauthorized-domain') {
-                    errorMsg.textContent = 'This domain is not authorized. Please contact administrator.';
-                } else {
-                    errorMsg.textContent = 'Failed to send email. Please try again. Error: ' + error.message;
-                }
-                errorMsg.style.display = 'block';
-            }
-        });
+        // Call this on page load
+        loadApprovedEmails();
 
-        // Check if user is returning from email link
-        if (auth.isSignInWithEmailLink(window.location.href)) {
-            let email = window.localStorage.getItem('emailForSignIn');
-            
-            if (!email) {
-                // If missing, prompt the user for it
-                email = window.prompt('Please provide your email for confirmation');
-            }
-            
-            if (email) {
-                auth.signInWithEmailLink(email, window.location.href)
-                    .then((result) => {
-                        // Clear email from storage
-                        window.localStorage.removeItem('emailForSignIn');
-                        
-                        // Store authenticated user
-                        authenticatedUser = result.user;
-                        
-                        // Clear the URL
-                        window.history.replaceState({}, document.title, window.location.pathname);
-                        
-                        // Show the complete sign-in section
-                        document.getElementById('schoolEmail').value = email;
-                        document.getElementById('schoolEmail').disabled = true;
-                        document.getElementById('sendLinkBtn').style.display = 'none';
-                        document.getElementById('waitingSection').style.display = 'none';
-                        document.getElementById('completeSignInSection').style.display = 'block';
-                        
-                        // Show success message
-                        const successMsg = document.createElement('p');
-                        successMsg.className = 'form-hint';
-                        successMsg.style.color = '#4CAF50';
-                        successMsg.style.textAlign = 'center';
-                        successMsg.textContent = '✓ Email verified successfully!';
-                        document.querySelector('.login-form').insertBefore(successMsg, document.getElementById('completeSignInSection'));
-                    })
-                    .catch((error) => {
-                        console.error('Error signing in with email link:', error);
-                        alert('Error: ' + error.message);
-                    });
-            }
+        // Check if email is in approved list
+        function isApprovedEmail(email) {
+            return approvedEmails.includes(email.toLowerCase());
         }
 
         // Form validation
@@ -1226,10 +1134,11 @@
 
         // Check form validity
         function checkFormValidity() {
+            const email = document.getElementById('schoolEmail').value;
             const nickname = document.getElementById('nickname').value;
             const submitBtn = document.getElementById('submitBtn');
             
-            if (authenticatedUser && nickname && captchaCompleted && termsAccepted) {
+            if (email && nickname && captchaCompleted && termsAccepted) {
                 submitBtn.disabled = false;
             } else {
                 submitBtn.disabled = true;
@@ -1237,6 +1146,26 @@
         }
 
         // Form inputs
+        document.getElementById('schoolEmail').addEventListener('input', function() {
+            checkFormValidity();
+            const errorMsg = document.getElementById('errorMessage');
+            
+            if (this.value && this.value.includes('@') && this.value.endsWith('@usd232.org')) {
+                // Check if email is approved
+                if (!isApprovedEmail(this.value)) {
+                    errorMsg.textContent = 'This email is not registered with USD 232. Please contact your administrator.';
+                    errorMsg.style.display = 'block';
+                } else {
+                    errorMsg.style.display = 'none';
+                }
+            } else if (this.value && this.value.includes('@')) {
+                errorMsg.textContent = 'Please use a valid @usd232.org email address';
+                errorMsg.style.display = 'block';
+            } else {
+                errorMsg.style.display = 'none';
+            }
+        });
+
         document.getElementById('nickname').addEventListener('input', function() {
             checkFormValidity();
             // Show admin password field if nickname is LeBron
@@ -1253,17 +1182,18 @@
         document.getElementById('loginForm').addEventListener('submit', function(e) {
             e.preventDefault();
             
-            if (!authenticatedUser) {
-                const errorMsg = document.getElementById('errorMessage');
-                errorMsg.textContent = 'Please verify your email first.';
-                errorMsg.style.display = 'block';
-                return;
-            }
-            
+            const email = document.getElementById('schoolEmail').value;
             const nickname = document.getElementById('nickname').value;
             const channel = document.getElementById('channel').value || '#general';
             const errorMsg = document.getElementById('errorMessage');
             const adminPassword = document.getElementById('adminPassword').value;
+            
+            // Check if email is approved
+            if (!isApprovedEmail(email)) {
+                errorMsg.textContent = 'This email is not authorized. Please contact your school administrator.';
+                errorMsg.style.display = 'block';
+                return;
+            }
             
             // Check if trying to use admin account
             if (nickname === 'LeBron') {
@@ -1277,10 +1207,13 @@
                 isAdmin = false;
             }
             
+            // Create a unique ID based on email
+            const userId = btoa(email).replace(/[^a-zA-Z0-9]/g, '');
+            
             currentUser = {
-                email: authenticatedUser.email,
+                email: email,
                 nickname: nickname,
-                uid: authenticatedUser.uid,
+                uid: userId,
                 isAdmin: isAdmin
             };
             currentChannel = channel;
@@ -1503,9 +1436,6 @@
             // Stop listening to messages
             const channelRef = database.ref('channels/' + currentChannel.substring(1) + '/messages');
             channelRef.off();
-            
-            // Sign out from Firebase
-            auth.signOut();
             
             currentUser = null;
             currentChannel = null;
@@ -1845,4 +1775,4 @@
         }
     </script>
 </body>
-    </html>
+</html>
