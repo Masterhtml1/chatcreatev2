@@ -335,6 +335,64 @@
             text-align: center;
         }
 
+        /* Google Sign-In */
+        .google-signin-container {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .google-signin-btn {
+            width: 100%;
+            padding: 12px 20px;
+            background: white;
+            border: 1px solid #dadce0;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 500;
+            color: #3c4043;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            transition: all 0.2s;
+        }
+
+        .google-signin-btn:hover {
+            background: #f8f9fa;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .dark-theme .google-signin-btn {
+            background: #2d2d2d;
+            border-color: #444;
+            color: #e0e0e0;
+        }
+
+        .dark-theme .google-signin-btn:hover {
+            background: #3a3a3a;
+        }
+
+        .signin-note {
+            margin-top: 10px;
+            font-size: 14px;
+            color: #666;
+        }
+
+        .dark-theme .signin-note {
+            color: #999;
+        }
+
+        .form-hint {
+            font-size: 13px;
+            color: #666;
+            margin-top: 5px;
+        }
+
+        .dark-theme .form-hint {
+            color: #999;
+        }
+
         /* Submit button */
         .submit-btn {
             width: 100%;
@@ -1000,6 +1058,7 @@
     <!-- Add Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
 
     <script>
         // Your Firebase configuration
@@ -1017,9 +1076,17 @@
         // Initialize Firebase
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
+        const auth = firebase.auth();
+
+        // Configure Google Auth Provider
+        const googleProvider = new firebase.auth.GoogleAuthProvider();
+        googleProvider.setCustomParameters({
+            'hd': 'usd232.org' // Restrict to usd232.org domain
+        });
 
         // State management
         let currentUser = null;
+        let googleUser = null;
         let currentChannel = null;
         let captchaCompleted = false;
         let termsAccepted = false;
@@ -1031,6 +1098,45 @@
         let isTyping = false;
         let onlineUsers = {};
         let messageReactions = {};
+
+        // Google Sign-In
+        document.getElementById('googleSignInBtn').addEventListener('click', async function() {
+            try {
+                const result = await auth.signInWithPopup(googleProvider);
+                const user = result.user;
+                
+                // Check if email is from usd232.org
+                if (!user.email.endsWith('@usd232.org')) {
+                    await auth.signOut();
+                    const errorMsg = document.getElementById('errorMessage');
+                    errorMsg.textContent = 'Access restricted to @usd232.org accounts only.';
+                    errorMsg.style.display = 'block';
+                    return;
+                }
+                
+                // Store Google user info
+                googleUser = user;
+                
+                // Extract first name from display name
+                const firstName = user.displayName.split(' ')[0];
+                
+                // Show nickname field with pre-filled name
+                document.getElementById('nicknameGroup').style.display = 'block';
+                document.getElementById('nickname').value = firstName;
+                
+                // Hide Google sign-in button
+                document.querySelector('.google-signin-container').style.display = 'none';
+                
+                // Check form validity
+                checkFormValidity();
+                
+            } catch (error) {
+                console.error('Google sign-in error:', error);
+                const errorMsg = document.getElementById('errorMessage');
+                errorMsg.textContent = 'Sign-in failed. Please try again.';
+                errorMsg.style.display = 'block';
+            }
+        });
 
         // reCAPTCHA simulation
         document.getElementById('recaptchaCheckbox').addEventListener('click', function() {
@@ -1047,11 +1153,10 @@
 
         // Check form validity
         function checkFormValidity() {
-            const email = document.getElementById('email').value;
             const nickname = document.getElementById('nickname').value;
             const submitBtn = document.getElementById('submitBtn');
             
-            if (email && nickname && captchaCompleted && termsAccepted) {
+            if (googleUser && nickname && captchaCompleted && termsAccepted) {
                 submitBtn.disabled = false;
             } else {
                 submitBtn.disabled = true;
@@ -1059,7 +1164,6 @@
         }
 
         // Form inputs
-        document.getElementById('email').addEventListener('input', checkFormValidity);
         document.getElementById('nickname').addEventListener('input', function() {
             checkFormValidity();
             // Show admin password field if nickname is LeBron
@@ -1076,7 +1180,13 @@
         document.getElementById('loginForm').addEventListener('submit', function(e) {
             e.preventDefault();
             
-            const email = document.getElementById('email').value;
+            if (!googleUser) {
+                const errorMsg = document.getElementById('errorMessage');
+                errorMsg.textContent = 'Please sign in with Google first.';
+                errorMsg.style.display = 'block';
+                return;
+            }
+            
             const nickname = document.getElementById('nickname').value;
             const channel = document.getElementById('channel').value || '#general';
             const errorMsg = document.getElementById('errorMessage');
@@ -1094,15 +1204,12 @@
                 isAdmin = false;
             }
             
-            if (!email.endsWith('@usd232.org')) {
-                errorMsg.textContent = 'Access restricted to @usd232.org email addresses only.';
-                errorMsg.style.display = 'block';
-                return;
-            }
-            
             currentUser = {
-                email: email,
+                email: googleUser.email,
                 nickname: nickname,
+                displayName: googleUser.displayName,
+                photoURL: googleUser.photoURL,
+                uid: googleUser.uid,
                 isAdmin: isAdmin
             };
             currentChannel = channel;
@@ -1326,7 +1433,11 @@
             const channelRef = database.ref('channels/' + currentChannel.substring(1) + '/messages');
             channelRef.off();
             
+            // Sign out from Google
+            auth.signOut();
+            
             currentUser = null;
+            googleUser = null;
             currentChannel = null;
             captchaCompleted = false;
             termsAccepted = false;
@@ -1336,6 +1447,8 @@
             document.getElementById('recaptchaCheckbox').classList.remove('checked');
             document.getElementById('submitBtn').disabled = true;
             document.getElementById('errorMessage').style.display = 'none';
+            document.getElementById('nicknameGroup').style.display = 'none';
+            document.querySelector('.google-signin-container').style.display = 'block';
             
             // Switch back to login
             document.getElementById('loginScreen').style.display = 'block';
@@ -1662,4 +1775,4 @@
         }
     </script>
 </body>
-</html>
+    </html>
