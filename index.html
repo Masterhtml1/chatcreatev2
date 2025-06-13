@@ -1108,30 +1108,13 @@
         let onlineUsers = {};
         let messageReactions = {};
 
-        // Google Sign-In simulation for testing
+        // Google Sign-In
         document.getElementById('googleSignInBtn').addEventListener('click', async function() {
-            // Simulate successful Google sign-in for testing
-            googleUser = {
-                email: 'testuser@usd232.org',
-                displayName: 'Test User',
-                uid: 'test123'
-            };
-            
-            // Show nickname field with pre-filled name
-            document.getElementById('nicknameGroup').style.display = 'block';
-            document.getElementById('nickname').value = 'Test';
-            
-            // Hide Google sign-in button
-            document.getElementById('googleSigninContainer').style.display = 'none';
-            
-            // Check form validity
-            checkFormValidity();
-            
-            /* Real Google Auth code (commented out for testing):
             try {
                 const result = await auth.signInWithPopup(googleProvider);
                 const user = result.user;
                 
+                // Check if email is from usd232.org
                 if (!user.email.endsWith('@usd232.org')) {
                     await auth.signOut();
                     const errorMsg = document.getElementById('errorMessage');
@@ -1140,21 +1123,34 @@
                     return;
                 }
                 
+                // Store Google user info
                 googleUser = user;
+                
+                // Extract first name from display name
                 const firstName = user.displayName.split(' ')[0];
                 
+                // Show nickname field with pre-filled name
                 document.getElementById('nicknameGroup').style.display = 'block';
                 document.getElementById('nickname').value = firstName;
+                
+                // Hide Google sign-in button
                 document.getElementById('googleSigninContainer').style.display = 'none';
+                
+                // Check form validity
                 checkFormValidity();
                 
             } catch (error) {
                 console.error('Google sign-in error:', error);
                 const errorMsg = document.getElementById('errorMessage');
-                errorMsg.textContent = 'Sign-in failed. Please try again.';
+                if (error.code === 'auth/popup-blocked') {
+                    errorMsg.textContent = 'Please allow popups for this site.';
+                } else if (error.code === 'auth/cancelled-popup-request') {
+                    errorMsg.textContent = 'Sign-in cancelled.';
+                } else {
+                    errorMsg.textContent = 'Sign-in failed. Please try again.';
+                }
                 errorMsg.style.display = 'block';
             }
-            */
         });
 
         // reCAPTCHA simulation
@@ -1452,8 +1448,8 @@
             const channelRef = database.ref('channels/' + currentChannel.substring(1) + '/messages');
             channelRef.off();
             
-            // Sign out from Google (commented out for testing)
-            // auth.signOut();
+            // Sign out from Google
+            auth.signOut();
             
             currentUser = null;
             googleUser = null;
