@@ -969,16 +969,19 @@
                 <div class="form-group">
                     <label class="form-label" for="schoolEmail">School Email</label>
                     <input type="email" id="schoolEmail" class="form-input" placeholder="yourname@usd232.org" required>
-                    <p class="form-hint">We'll send you a verification link</p>
+                    <p class="form-hint">We'll send you a sign-in link - no password needed!</p>
                 </div>
 
-                <button type="button" class="submit-btn" id="sendLinkBtn" style="margin-bottom: 20px;">Send Verification Link</button>
+                <button type="button" class="submit-btn" id="sendLinkBtn">Send Sign-In Link</button>
 
-                <div id="verificationSection" style="display: none;">
-                    <p class="form-hint" style="text-align: center; margin-bottom: 20px; color: #4CAF50;">
-                        ✓ Verification email sent! Check your inbox and click the link to continue.
+                <div id="waitingSection" style="display: none;">
+                    <p class="form-hint" style="text-align: center; margin: 20px 0; color: #4CAF50;">
+                        ✉️ Check your email! We sent a sign-in link to <strong id="sentToEmail"></strong>
                     </p>
-                    
+                    <button type="button" class="submit-btn" onclick="location.reload()">Send New Link</button>
+                </div>
+
+                <div id="completeSignInSection" style="display: none;">
                     <div class="form-group">
                         <label class="form-label" for="nickname">Nickname</label>
                         <input type="text" id="nickname" class="form-input" required>
@@ -1096,7 +1099,6 @@
 
         // State management
         let currentUser = null;
-        let googleUser = null;
         let currentChannel = null;
         let captchaCompleted = false;
         let termsAccepted = false;
@@ -1108,12 +1110,21 @@
         let isTyping = false;
         let onlineUsers = {};
         let messageReactions = {};
-        let verifiedEmail = null;
+        let authenticatedUser = null;
 
-        // Email verification
+        // Action code settings for email link
+        const actionCodeSettings = {
+            // URL you want to redirect back to
+            url: window.location.origin + window.location.pathname,
+            // This must be true for email link sign-in
+            handleCodeInApp: true,
+        };
+
+        // Send sign-in email link
         document.getElementById('sendLinkBtn').addEventListener('click', async function() {
             const email = document.getElementById('schoolEmail').value;
             const errorMsg = document.getElementById('errorMessage');
+            errorMsg.style.display = 'none';
             
             if (!email) {
                 errorMsg.textContent = 'Please enter your email address.';
@@ -1128,58 +1139,76 @@
             }
             
             try {
-                // Configure action code settings
-                const actionCodeSettings = {
-                    url: window.location.href,
-                    handleCodeInApp: true
-                };
-                
-                // Send verification email
                 await auth.sendSignInLinkToEmail(email, actionCodeSettings);
                 
-                // Save email for later verification
+                // Save the email locally
                 window.localStorage.setItem('emailForSignIn', email);
                 
-                // Show success message
-                errorMsg.style.display = 'none';
-                document.getElementById('verificationSection').style.display = 'block';
-                document.getElementById('sendLinkBtn').style.display = 'none';
+                // Show waiting message
                 document.getElementById('schoolEmail').disabled = true;
+                document.getElementById('sendLinkBtn').style.display = 'none';
+                document.getElementById('waitingSection').style.display = 'block';
+                document.getElementById('sentToEmail').textContent = email;
                 
             } catch (error) {
-                console.error('Email verification error:', error);
-                errorMsg.textContent = 'Failed to send verification email. Please try again.';
+                console.error('Error sending email:', error);
+                
+                if (error.code === 'auth/invalid-email') {
+                    errorMsg.textContent = 'Invalid email address format.';
+                } else if (error.code === 'auth/missing-android-pkg-name') {
+                    errorMsg.textContent = 'Configuration error. Please contact administrator.';
+                } else if (error.code === 'auth/missing-ios-bundle-id') {
+                    errorMsg.textContent = 'Configuration error. Please contact administrator.';
+                } else if (error.code === 'auth/unauthorized-domain') {
+                    errorMsg.textContent = 'This domain is not authorized. Please contact administrator.';
+                } else {
+                    errorMsg.textContent = 'Failed to send email. Please try again. Error: ' + error.message;
+                }
                 errorMsg.style.display = 'block';
             }
         });
 
-        // Check if returning from email link
+        // Check if user is returning from email link
         if (auth.isSignInWithEmailLink(window.location.href)) {
             let email = window.localStorage.getItem('emailForSignIn');
+            
             if (!email) {
+                // If missing, prompt the user for it
                 email = window.prompt('Please provide your email for confirmation');
             }
             
-            auth.signInWithEmailLink(email, window.location.href)
-                .then((result) => {
-                    window.localStorage.removeItem('emailForSignIn');
-                    verifiedEmail = result.user.email;
-                    
-                    // Show the form sections
-                    document.getElementById('verificationSection').style.display = 'block';
-                    document.getElementById('sendLinkBtn').style.display = 'none';
-                    document.getElementById('schoolEmail').value = email;
-                    document.getElementById('schoolEmail').disabled = true;
-                    
-                    // Update hint text
-                    const hint = document.querySelector('.form-hint');
-                    hint.textContent = '✓ Email verified successfully!';
-                    hint.style.color = '#4CAF50';
-                })
-                .catch((error) => {
-                    console.error('Email link error:', error);
-                    alert('Invalid or expired link. Please request a new one.');
-                });
+            if (email) {
+                auth.signInWithEmailLink(email, window.location.href)
+                    .then((result) => {
+                        // Clear email from storage
+                        window.localStorage.removeItem('emailForSignIn');
+                        
+                        // Store authenticated user
+                        authenticatedUser = result.user;
+                        
+                        // Clear the URL
+                        window.history.replaceState({}, document.title, window.location.pathname);
+                        
+                        // Show the complete sign-in section
+                        document.getElementById('schoolEmail').value = email;
+                        document.getElementById('schoolEmail').disabled = true;
+                        document.getElementById('sendLinkBtn').style.display = 'none';
+                        document.getElementById('waitingSection').style.display = 'none';
+                        document.getElementById('completeSignInSection').style.display = 'block';
+                        
+                        // Show success message
+                        const successMsg = document.createElement('p');
+                        successMsg.className = 'form-hint';
+                        successMsg.style.color = '#4CAF50';
+                        successMsg.style.textAlign = 'center';
+                        successMsg.textContent = '✓ Email verified successfully!';
+                        document.querySelector('.login-form').insertBefore(successMsg, document.getElementById('completeSignInSection'));
+                    })
+                    .catch((error) => {
+                        console.error('Error signing in with email link:', error);
+                        alert('Error: ' + error.message);
+                    });
+            }
         }
 
         // Form validation
@@ -1200,7 +1229,7 @@
             const nickname = document.getElementById('nickname').value;
             const submitBtn = document.getElementById('submitBtn');
             
-            if (verifiedEmail && nickname && captchaCompleted && termsAccepted) {
+            if (authenticatedUser && nickname && captchaCompleted && termsAccepted) {
                 submitBtn.disabled = false;
             } else {
                 submitBtn.disabled = true;
@@ -1220,11 +1249,11 @@
             }
         });
 
-        // Login form submission with Firebase
+        // Login form submission
         document.getElementById('loginForm').addEventListener('submit', function(e) {
             e.preventDefault();
             
-            if (!verifiedEmail) {
+            if (!authenticatedUser) {
                 const errorMsg = document.getElementById('errorMessage');
                 errorMsg.textContent = 'Please verify your email first.';
                 errorMsg.style.display = 'block';
@@ -1249,8 +1278,9 @@
             }
             
             currentUser = {
-                email: verifiedEmail,
+                email: authenticatedUser.email,
                 nickname: nickname,
+                uid: authenticatedUser.uid,
                 isAdmin: isAdmin
             };
             currentChannel = channel;
@@ -1473,6 +1503,9 @@
             // Stop listening to messages
             const channelRef = database.ref('channels/' + currentChannel.substring(1) + '/messages');
             channelRef.off();
+            
+            // Sign out from Firebase
+            auth.signOut();
             
             currentUser = null;
             currentChannel = null;
@@ -1812,4 +1845,4 @@
         }
     </script>
 </body>
-</html>
+    </html>
