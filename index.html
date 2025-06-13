@@ -966,56 +966,57 @@
             </div>
 
             <form class="login-form" id="loginForm">
-                <div class="google-signin-container" id="googleSigninContainer">
-                    <button type="button" class="google-signin-btn" id="googleSignInBtn">
-                        <svg width="20" height="20" viewBox="0 0 24 24">
-                            <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-                            <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-                            <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
-                            <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
-                        </svg>
-                        Sign in with Google
-                    </button>
-                    <p class="signin-note">Use your @usd232.org account</p>
-                </div>
-
-                <div class="form-group" id="nicknameGroup" style="display: none;">
-                    <label class="form-label" for="nickname">Nickname</label>
-                    <input type="text" id="nickname" class="form-input">
-                    <p class="form-hint">Your Google account name has been pre-filled. You can change it if you'd like.</p>
-                </div>
-
-                <div class="form-group" id="adminPasswordGroup" style="display: none;">
-                    <label class="form-label" for="adminPassword">Admin Password</label>
-                    <input type="password" id="adminPassword" class="form-input" placeholder="Enter admin password">
-                </div>
-
                 <div class="form-group">
-                    <label class="form-label" for="channel">Channel</label>
-                    <input type="text" id="channel" class="form-input channel-input" value="#channel" placeholder="#channel">
+                    <label class="form-label" for="schoolEmail">School Email</label>
+                    <input type="email" id="schoolEmail" class="form-input" placeholder="yourname@usd232.org" required>
+                    <p class="form-hint">We'll send you a verification link</p>
                 </div>
 
-                <div class="recaptcha-container">
-                    <div class="recaptcha-checkbox" id="recaptchaCheckbox"></div>
-                    <span class="recaptcha-text">I'm not a robot</span>
-                    <div class="recaptcha-logo">
-                        reCAPTCHA<br>
-                        <small>Privacy - Terms</small>
+                <button type="button" class="submit-btn" id="sendLinkBtn" style="margin-bottom: 20px;">Send Verification Link</button>
+
+                <div id="verificationSection" style="display: none;">
+                    <p class="form-hint" style="text-align: center; margin-bottom: 20px; color: #4CAF50;">
+                        ✓ Verification email sent! Check your inbox and click the link to continue.
+                    </p>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="nickname">Nickname</label>
+                        <input type="text" id="nickname" class="form-input" required>
                     </div>
+
+                    <div class="form-group" id="adminPasswordGroup" style="display: none;">
+                        <label class="form-label" for="adminPassword">Admin Password</label>
+                        <input type="password" id="adminPassword" class="form-input" placeholder="Enter admin password">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="channel">Channel</label>
+                        <input type="text" id="channel" class="form-input channel-input" value="#channel" placeholder="#channel">
+                    </div>
+
+                    <div class="recaptcha-container">
+                        <div class="recaptcha-checkbox" id="recaptchaCheckbox"></div>
+                        <span class="recaptcha-text">I'm not a robot</span>
+                        <div class="recaptcha-logo">
+                            reCAPTCHA<br>
+                            <small>Privacy - Terms</small>
+                        </div>
+                    </div>
+
+                    <div class="terms-container">
+                        <input type="checkbox" id="termsCheckbox" class="terms-checkbox">
+                        <label for="termsCheckbox" class="terms-text">
+                            I agree to the <a href="terms.html" target="_blank">Terms of Use</a> and <a href="privacy.html" target="_blank">Privacy Policy</a>
+                        </label>
+                    </div>
+
+                    <p class="terms-notice">
+                        By joining a channel, you agree to our terms of service which includes: respecting other users, no harassment, no spam, and appropriate content only. Your messages may be monitored for compliance.
+                    </p>
+
+                    <button type="submit" class="submit-btn" id="submitBtn" disabled>Join Channel</button>
                 </div>
-
-                <div class="terms-container">
-                    <input type="checkbox" id="termsCheckbox" class="terms-checkbox">
-                    <label for="termsCheckbox" class="terms-text">
-                        I agree to the <a href="terms.html" target="_blank">Terms of Use</a> and <a href="privacy.html" target="_blank">Privacy Policy</a>
-                    </label>
-                </div>
-
-                <p class="terms-notice">
-                    By joining a channel, you agree to our terms of service which includes: respecting other users, no harassment, no spam, and appropriate content only. Your messages may be monitored for compliance.
-                </p>
-
-                <button type="submit" class="submit-btn" id="submitBtn" disabled>Join Channel</button>
+                
                 <div class="error-message" id="errorMessage"></div>
             </form>
         </div>
@@ -1107,53 +1108,81 @@
         let isTyping = false;
         let onlineUsers = {};
         let messageReactions = {};
+        let verifiedEmail = null;
 
-        // Google Sign-In
-        document.getElementById('googleSignInBtn').addEventListener('click', async function() {
+        // Email verification
+        document.getElementById('sendLinkBtn').addEventListener('click', async function() {
+            const email = document.getElementById('schoolEmail').value;
+            const errorMsg = document.getElementById('errorMessage');
+            
+            if (!email) {
+                errorMsg.textContent = 'Please enter your email address.';
+                errorMsg.style.display = 'block';
+                return;
+            }
+            
+            if (!email.endsWith('@usd232.org')) {
+                errorMsg.textContent = 'Only @usd232.org email addresses are allowed.';
+                errorMsg.style.display = 'block';
+                return;
+            }
+            
             try {
-                const result = await auth.signInWithPopup(googleProvider);
-                const user = result.user;
+                // Configure action code settings
+                const actionCodeSettings = {
+                    url: window.location.href,
+                    handleCodeInApp: true
+                };
                 
-                // Check if email is from usd232.org
-                if (!user.email.endsWith('@usd232.org')) {
-                    await auth.signOut();
-                    const errorMsg = document.getElementById('errorMessage');
-                    errorMsg.textContent = 'Access restricted to @usd232.org accounts only.';
-                    errorMsg.style.display = 'block';
-                    return;
-                }
+                // Send verification email
+                await auth.sendSignInLinkToEmail(email, actionCodeSettings);
                 
-                // Store Google user info
-                googleUser = user;
+                // Save email for later verification
+                window.localStorage.setItem('emailForSignIn', email);
                 
-                // Extract first name from display name
-                const firstName = user.displayName.split(' ')[0];
-                
-                // Show nickname field with pre-filled name
-                document.getElementById('nicknameGroup').style.display = 'block';
-                document.getElementById('nickname').value = firstName;
-                
-                // Hide Google sign-in button
-                document.getElementById('googleSigninContainer').style.display = 'none';
-                
-                // Check form validity
-                checkFormValidity();
+                // Show success message
+                errorMsg.style.display = 'none';
+                document.getElementById('verificationSection').style.display = 'block';
+                document.getElementById('sendLinkBtn').style.display = 'none';
+                document.getElementById('schoolEmail').disabled = true;
                 
             } catch (error) {
-                console.error('Google sign-in error:', error);
-                const errorMsg = document.getElementById('errorMessage');
-                if (error.code === 'auth/popup-blocked') {
-                    errorMsg.textContent = 'Please allow popups for this site.';
-                } else if (error.code === 'auth/cancelled-popup-request') {
-                    errorMsg.textContent = 'Sign-in cancelled.';
-                } else {
-                    errorMsg.textContent = 'Sign-in failed. Please try again.';
-                }
+                console.error('Email verification error:', error);
+                errorMsg.textContent = 'Failed to send verification email. Please try again.';
                 errorMsg.style.display = 'block';
             }
         });
 
-        // reCAPTCHA simulation
+        // Check if returning from email link
+        if (auth.isSignInWithEmailLink(window.location.href)) {
+            let email = window.localStorage.getItem('emailForSignIn');
+            if (!email) {
+                email = window.prompt('Please provide your email for confirmation');
+            }
+            
+            auth.signInWithEmailLink(email, window.location.href)
+                .then((result) => {
+                    window.localStorage.removeItem('emailForSignIn');
+                    verifiedEmail = result.user.email;
+                    
+                    // Show the form sections
+                    document.getElementById('verificationSection').style.display = 'block';
+                    document.getElementById('sendLinkBtn').style.display = 'none';
+                    document.getElementById('schoolEmail').value = email;
+                    document.getElementById('schoolEmail').disabled = true;
+                    
+                    // Update hint text
+                    const hint = document.querySelector('.form-hint');
+                    hint.textContent = '✓ Email verified successfully!';
+                    hint.style.color = '#4CAF50';
+                })
+                .catch((error) => {
+                    console.error('Email link error:', error);
+                    alert('Invalid or expired link. Please request a new one.');
+                });
+        }
+
+        // Form validation
         document.getElementById('recaptchaCheckbox').addEventListener('click', function() {
             this.classList.toggle('checked');
             captchaCompleted = this.classList.contains('checked');
@@ -1171,7 +1200,7 @@
             const nickname = document.getElementById('nickname').value;
             const submitBtn = document.getElementById('submitBtn');
             
-            if (googleUser && nickname && captchaCompleted && termsAccepted) {
+            if (verifiedEmail && nickname && captchaCompleted && termsAccepted) {
                 submitBtn.disabled = false;
             } else {
                 submitBtn.disabled = true;
@@ -1195,9 +1224,9 @@
         document.getElementById('loginForm').addEventListener('submit', function(e) {
             e.preventDefault();
             
-            if (!googleUser) {
+            if (!verifiedEmail) {
                 const errorMsg = document.getElementById('errorMessage');
-                errorMsg.textContent = 'Please sign in with Google first.';
+                errorMsg.textContent = 'Please verify your email first.';
                 errorMsg.style.display = 'block';
                 return;
             }
@@ -1220,11 +1249,8 @@
             }
             
             currentUser = {
-                email: googleUser.email,
+                email: verifiedEmail,
                 nickname: nickname,
-                displayName: googleUser.displayName,
-                photoURL: googleUser.photoURL,
-                uid: googleUser.uid,
                 isAdmin: isAdmin
             };
             currentChannel = channel;
@@ -1254,7 +1280,7 @@
             listenForMessages();
             listenForMessageUpdates();
             loadBannedWords();
-            loadBannedUsers(); // Load for everyone, not just admins
+            loadBannedUsers();
             setupPresence();
             listenForTyping();
             listenForOnlineUsers();
@@ -1448,11 +1474,7 @@
             const channelRef = database.ref('channels/' + currentChannel.substring(1) + '/messages');
             channelRef.off();
             
-            // Sign out from Google
-            auth.signOut();
-            
             currentUser = null;
-            googleUser = null;
             currentChannel = null;
             captchaCompleted = false;
             termsAccepted = false;
@@ -1463,9 +1485,7 @@
             document.getElementById('recaptchaCheckbox').classList.remove('checked');
             document.getElementById('submitBtn').disabled = true;
             document.getElementById('errorMessage').style.display = 'none';
-            document.getElementById('nicknameGroup').style.display = 'none';
             document.getElementById('adminPasswordGroup').style.display = 'none';
-            document.getElementById('googleSigninContainer').style.display = 'block';
             
             // Switch back to login
             document.getElementById('loginScreen').style.display = 'block';
@@ -1792,4 +1812,4 @@
         }
     </script>
 </body>
-    </html>
+</html>
