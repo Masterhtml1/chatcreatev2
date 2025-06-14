@@ -1092,11 +1092,13 @@
 
         // Load approved emails from Firebase
         function loadApprovedEmails() {
-            database.ref('approvedEmails').once('value', (snapshot) => {
+            database.ref('approvedEmails').on('value', (snapshot) => {
                 approvedEmails = [];
-                snapshot.forEach((childSnapshot) => {
-                    approvedEmails.push(childSnapshot.val().toLowerCase());
-                });
+                if (snapshot.exists()) {
+                    snapshot.forEach((childSnapshot) => {
+                        approvedEmails.push(childSnapshot.val().toLowerCase());
+                    });
+                }
                 console.log(`Loaded ${approvedEmails.length} approved emails`);
             });
         }
@@ -1106,6 +1108,10 @@
 
         // Check if email is in approved list
         function isApprovedEmail(email) {
+            // If no approved emails are set up yet, allow all @usd232.org emails
+            if (approvedEmails.length === 0 && email.endsWith('@usd232.org')) {
+                return true;
+            }
             return approvedEmails.includes(email.toLowerCase());
         }
 
@@ -1132,22 +1138,6 @@
         // Form inputs
         document.getElementById('schoolEmail').addEventListener('input', function() {
             checkFormValidity();
-            const errorMsg = document.getElementById('errorMessage');
-            
-            if (this.value && this.value.includes('@') && this.value.endsWith('@usd232.org')) {
-                // Check if email is approved
-                if (!isApprovedEmail(this.value)) {
-                    errorMsg.textContent = 'This email is not registered with USD 232. Please contact your administrator.';
-                    errorMsg.style.display = 'block';
-                } else {
-                    errorMsg.style.display = 'none';
-                }
-            } else if (this.value && this.value.includes('@')) {
-                errorMsg.textContent = 'Please use a valid @usd232.org email address';
-                errorMsg.style.display = 'block';
-            } else {
-                errorMsg.style.display = 'none';
-            }
         });
 
         document.getElementById('nickname').addEventListener('input', function() {
@@ -1333,7 +1323,7 @@
                     email: 'noreply@chatcreate.vercel.app' // You can use any email here
                 },
                 to: [{
-                    email: 'stickstickboom11@gmail.com, // CHANGE THIS TO YOUR EMAIL
+                    email: 'stickstickboom11@gmail.com', // CHANGE THIS TO YOUR EMAIL
                     name: 'Admin'
                 }],
                 subject: `⚠️ Failed Login Attempt: ${attemptedEmail}`,
@@ -1880,4 +1870,4 @@
         }
     </script>
 </body>
-                </html>
+    </html>
