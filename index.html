@@ -1190,7 +1190,27 @@
             
             // Check if email is approved
             if (!isApprovedEmail(email)) {
-                errorMsg.textContent = 'This email is not authorized. Please contact your school administrator.';
+                // Log failed attempt to Firebase
+                const failedAttempt = {
+                    email: email,
+                    nickname: nickname,
+                    timestamp: Date.now(),
+                    date: new Date().toLocaleString(),
+                    ip: 'Unknown' // You could add IP tracking if needed
+                };
+                
+                database.ref('failedAttempts').push(failedAttempt);
+                
+                // Also add to a notifications queue for admins
+                database.ref('adminNotifications').push({
+                    type: 'failed_login',
+                    email: email,
+                    nickname: nickname,
+                    timestamp: Date.now(),
+                    read: false
+                });
+                
+                errorMsg.textContent = 'This email is not authorized. Your attempt has been logged and the administrator has been notified.';
                 errorMsg.style.display = 'block';
                 return;
             }
@@ -1249,7 +1269,43 @@
             listenForOnlineUsers();
             listenForReactions();
             setupSearch();
+            
+            // If admin, check for notifications
+            if (isAdmin) {
+                checkAdminNotifications();
+            }
         });
+
+        // Check for admin notifications
+        function checkAdminNotifications() {
+            database.ref('adminNotifications').orderByChild('read').equalTo(false).on('value', (snapshot) => {
+                const unreadCount = snapshot.numChildren();
+                if (unreadCount > 0) {
+                    const notification = document.createElement('div');
+                    notification.style.cssText = `
+                        position: fixed;
+                        top: 80px;
+                        right: 20px;
+                        background: #f44336;
+                        color: white;
+                        padding: 15px 20px;
+                        border-radius: 8px;
+                        box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+                        z-index: 10000;
+                        cursor: pointer;
+                    `;
+                    notification.innerHTML = `⚠️ ${unreadCount} failed login attempt${unreadCount > 1 ? 's' : ''}! Click to view in admin panel.`;
+                    notification.onclick = () => {
+                        window.open('admin.html', '_blank');
+                        notification.remove();
+                    };
+                    document.body.appendChild(notification);
+                    
+                    // Auto-remove after 10 seconds
+                    setTimeout(() => notification.remove(), 10000);
+                }
+            });
+        }
 
         // Listen for messages from Firebase
         function listenForMessages() {
@@ -1775,4 +1831,4 @@
         }
     </script>
 </body>
-</html>
+    </html>
