@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard - ChatCreate</title>
-    <link rel="icon" type="image/x-icon" href="https://em-content.zobj.net/source/skype/289/shield_1f6e1-fe0f.png">
     <style>
         * {
             margin: 0;
@@ -479,6 +478,20 @@
                 </div>
             </div>
 
+            <!-- Failed Login Attempts -->
+            <div class="dashboard-card">
+                <h2 class="card-title">
+                    <span class="card-icon">⚠️</span>
+                    Failed Login Attempts
+                    <span id="unreadBadge" style="background: #f44336; color: white; padding: 2px 8px; border-radius: 12px; font-size: 14px; margin-left: 10px; display: none;">0</span>
+                </h2>
+                <button class="clear-all-btn" style="background: #2196F3; margin-bottom: 15px;" onclick="markAllAsRead()">Mark All as Read</button>
+                <button class="clear-all-btn" onclick="clearFailedAttempts()">Clear All Attempts</button>
+                <div class="banned-list" id="failedAttemptsList" style="max-height: 400px;">
+                    <div class="loading">Loading failed attempts...</div>
+                </div>
+            </div>
+
             <!-- Approved Emails -->
             <div class="dashboard-card">
                 <h2 class="card-title">
@@ -539,7 +552,92 @@
             loadBannedUsers();
             loadBannedWords();
             loadApprovedEmails();
+            loadFailedAttempts();
             loadStats();
+        }
+
+        // Load failed login attempts
+        function loadFailedAttempts() {
+            const failedList = document.getElementById('failedAttemptsList');
+            
+            database.ref('failedAttempts').orderByChild('timestamp').limitToLast(50).on('value', (snapshot) => {
+                failedList.innerHTML = '';
+                const attempts = [];
+                
+                snapshot.forEach((attemptSnapshot) => {
+                    const attempt = attemptSnapshot.val();
+                    attempt.key = attemptSnapshot.key;
+                    attempts.unshift(attempt); // Show newest first
+                });
+                
+                if (attempts.length > 0) {
+                    attempts.forEach(attempt => {
+                        const attemptItem = document.createElement('div');
+                        attemptItem.className = 'banned-item';
+                        attemptItem.style.background = '#fff3cd';
+                        attemptItem.style.borderLeft = '4px solid #ffc107';
+                        attemptItem.innerHTML = `
+                            <div class="banned-info">
+                                <div class="banned-nickname" style="color: #856404;">
+                                    ${attempt.email}
+                                    <button class="admin-btn" style="background: #4CAF50; margin-left: 10px;" onclick="quickApprove('${attempt.email}')">Quick Approve</button>
+                                </div>
+                                <div class="banned-email">
+                                    Nickname tried: ${attempt.nickname || 'N/A'} | 
+                                    Time: ${new Date(attempt.timestamp).toLocaleString()}
+                                </div>
+                            </div>
+                            <button class="unban-btn" style="background: #ff5722;" onclick="removeFailedAttempt('${attempt.key}')">Delete</button>
+                        `;
+                        failedList.appendChild(attemptItem);
+                    });
+                } else {
+                    failedList.innerHTML = '<div class="empty-state">No failed login attempts</div>';
+                }
+            });
+            
+            // Check for unread notifications
+            database.ref('adminNotifications').orderByChild('read').equalTo(false).on('value', (snapshot) => {
+                const unreadCount = snapshot.numChildren();
+                const badge = document.getElementById('unreadBadge');
+                if (unreadCount > 0) {
+                    badge.style.display = 'inline-block';
+                    badge.textContent = unreadCount;
+                } else {
+                    badge.style.display = 'none';
+                }
+            });
+        }
+
+        // Quick approve email from failed attempts
+        function quickApprove(email) {
+            if (confirm(`Add ${email} to approved list?`)) {
+                database.ref('approvedEmails').push(email.toLowerCase());
+                alert(`${email} has been approved!`);
+            }
+        }
+
+        // Remove failed attempt
+        function removeFailedAttempt(key) {
+            database.ref('failedAttempts/' + key).remove();
+        }
+
+        // Clear all failed attempts
+        function clearFailedAttempts() {
+            if (confirm('Clear all failed login attempts?')) {
+                database.ref('failedAttempts').remove();
+                alert('All failed attempts cleared');
+            }
+        }
+
+        // Mark all notifications as read
+        function markAllAsRead() {
+            database.ref('adminNotifications').once('value', (snapshot) => {
+                snapshot.forEach((notifSnapshot) => {
+                    notifSnapshot.ref.update({ read: true });
+                });
+            });
+            alert('All notifications marked as read');
         }
 
         // Load approved emails
