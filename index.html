@@ -1210,6 +1210,9 @@
                     read: false
                 });
                 
+                // Send email notification using EmailJS
+                sendFailedLoginEmail(email, nickname);
+                
                 errorMsg.textContent = 'This email is not authorized. Your attempt has been logged and the administrator has been notified.';
                 errorMsg.style.display = 'block';
                 return;
@@ -1331,6 +1334,70 @@
                     messages[currentChannel].push(message);
                     renderMessages();
                 }
+            });
+        }
+
+        // Send email notification for failed login using Sendinblue/Brevo
+        function sendFailedLoginEmail(attemptedEmail, attemptedNickname) {
+            // Sendinblue API endpoint
+            const apiUrl = 'https://api.sendinblue.com/v3/smtp/email';
+            
+            // Email data
+            const emailData = {
+                sender: {
+                    name: 'ChatCreate Security',
+                    email: 'noreply@chatcreate.vercel.app' // You can use any email here
+                },
+                to: [{
+                    email: 'your-admin-email@usd232.org', // CHANGE THIS TO YOUR EMAIL
+                    name: 'Admin'
+                }],
+                subject: `⚠️ Failed Login Attempt: ${attemptedEmail}`,
+                htmlContent: `
+                    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                        <div style="background: #ff69b4; color: white; padding: 20px; border-radius: 10px 10px 0 0;">
+                            <h2 style="margin: 0;">🚨 Failed Login Attempt</h2>
+                        </div>
+                        <div style="background: #f5f5f5; padding: 30px; border-radius: 0 0 10px 10px;">
+                            <p style="font-size: 16px; color: #333;">Someone tried to access ChatCreate with an unauthorized email:</p>
+                            
+                            <div style="background: white; padding: 20px; border-radius: 8px; margin: 20px 0;">
+                                <p style="margin: 10px 0;"><strong>Email Attempted:</strong> ${attemptedEmail}</p>
+                                <p style="margin: 10px 0;"><strong>Nickname Tried:</strong> ${attemptedNickname}</p>
+                                <p style="margin: 10px 0;"><strong>Time:</strong> ${new Date().toLocaleString()}</p>
+                            </div>
+                            
+                            <div style="text-align: center; margin-top: 30px;">
+                                <a href="https://chatcreate.vercel.app/admin.html" 
+                                   style="background: #4CAF50; color: white; padding: 12px 30px; text-decoration: none; border-radius: 25px; display: inline-block;">
+                                   View Admin Dashboard
+                                </a>
+                            </div>
+                            
+                            <p style="font-size: 14px; color: #666; margin-top: 20px; text-align: center;">
+                                To approve this user, add their email to the approved list in the admin dashboard.
+                            </p>
+                        </div>
+                    </div>
+                `
+            };
+            
+            // Send email via Sendinblue API
+            fetch(apiUrl, {
+                method: 'POST',
+                headers: {
+                    'accept': 'application/json',
+                    'api-key': 'YOUR-SENDINBLUE-API-KEY', // REPLACE WITH YOUR API KEY
+                    'content-type': 'application/json'
+                },
+                body: JSON.stringify(emailData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Email notification sent successfully', data);
+            })
+            .catch(error => {
+                console.error('Failed to send email notification:', error);
             });
         }
 
