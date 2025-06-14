@@ -987,15 +987,6 @@
                     <input type="text" id="channel" class="form-input channel-input" value="#channel" placeholder="#channel">
                 </div>
 
-                <div class="recaptcha-container">
-                    <div class="recaptcha-checkbox" id="recaptchaCheckbox"></div>
-                    <span class="recaptcha-text">I'm not a robot</span>
-                    <div class="recaptcha-logo">
-                        reCAPTCHA<br>
-                        <small>Privacy - Terms</small>
-                    </div>
-                </div>
-
                 <div class="terms-container">
                     <input type="checkbox" id="termsCheckbox" class="terms-checkbox">
                     <label for="termsCheckbox" class="terms-text">
@@ -1088,7 +1079,6 @@
         // State management
         let currentUser = null;
         let currentChannel = null;
-        let captchaCompleted = false;
         let termsAccepted = false;
         let messages = {};
         let isAdmin = false;
@@ -1120,12 +1110,6 @@
         }
 
         // Form validation
-        document.getElementById('recaptchaCheckbox').addEventListener('click', function() {
-            this.classList.toggle('checked');
-            captchaCompleted = this.classList.contains('checked');
-            checkFormValidity();
-        });
-
         // Terms checkbox
         document.getElementById('termsCheckbox').addEventListener('change', function() {
             termsAccepted = this.checked;
@@ -1138,7 +1122,7 @@
             const nickname = document.getElementById('nickname').value;
             const submitBtn = document.getElementById('submitBtn');
             
-            if (email && nickname && captchaCompleted && termsAccepted) {
+            if (email && nickname && termsAccepted) {
                 submitBtn.disabled = false;
             } else {
                 submitBtn.disabled = true;
@@ -1562,13 +1546,11 @@
             
             currentUser = null;
             currentChannel = null;
-            captchaCompleted = false;
             termsAccepted = false;
             isAdmin = false;
             
             // Reset form
             document.getElementById('loginForm').reset();
-            document.getElementById('recaptchaCheckbox').classList.remove('checked');
             document.getElementById('submitBtn').disabled = true;
             document.getElementById('errorMessage').style.display = 'none';
             document.getElementById('adminPasswordGroup').style.display = 'none';
@@ -1898,4 +1880,4 @@
         }
     </script>
 </body>
-    </html>
+                </html>
