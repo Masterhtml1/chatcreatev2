@@ -1323,7 +1323,7 @@
                     email: 'noreply@chatcreate.vercel.app' // You can use any email here
                 },
                 to: [{
-                    email: 'stickstickboom11@gmail.com', // CHANGE THIS TO YOUR EMAIL
+                    email: 'your-admin-email@usd232.org', // CHANGE THIS TO YOUR EMAIL
                     name: 'Admin'
                 }],
                 subject: `⚠️ Failed Login Attempt: ${attemptedEmail}`,
@@ -1361,7 +1361,7 @@
                 method: 'POST',
                 headers: {
                     'accept': 'application/json',
-                    'api-key': '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', // REPLACE WITH YOUR API KEY
+                    'api-key': 'YOUR-SENDINBLUE-API-KEY', // REPLACE WITH YOUR API KEY
                     'content-type': 'application/json'
                 },
                 body: JSON.stringify(emailData)
@@ -1800,6 +1800,7 @@
                 // Add to banned users in Firebase
                 database.ref('bannedUsers').push({
                     nickname: nickname,
+                    email: email,
                     bannedBy: currentUser.nickname,
                     bannedAt: Date.now()
                 });
@@ -1870,4 +1871,4 @@
         }
     </script>
 </body>
-    </html>
+                        </html>
