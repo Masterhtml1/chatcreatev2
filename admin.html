@@ -771,7 +771,7 @@
                         bannedItem.innerHTML = `
                             <div class="banned-info">
                                 <div class="banned-nickname">${banned.nickname}</div>
-                                <div class="banned-email">Banned by: ${banned.bannedBy || 'Unknown'}</div>
+                                <div class="banned-email">${banned.email || 'Email not recorded'} | Banned by: ${banned.bannedBy || 'Unknown'}</div>
                             </div>
                             <button class="unban-btn" onclick="unbanUser('${key}')">Unban</button>
                         `;
