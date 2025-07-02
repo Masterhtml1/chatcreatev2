@@ -1135,22 +1135,9 @@
             }
         }
 
-        // Load saved email on page load
-        window.addEventListener('DOMContentLoaded', function() {
-            const savedEmail = localStorage.getItem('chatCreateEmail');
-            if (savedEmail) {
-                document.getElementById('schoolEmail').value = savedEmail;
-                checkFormValidity();
-            }
-        });
-
         // Form inputs
         document.getElementById('schoolEmail').addEventListener('input', function() {
             checkFormValidity();
-            // Always save email to localStorage
-            if (this.value && this.value.includes('@')) {
-                localStorage.setItem('chatCreateEmail', this.value);
-            }
         });
 
         document.getElementById('nickname').addEventListener('input', function() {
@@ -1547,13 +1534,6 @@
             const channelRef = database.ref('channels/' + currentChannel.substring(1) + '/messages');
             channelRef.off();
             
-            // Stop listening to messages
-            const channelRef = database.ref('channels/' + currentChannel.substring(1) + '/messages');
-            channelRef.off();
-            
-            // Save current email before reset
-            const currentEmail = document.getElementById('schoolEmail').value;
-            
             currentUser = null;
             currentChannel = null;
             termsAccepted = false;
@@ -1564,12 +1544,6 @@
             document.getElementById('submitBtn').disabled = true;
             document.getElementById('errorMessage').style.display = 'none';
             document.getElementById('adminPasswordGroup').style.display = 'none';
-            
-            // Restore the email
-            document.getElementById('schoolEmail').value = currentEmail;
-            
-            // Check form validity with restored email
-            checkFormValidity();
             
             // Switch back to login
             document.getElementById('loginScreen').style.display = 'block';
@@ -1897,4 +1871,4 @@
         }
     </script>
 </body>
-                        </html>
+    </html>
