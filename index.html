@@ -972,13 +972,6 @@
                     <p class="form-hint">Enter your USD 232 school email address</p>
                 </div>
 
-                <div style="margin-bottom: 15px;">
-                    <label style="display: flex; align-items: center; gap: 8px; font-size: 14px; color: #666; cursor: pointer;">
-                        <input type="checkbox" id="rememberEmail" checked>
-                        Remember my email for next time
-                    </label>
-                </div>
-
                 <div class="form-group">
                     <label class="form-label" for="nickname">Nickname</label>
                     <input type="text" id="nickname" class="form-input" required>
@@ -1145,11 +1138,8 @@
         // Load saved email on page load
         window.addEventListener('DOMContentLoaded', function() {
             const savedEmail = localStorage.getItem('chatCreateEmail');
-            const rememberCheckbox = document.getElementById('rememberEmail');
-            
             if (savedEmail) {
                 document.getElementById('schoolEmail').value = savedEmail;
-                rememberCheckbox.checked = true;
                 checkFormValidity();
             }
         });
@@ -1157,20 +1147,9 @@
         // Form inputs
         document.getElementById('schoolEmail').addEventListener('input', function() {
             checkFormValidity();
-            // Save email to localStorage if remember is checked
-            const rememberCheckbox = document.getElementById('rememberEmail');
-            if (this.value && this.value.includes('@') && rememberCheckbox.checked) {
+            // Always save email to localStorage
+            if (this.value && this.value.includes('@')) {
                 localStorage.setItem('chatCreateEmail', this.value);
-            }
-        });
-
-        // Remember email checkbox
-        document.getElementById('rememberEmail').addEventListener('change', function() {
-            const email = document.getElementById('schoolEmail').value;
-            if (this.checked && email) {
-                localStorage.setItem('chatCreateEmail', email);
-            } else if (!this.checked) {
-                localStorage.removeItem('chatCreateEmail');
             }
         });
 
@@ -1568,6 +1547,13 @@
             const channelRef = database.ref('channels/' + currentChannel.substring(1) + '/messages');
             channelRef.off();
             
+            // Stop listening to messages
+            const channelRef = database.ref('channels/' + currentChannel.substring(1) + '/messages');
+            channelRef.off();
+            
+            // Save current email before reset
+            const currentEmail = document.getElementById('schoolEmail').value;
+            
             currentUser = null;
             currentChannel = null;
             termsAccepted = false;
@@ -1578,6 +1564,12 @@
             document.getElementById('submitBtn').disabled = true;
             document.getElementById('errorMessage').style.display = 'none';
             document.getElementById('adminPasswordGroup').style.display = 'none';
+            
+            // Restore the email
+            document.getElementById('schoolEmail').value = currentEmail;
+            
+            // Check form validity with restored email
+            checkFormValidity();
             
             // Switch back to login
             document.getElementById('loginScreen').style.display = 'block';
@@ -1905,4 +1897,4 @@
         }
     </script>
 </body>
-</html>
+                        </html>
