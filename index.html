@@ -972,6 +972,13 @@
                     <p class="form-hint">Enter your USD 232 school email address</p>
                 </div>
 
+                <div style="margin-bottom: 15px;">
+                    <label style="display: flex; align-items: center; gap: 8px; font-size: 14px; color: #666; cursor: pointer;">
+                        <input type="checkbox" id="rememberEmail" checked>
+                        Remember my email for next time
+                    </label>
+                </div>
+
                 <div class="form-group">
                     <label class="form-label" for="nickname">Nickname</label>
                     <input type="text" id="nickname" class="form-input" required>
@@ -1135,9 +1142,36 @@
             }
         }
 
+        // Load saved email on page load
+        window.addEventListener('DOMContentLoaded', function() {
+            const savedEmail = localStorage.getItem('chatCreateEmail');
+            const rememberCheckbox = document.getElementById('rememberEmail');
+            
+            if (savedEmail) {
+                document.getElementById('schoolEmail').value = savedEmail;
+                rememberCheckbox.checked = true;
+                checkFormValidity();
+            }
+        });
+
         // Form inputs
         document.getElementById('schoolEmail').addEventListener('input', function() {
             checkFormValidity();
+            // Save email to localStorage if remember is checked
+            const rememberCheckbox = document.getElementById('rememberEmail');
+            if (this.value && this.value.includes('@') && rememberCheckbox.checked) {
+                localStorage.setItem('chatCreateEmail', this.value);
+            }
+        });
+
+        // Remember email checkbox
+        document.getElementById('rememberEmail').addEventListener('change', function() {
+            const email = document.getElementById('schoolEmail').value;
+            if (this.checked && email) {
+                localStorage.setItem('chatCreateEmail', email);
+            } else if (!this.checked) {
+                localStorage.removeItem('chatCreateEmail');
+            }
         });
 
         document.getElementById('nickname').addEventListener('input', function() {
@@ -1871,4 +1905,4 @@
         }
     </script>
 </body>
-                        </html>
+</html>
