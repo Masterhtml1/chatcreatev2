@@ -967,16 +967,8 @@
 
             <form class="login-form" id="loginForm">
                 <div class="form-group">
-                    <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <label class="form-label" for="schoolEmail" style="margin-bottom: 0;">School Email</label>
-                        <button type="button" onclick="connectCanvas()" style="padding: 6px 12px; background: #1a73e8; color: white; border: none; border-radius: 15px; font-size: 12px; cursor: pointer; display: flex; align-items: center;">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="white" style="margin-right: 5px;">
-                                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
-                            </svg>
-                            Canvas
-                        </button>
-                    </div>
-                    <input type="email" id="schoolEmail" class="form-input" placeholder="yourname@usd232.org" required style="margin-top: 10px;">
+                    <label class="form-label" for="schoolEmail">School Email</label>
+                    <input type="email" id="schoolEmail" class="form-input" placeholder="yourname@usd232.org" required>
                     <p class="form-hint">Enter your USD 232 school email address</p>
                 </div>
 
@@ -1054,48 +1046,6 @@
             <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
         </svg>
     </button>
-
-    <!-- Canvas Integration Modal -->
-    <div id="canvasModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 10000;">
-        <div style="position: relative; background: white; margin: 50px auto; padding: 30px; max-width: 500px; border-radius: 15px;">
-            <button onclick="closeCanvasModal()" style="position: absolute; top: 15px; right: 15px; background: none; border: none; font-size: 24px; cursor: pointer;">×</button>
-            
-            <h2 style="color: #ff69b4; margin-bottom: 20px;">Connect to Canvas</h2>
-            
-            <div id="canvasLoginSection">
-                <p style="margin-bottom: 15px;">Enter your Canvas access token to sync assignments and grades.</p>
-                
-                <input type="text" id="canvasToken" placeholder="Canvas Access Token" style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; margin-bottom: 15px;">
-                
-                <input type="text" id="canvasUrl" placeholder="Canvas URL (e.g., usd232.instructure.com)" value="usd232.instructure.com" style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; margin-bottom: 15px;">
-                
-                <button onclick="connectCanvasAccount()" style="width: 100%; padding: 12px; background: #ff69b4; color: white; border: none; border-radius: 25px; font-size: 16px; cursor: pointer;">Connect Canvas</button>
-                
-                <p style="margin-top: 15px; font-size: 14px; color: #666;">
-                    <strong>How to get your access token:</strong><br>
-                    1. Log into Canvas<br>
-                    2. Go to Account → Settings<br>
-                    3. Scroll to "Approved Integrations"<br>
-                    4. Click "+ New Access Token"<br>
-                    5. Copy and paste it here
-                </p>
-            </div>
-            
-            <div id="canvasConnectedSection" style="display: none;">
-                <p style="color: #4CAF50; margin-bottom: 20px;">✓ Canvas Connected!</p>
-                
-                <div id="canvasData">
-                    <h3>Your Courses:</h3>
-                    <div id="coursesList" style="max-height: 300px; overflow-y: auto;"></div>
-                    
-                    <h3 style="margin-top: 20px;">Recent Assignments:</h3>
-                    <div id="assignmentsList" style="max-height: 300px; overflow-y: auto;"></div>
-                </div>
-                
-                <button onclick="disconnectCanvas()" style="width: 100%; padding: 12px; background: #f44336; color: white; border: none; border-radius: 25px; font-size: 16px; cursor: pointer; margin-top: 20px;">Disconnect Canvas</button>
-            </div>
-        </div>
-    </div>
 
     <!-- Add Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
@@ -1361,201 +1311,6 @@
             });
         }
 
-        // Canvas Integration Functions
-        let canvasToken = localStorage.getItem('canvasToken') || null;
-        let canvasUrl = localStorage.getItem('canvasUrl') || null;
-        let canvasData = {};
-
-        function connectCanvas() {
-            document.getElementById('canvasModal').style.display = 'block';
-            
-            // Check if already connected
-            if (canvasToken && canvasUrl) {
-                document.getElementById('canvasToken').value = '••••••••••••••••••••';
-                document.getElementById('canvasUrl').value = canvasUrl;
-                showCanvasData();
-            }
-        }
-
-        function closeCanvasModal() {
-            document.getElementById('canvasModal').style.display = 'none';
-        }
-
-        async function connectCanvasAccount() {
-            const token = document.getElementById('canvasToken').value.trim();
-            const url = document.getElementById('canvasUrl').value.trim();
-            
-            if (!token || !url) {
-                alert('Please enter both Canvas token and URL');
-                return;
-            }
-            
-            // Don't update if token is masked
-            if (token !== '••••••••••••••••••••') {
-                canvasToken = token;
-            }
-            canvasUrl = url;
-            
-            // Clean up the URL (remove https:// if present)
-            canvasUrl = canvasUrl.replace(/^https?:\/\//, '');
-            
-            // Test the connection with CORS proxy
-            try {
-                // Using a CORS proxy for testing
-                const proxyUrl = `https://cors-anywhere.herokuapp.com/https://${canvasUrl}/api/v1/courses`;
-                
-                const response = await fetch(proxyUrl, {
-                    headers: {
-                        'Authorization': `Bearer ${canvasToken}`,
-                        'Origin': window.location.origin
-                    }
-                });
-                
-                if (!response.ok) {
-                    throw new Error(`Canvas API error: ${response.status}`);
-                }
-                
-                // Save to localStorage
-                localStorage.setItem('canvasToken', canvasToken);
-                localStorage.setItem('canvasUrl', canvasUrl);
-                
-                alert('Canvas connected successfully!');
-                await showCanvasData();
-                
-            } catch (error) {
-                console.error('Canvas connection error:', error);
-                
-                // Try without CORS proxy (will work if Canvas allows CORS)
-                try {
-                    const directResponse = await fetch(`https://${canvasUrl}/api/v1/courses`, {
-                        headers: {
-                            'Authorization': `Bearer ${canvasToken}`
-                        }
-                    });
-                    
-                    if (directResponse.ok) {
-                        localStorage.setItem('canvasToken', canvasToken);
-                        localStorage.setItem('canvasUrl', canvasUrl);
-                        alert('Canvas connected successfully!');
-                        await showCanvasData();
-                    } else {
-                        throw new Error('Direct connection failed');
-                    }
-                } catch (directError) {
-                    alert('Canvas connection failed. This might be due to CORS restrictions. Try using the Canvas bot commands instead after saving your token.');
-                    
-                    // Save anyway for bot commands
-                    localStorage.setItem('canvasToken', canvasToken);
-                    localStorage.setItem('canvasUrl', canvasUrl);
-                    
-                    document.getElementById('canvasLoginSection').style.display = 'none';
-                    document.getElementById('canvasConnectedSection').style.display = 'block';
-                    document.getElementById('canvasData').innerHTML = '<p>Canvas connected for bot commands. Use /canvas help in chat.</p>';
-                }
-            }
-        }
-
-        async function showCanvasData() {
-            document.getElementById('canvasLoginSection').style.display = 'none';
-            document.getElementById('canvasConnectedSection').style.display = 'block';
-            
-            try {
-                // Fetch courses
-                const coursesResponse = await fetch(`https://${canvasUrl}/api/v1/courses?enrollment_state=active`, {
-                    headers: {
-                        'Authorization': `Bearer ${canvasToken}`
-                    }
-                });
-                const courses = await coursesResponse.json();
-                
-                // Display courses
-                const coursesList = document.getElementById('coursesList');
-                coursesList.innerHTML = '';
-                courses.forEach(course => {
-                    const courseDiv = document.createElement('div');
-                    courseDiv.style.cssText = 'padding: 10px; margin: 5px 0; background: #f0f0f0; border-radius: 8px; cursor: pointer;';
-                    courseDiv.innerHTML = `
-                        <strong>${course.name}</strong><br>
-                        <small>${course.course_code || ''}</small>
-                    `;
-                    courseDiv.onclick = () => shareCanvasUpdate('course', course);
-                    coursesList.appendChild(courseDiv);
-                });
-                
-                // Fetch assignments
-                const assignmentsPromises = courses.map(course => 
-                    fetch(`https://${canvasUrl}/api/v1/courses/${course.id}/assignments?order_by=due_at`, {
-                        headers: {
-                            'Authorization': `Bearer ${canvasToken}`
-                        }
-                    }).then(r => r.json())
-                );
-                
-                const allAssignments = (await Promise.all(assignmentsPromises)).flat();
-                const upcomingAssignments = allAssignments
-                    .filter(a => a.due_at && new Date(a.due_at) > new Date())
-                    .sort((a, b) => new Date(a.due_at) - new Date(b.due_at))
-                    .slice(0, 5);
-                
-                // Display assignments
-                const assignmentsList = document.getElementById('assignmentsList');
-                assignmentsList.innerHTML = '';
-                upcomingAssignments.forEach(assignment => {
-                    const assignmentDiv = document.createElement('div');
-                    assignmentDiv.style.cssText = 'padding: 10px; margin: 5px 0; background: #fff3cd; border-radius: 8px; cursor: pointer;';
-                    assignmentDiv.innerHTML = `
-                        <strong>${assignment.name}</strong><br>
-                        <small>Due: ${new Date(assignment.due_at).toLocaleDateString()}</small>
-                    `;
-                    assignmentDiv.onclick = () => shareCanvasUpdate('assignment', assignment);
-                    assignmentsList.appendChild(assignmentDiv);
-                });
-                
-            } catch (error) {
-                console.error('Error fetching Canvas data:', error);
-                alert('Error loading Canvas data. Please try reconnecting.');
-            }
-        }
-
-        function shareCanvasUpdate(type, data) {
-            if (!currentChannel) {
-                alert('Please join a channel first to share Canvas updates');
-                return;
-            }
-            
-            let messageText = '';
-            
-            if (type === 'course') {
-                messageText = `📚 **Canvas Course Update**\nCourse: ${data.name}\nCode: ${data.course_code || 'N/A'}`;
-            } else if (type === 'assignment') {
-                messageText = `📝 **Canvas Assignment**\nAssignment: ${data.name}\nDue: ${new Date(data.due_at).toLocaleString()}\nPoints: ${data.points_possible || 'N/A'}`;
-            }
-            
-            const canvasMessage = {
-                author: currentUser.email,
-                nickname: currentUser.nickname,
-                text: messageText,
-                timestamp: Date.now(),
-                isCanvasUpdate: true
-            };
-            
-            database.ref('channels/' + currentChannel.substring(1) + '/messages').push(canvasMessage);
-            closeCanvasModal();
-            
-            alert('Canvas update shared in chat!');
-        }
-
-        function disconnectCanvas() {
-            localStorage.removeItem('canvasToken');
-            localStorage.removeItem('canvasUrl');
-            canvasToken = null;
-            canvasUrl = null;
-            
-            document.getElementById('canvasLoginSection').style.display = 'block';
-            document.getElementById('canvasConnectedSection').style.display = 'none';
-            document.getElementById('canvasToken').value = '';
-        }
-
         // Send email notification for failed login using Sendinblue/Brevo
         function sendFailedLoginEmail(attemptedEmail, attemptedNickname) {
             // Sendinblue API endpoint
@@ -1629,11 +1384,6 @@
         window.showReactionPicker = showReactionPicker;
         window.addReaction = addReaction;
         window.toggleReaction = toggleReaction;
-        window.connectCanvas = connectCanvas;
-        window.closeCanvasModal = closeCanvasModal;
-        window.connectCanvasAccount = connectCanvasAccount;
-        window.shareCanvasUpdate = shareCanvasUpdate;
-        window.disconnectCanvas = disconnectCanvas;
 
         // Render messages
         function renderMessages() {
@@ -1743,13 +1493,6 @@
                 }
             }
             
-            // Check for Canvas commands
-            if (text.startsWith('/canvas')) {
-                handleCanvasCommand(text);
-                input.value = '';
-                return;
-            }
-            
             const message = {
                 author: currentUser.email,
                 nickname: currentUser.nickname,
@@ -1757,189 +1500,10 @@
                 timestamp: Date.now()
             };
             
-            // Send to Firebase
+            // Send to Firebase instead of local array
             database.ref('channels/' + currentChannel.substring(1) + '/messages').push(message);
             
             input.value = '';
-        }
-
-        // Handle Canvas bot commands
-        function handleCanvasCommand(command) {
-            const parts = command.split(' ');
-            const subCommand = parts[1];
-            
-            if (!localStorage.getItem('canvasToken')) {
-                const helpMessage = {
-                    author: 'System',
-                    nickname: 'Canvas Bot',
-                    text: '🤖 Canvas not connected! Click the Canvas button in the header to connect your account.',
-                    timestamp: Date.now()
-                };
-                database.ref('channels/' + currentChannel.substring(1) + '/messages').push(helpMessage);
-                return;
-            }
-            
-            switch(subCommand) {
-                case 'help':
-                    const helpMessage = {
-                        author: 'System',
-                        nickname: 'Canvas Bot',
-                        text: '🤖 **Canvas Commands:**\n/canvas help - Show this message\n/canvas setup - Instructions for using Canvas integration\n/canvas example - Show example assignment format\n\n⚠️ **Note:** Direct Canvas API access is blocked by CORS in browsers. Use the manual sharing feature or set up a backend server.',
-                        timestamp: Date.now()
-                    };
-                    database.ref('channels/' + currentChannel.substring(1) + '/messages').push(helpMessage);
-                    break;
-                    
-                case 'setup':
-                    const setupMessage = {
-                        author: 'System',
-                        nickname: 'Canvas Bot',
-                        text: '🛠️ **Canvas Setup Options:**\n\n**Option 1: Manual Sharing**\n• Copy assignment details from Canvas\n• Paste in chat with /share command\n\n**Option 2: Backend Server**\n• Deploy a simple Node.js server\n• Use it as a proxy for Canvas API\n\n**Option 3: Browser Extension**\n• Install "CORS Unblock" extension (for testing only)\n• Not recommended for production',
-                        timestamp: Date.now()
-                    };
-                    database.ref('channels/' + currentChannel.substring(1) + '/messages').push(setupMessage);
-                    break;
-                    
-                case 'example':
-                    const exampleMessage = {
-                        author: 'System',
-                        nickname: 'Canvas Bot',
-                        text: '📝 **Example Assignment Share:**\n\n**Math Homework**\nDue: Friday, Nov 15 at 11:59 PM\nPoints: 50\nComplete problems 1-20 on page 145\n\nTo share your own: Type your assignment details after /share',
-                        timestamp: Date.now()
-                    };
-                    database.ref('channels/' + currentChannel.substring(1) + '/messages').push(exampleMessage);
-                    break;
-                    
-                case 'share':
-                    const shareText = parts.slice(2).join(' ');
-                    if (shareText) {
-                        const shareMessage = {
-                            author: currentUser.email,
-                            nickname: currentUser.nickname,
-                            text: `📚 **Canvas Update:**\n${shareText}`,
-                            timestamp: Date.now()
-                        };
-                        database.ref('channels/' + currentChannel.substring(1) + '/messages').push(shareMessage);
-                    } else {
-                        const instructMessage = {
-                            author: 'System',
-                            nickname: 'Canvas Bot',
-                            text: '💡 **How to share:** /canvas share [your assignment details]',
-                            timestamp: Date.now()
-                        };
-                        database.ref('channels/' + currentChannel.substring(1) + '/messages').push(instructMessage);
-                    }
-                    break;
-                    
-                default:
-                    // For any other commands, show a simplified message
-                    const corsMessage = {
-                        author: 'System',
-                        nickname: 'Canvas Bot',
-                        text: '⚠️ **Canvas Integration Status:**\n\nYour Canvas token is saved, but direct API access is blocked by browser security (CORS).\n\n**What you can do:**\n• Use /canvas share to manually share assignments\n• Use /canvas example to see the format\n• Use /canvas setup for technical solutions',
-                        timestamp: Date.now()
-                    };
-                    database.ref('channels/' + currentChannel.substring(1) + '/messages').push(corsMessage);
-            }
-        }
-
-        async function fetchCanvasAssignments() {
-            if (!canvasToken || !canvasUrl) {
-                const message = {
-                    author: 'System',
-                    nickname: 'Canvas Bot',
-                    text: '❌ Canvas not configured. Click the Canvas button to connect.',
-                    timestamp: Date.now()
-                };
-                database.ref('channels/' + currentChannel.substring(1) + '/messages').push(message);
-                return;
-            }
-            
-            try {
-                // Note: This will likely fail due to CORS, but the structure is correct
-                const response = await fetch(`https://${canvasUrl}/api/v1/courses?enrollment_state=active`, {
-                    headers: { 'Authorization': `Bearer ${canvasToken}` }
-                });
-                const courses = await response.json();
-                
-                const assignmentsPromises = courses.map(course => 
-                    fetch(`https://${canvasUrl}/api/v1/courses/${course.id}/assignments?order_by=due_at`, {
-                        headers: { 'Authorization': `Bearer ${canvasToken}` }
-                    }).then(r => r.json())
-                );
-                
-                const allAssignments = (await Promise.all(assignmentsPromises)).flat();
-                const upcoming = allAssignments
-                    .filter(a => a.due_at && new Date(a.due_at) > new Date())
-                    .sort((a, b) => new Date(a.due_at) - new Date(b.due_at))
-                    .slice(0, 5);
-                
-                let messageText = '📝 **Upcoming Assignments:**\n';
-                upcoming.forEach(a => {
-                    messageText += `• ${a.name} - Due: ${new Date(a.due_at).toLocaleDateString()}\n`;
-                });
-                
-                const message = {
-                    author: 'System',
-                    nickname: 'Canvas Bot',
-                    text: messageText || '✅ No upcoming assignments!',
-                    timestamp: Date.now()
-                };
-                database.ref('channels/' + currentChannel.substring(1) + '/messages').push(message);
-                
-            } catch (error) {
-                console.error('Canvas fetch error:', error);
-                const message = {
-                    author: 'System',
-                    nickname: 'Canvas Bot',
-                    text: '⚠️ Canvas API is blocked by CORS. For full functionality, you would need to:\n1. Use a backend server\n2. Set up a proxy\n3. Or use Canvas as an LTI app',
-                    timestamp: Date.now()
-                };
-                database.ref('channels/' + currentChannel.substring(1) + '/messages').push(message);
-            }
-        }
-
-        async function fetchCanvasCourses() {
-            if (!canvasToken || !canvasUrl) {
-                const message = {
-                    author: 'System',
-                    nickname: 'Canvas Bot',
-                    text: '❌ Canvas not configured. Click the Canvas button to connect.',
-                    timestamp: Date.now()
-                };
-                database.ref('channels/' + currentChannel.substring(1) + '/messages').push(message);
-                return;
-            }
-            
-            try {
-                const response = await fetch(`https://${canvasUrl}/api/v1/courses?enrollment_state=active`, {
-                    headers: { 'Authorization': `Bearer ${canvasToken}` }
-                });
-                const courses = await response.json();
-                
-                let messageText = '📚 **Your Active Courses:**\n';
-                courses.forEach(c => {
-                    messageText += `• ${c.name} (${c.course_code || 'No code'})\n`;
-                });
-                
-                const message = {
-                    author: 'System',
-                    nickname: 'Canvas Bot',
-                    text: messageText,
-                    timestamp: Date.now()
-                };
-                database.ref('channels/' + currentChannel.substring(1) + '/messages').push(message);
-                
-            } catch (error) {
-                console.error('Canvas fetch error:', error);
-                const message = {
-                    author: 'System',
-                    nickname: 'Canvas Bot',
-                    text: '⚠️ Canvas API is blocked by CORS. For full functionality, you would need a backend server.',
-                    timestamp: Date.now()
-                };
-                database.ref('channels/' + currentChannel.substring(1) + '/messages').push(message);
-            }
         }
 
         // Enter key to send
@@ -2307,4 +1871,4 @@
         }
     </script>
 </body>
-</html>
+    </html>
