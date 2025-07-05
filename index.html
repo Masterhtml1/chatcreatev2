@@ -1784,30 +1784,62 @@
                     const helpMessage = {
                         author: 'System',
                         nickname: 'Canvas Bot',
-                        text: '🤖 **Canvas Commands:**\n/canvas assignments - Show upcoming assignments\n/canvas courses - List your courses\n/canvas grades - Show recent grades\n/canvas announcements - Show recent announcements',
+                        text: '🤖 **Canvas Commands:**\n/canvas help - Show this message\n/canvas setup - Instructions for using Canvas integration\n/canvas example - Show example assignment format\n\n⚠️ **Note:** Direct Canvas API access is blocked by CORS in browsers. Use the manual sharing feature or set up a backend server.',
                         timestamp: Date.now()
                     };
                     database.ref('channels/' + currentChannel.substring(1) + '/messages').push(helpMessage);
                     break;
                     
-                case 'assignments':
-                    fetchCanvasAssignments();
+                case 'setup':
+                    const setupMessage = {
+                        author: 'System',
+                        nickname: 'Canvas Bot',
+                        text: '🛠️ **Canvas Setup Options:**\n\n**Option 1: Manual Sharing**\n• Copy assignment details from Canvas\n• Paste in chat with /share command\n\n**Option 2: Backend Server**\n• Deploy a simple Node.js server\n• Use it as a proxy for Canvas API\n\n**Option 3: Browser Extension**\n• Install "CORS Unblock" extension (for testing only)\n• Not recommended for production',
+                        timestamp: Date.now()
+                    };
+                    database.ref('channels/' + currentChannel.substring(1) + '/messages').push(setupMessage);
                     break;
                     
-                case 'courses':
-                    fetchCanvasCourses();
+                case 'example':
+                    const exampleMessage = {
+                        author: 'System',
+                        nickname: 'Canvas Bot',
+                        text: '📝 **Example Assignment Share:**\n\n**Math Homework**\nDue: Friday, Nov 15 at 11:59 PM\nPoints: 50\nComplete problems 1-20 on page 145\n\nTo share your own: Type your assignment details after /share',
+                        timestamp: Date.now()
+                    };
+                    database.ref('channels/' + currentChannel.substring(1) + '/messages').push(exampleMessage);
                     break;
                     
-                case 'grades':
-                    fetchCanvasGrades();
-                    break;
-                    
-                case 'announcements':
-                    fetchCanvasAnnouncements();
+                case 'share':
+                    const shareText = parts.slice(2).join(' ');
+                    if (shareText) {
+                        const shareMessage = {
+                            author: currentUser.email,
+                            nickname: currentUser.nickname,
+                            text: `📚 **Canvas Update:**\n${shareText}`,
+                            timestamp: Date.now()
+                        };
+                        database.ref('channels/' + currentChannel.substring(1) + '/messages').push(shareMessage);
+                    } else {
+                        const instructMessage = {
+                            author: 'System',
+                            nickname: 'Canvas Bot',
+                            text: '💡 **How to share:** /canvas share [your assignment details]',
+                            timestamp: Date.now()
+                        };
+                        database.ref('channels/' + currentChannel.substring(1) + '/messages').push(instructMessage);
+                    }
                     break;
                     
                 default:
-                    handleCanvasCommand('/canvas help');
+                    // For any other commands, show a simplified message
+                    const corsMessage = {
+                        author: 'System',
+                        nickname: 'Canvas Bot',
+                        text: '⚠️ **Canvas Integration Status:**\n\nYour Canvas token is saved, but direct API access is blocked by browser security (CORS).\n\n**What you can do:**\n• Use /canvas share to manually share assignments\n• Use /canvas example to see the format\n• Use /canvas setup for technical solutions',
+                        timestamp: Date.now()
+                    };
+                    database.ref('channels/' + currentChannel.substring(1) + '/messages').push(corsMessage);
             }
         }
 
@@ -2275,4 +2307,4 @@
         }
     </script>
 </body>
-                        </html>
+</html>
