@@ -1362,20 +1362,17 @@
         }
 
         // Canvas Integration Functions
-        let canvasToken = null;
-        let canvasUrl = null;
+        let canvasToken = localStorage.getItem('canvasToken') || null;
+        let canvasUrl = localStorage.getItem('canvasUrl') || null;
         let canvasData = {};
 
         function connectCanvas() {
             document.getElementById('canvasModal').style.display = 'block';
             
             // Check if already connected
-            const savedToken = localStorage.getItem('canvasToken');
-            const savedUrl = localStorage.getItem('canvasUrl');
-            
-            if (savedToken && savedUrl) {
-                canvasToken = savedToken;
-                canvasUrl = savedUrl;
+            if (canvasToken && canvasUrl) {
+                document.getElementById('canvasToken').value = '••••••••••••••••••••';
+                document.getElementById('canvasUrl').value = canvasUrl;
                 showCanvasData();
             }
         }
@@ -1393,30 +1390,68 @@
                 return;
             }
             
-            canvasToken = token;
+            // Don't update if token is masked
+            if (token !== '••••••••••••••••••••') {
+                canvasToken = token;
+            }
             canvasUrl = url;
             
-            // Test the connection
+            // Clean up the URL (remove https:// if present)
+            canvasUrl = canvasUrl.replace(/^https?:\/\//, '');
+            
+            // Test the connection with CORS proxy
             try {
-                const response = await fetch(`https://${canvasUrl}/api/v1/courses`, {
+                // Using a CORS proxy for testing
+                const proxyUrl = `https://cors-anywhere.herokuapp.com/https://${canvasUrl}/api/v1/courses`;
+                
+                const response = await fetch(proxyUrl, {
                     headers: {
-                        'Authorization': `Bearer ${canvasToken}`
+                        'Authorization': `Bearer ${canvasToken}`,
+                        'Origin': window.location.origin
                     }
                 });
                 
                 if (!response.ok) {
-                    throw new Error('Invalid token or URL');
+                    throw new Error(`Canvas API error: ${response.status}`);
                 }
                 
                 // Save to localStorage
                 localStorage.setItem('canvasToken', canvasToken);
                 localStorage.setItem('canvasUrl', canvasUrl);
                 
+                alert('Canvas connected successfully!');
                 await showCanvasData();
                 
             } catch (error) {
-                alert('Failed to connect to Canvas. Please check your token and URL.');
                 console.error('Canvas connection error:', error);
+                
+                // Try without CORS proxy (will work if Canvas allows CORS)
+                try {
+                    const directResponse = await fetch(`https://${canvasUrl}/api/v1/courses`, {
+                        headers: {
+                            'Authorization': `Bearer ${canvasToken}`
+                        }
+                    });
+                    
+                    if (directResponse.ok) {
+                        localStorage.setItem('canvasToken', canvasToken);
+                        localStorage.setItem('canvasUrl', canvasUrl);
+                        alert('Canvas connected successfully!');
+                        await showCanvasData();
+                    } else {
+                        throw new Error('Direct connection failed');
+                    }
+                } catch (directError) {
+                    alert('Canvas connection failed. This might be due to CORS restrictions. Try using the Canvas bot commands instead after saving your token.');
+                    
+                    // Save anyway for bot commands
+                    localStorage.setItem('canvasToken', canvasToken);
+                    localStorage.setItem('canvasUrl', canvasUrl);
+                    
+                    document.getElementById('canvasLoginSection').style.display = 'none';
+                    document.getElementById('canvasConnectedSection').style.display = 'block';
+                    document.getElementById('canvasData').innerHTML = '<p>Canvas connected for bot commands. Use /canvas help in chat.</p>';
+                }
             }
         }
 
@@ -1777,7 +1812,19 @@
         }
 
         async function fetchCanvasAssignments() {
+            if (!canvasToken || !canvasUrl) {
+                const message = {
+                    author: 'System',
+                    nickname: 'Canvas Bot',
+                    text: '❌ Canvas not configured. Click the Canvas button to connect.',
+                    timestamp: Date.now()
+                };
+                database.ref('channels/' + currentChannel.substring(1) + '/messages').push(message);
+                return;
+            }
+            
             try {
+                // Note: This will likely fail due to CORS, but the structure is correct
                 const response = await fetch(`https://${canvasUrl}/api/v1/courses?enrollment_state=active`, {
                     headers: { 'Authorization': `Bearer ${canvasToken}` }
                 });
@@ -1810,10 +1857,28 @@
                 
             } catch (error) {
                 console.error('Canvas fetch error:', error);
+                const message = {
+                    author: 'System',
+                    nickname: 'Canvas Bot',
+                    text: '⚠️ Canvas API is blocked by CORS. For full functionality, you would need to:\n1. Use a backend server\n2. Set up a proxy\n3. Or use Canvas as an LTI app',
+                    timestamp: Date.now()
+                };
+                database.ref('channels/' + currentChannel.substring(1) + '/messages').push(message);
             }
         }
 
         async function fetchCanvasCourses() {
+            if (!canvasToken || !canvasUrl) {
+                const message = {
+                    author: 'System',
+                    nickname: 'Canvas Bot',
+                    text: '❌ Canvas not configured. Click the Canvas button to connect.',
+                    timestamp: Date.now()
+                };
+                database.ref('channels/' + currentChannel.substring(1) + '/messages').push(message);
+                return;
+            }
+            
             try {
                 const response = await fetch(`https://${canvasUrl}/api/v1/courses?enrollment_state=active`, {
                     headers: { 'Authorization': `Bearer ${canvasToken}` }
@@ -1835,6 +1900,13 @@
                 
             } catch (error) {
                 console.error('Canvas fetch error:', error);
+                const message = {
+                    author: 'System',
+                    nickname: 'Canvas Bot',
+                    text: '⚠️ Canvas API is blocked by CORS. For full functionality, you would need a backend server.',
+                    timestamp: Date.now()
+                };
+                database.ref('channels/' + currentChannel.substring(1) + '/messages').push(message);
             }
         }
 
@@ -2203,4 +2275,4 @@
         }
     </script>
 </body>
-                    </html>
+                        </html>
