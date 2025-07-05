@@ -967,8 +967,16 @@
 
             <form class="login-form" id="loginForm">
                 <div class="form-group">
-                    <label class="form-label" for="schoolEmail">School Email</label>
-                    <input type="email" id="schoolEmail" class="form-input" placeholder="yourname@usd232.org" required>
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <label class="form-label" for="schoolEmail" style="margin-bottom: 0;">School Email</label>
+                        <button type="button" onclick="connectCanvas()" style="padding: 6px 12px; background: #1a73e8; color: white; border: none; border-radius: 15px; font-size: 12px; cursor: pointer; display: flex; align-items: center;">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="white" style="margin-right: 5px;">
+                                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                            </svg>
+                            Canvas
+                        </button>
+                    </div>
+                    <input type="email" id="schoolEmail" class="form-input" placeholder="yourname@usd232.org" required style="margin-top: 10px;">
                     <p class="form-hint">Enter your USD 232 school email address</p>
                 </div>
 
@@ -1046,6 +1054,48 @@
             <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
         </svg>
     </button>
+
+    <!-- Canvas Integration Modal -->
+    <div id="canvasModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 10000;">
+        <div style="position: relative; background: white; margin: 50px auto; padding: 30px; max-width: 500px; border-radius: 15px;">
+            <button onclick="closeCanvasModal()" style="position: absolute; top: 15px; right: 15px; background: none; border: none; font-size: 24px; cursor: pointer;">×</button>
+            
+            <h2 style="color: #ff69b4; margin-bottom: 20px;">Connect to Canvas</h2>
+            
+            <div id="canvasLoginSection">
+                <p style="margin-bottom: 15px;">Enter your Canvas access token to sync assignments and grades.</p>
+                
+                <input type="text" id="canvasToken" placeholder="Canvas Access Token" style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; margin-bottom: 15px;">
+                
+                <input type="text" id="canvasUrl" placeholder="Canvas URL (e.g., usd232.instructure.com)" value="usd232.instructure.com" style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; margin-bottom: 15px;">
+                
+                <button onclick="connectCanvasAccount()" style="width: 100%; padding: 12px; background: #ff69b4; color: white; border: none; border-radius: 25px; font-size: 16px; cursor: pointer;">Connect Canvas</button>
+                
+                <p style="margin-top: 15px; font-size: 14px; color: #666;">
+                    <strong>How to get your access token:</strong><br>
+                    1. Log into Canvas<br>
+                    2. Go to Account → Settings<br>
+                    3. Scroll to "Approved Integrations"<br>
+                    4. Click "+ New Access Token"<br>
+                    5. Copy and paste it here
+                </p>
+            </div>
+            
+            <div id="canvasConnectedSection" style="display: none;">
+                <p style="color: #4CAF50; margin-bottom: 20px;">✓ Canvas Connected!</p>
+                
+                <div id="canvasData">
+                    <h3>Your Courses:</h3>
+                    <div id="coursesList" style="max-height: 300px; overflow-y: auto;"></div>
+                    
+                    <h3 style="margin-top: 20px;">Recent Assignments:</h3>
+                    <div id="assignmentsList" style="max-height: 300px; overflow-y: auto;"></div>
+                </div>
+                
+                <button onclick="disconnectCanvas()" style="width: 100%; padding: 12px; background: #f44336; color: white; border: none; border-radius: 25px; font-size: 16px; cursor: pointer; margin-top: 20px;">Disconnect Canvas</button>
+            </div>
+        </div>
+    </div>
 
     <!-- Add Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
@@ -1311,6 +1361,166 @@
             });
         }
 
+        // Canvas Integration Functions
+        let canvasToken = null;
+        let canvasUrl = null;
+        let canvasData = {};
+
+        function connectCanvas() {
+            document.getElementById('canvasModal').style.display = 'block';
+            
+            // Check if already connected
+            const savedToken = localStorage.getItem('canvasToken');
+            const savedUrl = localStorage.getItem('canvasUrl');
+            
+            if (savedToken && savedUrl) {
+                canvasToken = savedToken;
+                canvasUrl = savedUrl;
+                showCanvasData();
+            }
+        }
+
+        function closeCanvasModal() {
+            document.getElementById('canvasModal').style.display = 'none';
+        }
+
+        async function connectCanvasAccount() {
+            const token = document.getElementById('canvasToken').value.trim();
+            const url = document.getElementById('canvasUrl').value.trim();
+            
+            if (!token || !url) {
+                alert('Please enter both Canvas token and URL');
+                return;
+            }
+            
+            canvasToken = token;
+            canvasUrl = url;
+            
+            // Test the connection
+            try {
+                const response = await fetch(`https://${canvasUrl}/api/v1/courses`, {
+                    headers: {
+                        'Authorization': `Bearer ${canvasToken}`
+                    }
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Invalid token or URL');
+                }
+                
+                // Save to localStorage
+                localStorage.setItem('canvasToken', canvasToken);
+                localStorage.setItem('canvasUrl', canvasUrl);
+                
+                await showCanvasData();
+                
+            } catch (error) {
+                alert('Failed to connect to Canvas. Please check your token and URL.');
+                console.error('Canvas connection error:', error);
+            }
+        }
+
+        async function showCanvasData() {
+            document.getElementById('canvasLoginSection').style.display = 'none';
+            document.getElementById('canvasConnectedSection').style.display = 'block';
+            
+            try {
+                // Fetch courses
+                const coursesResponse = await fetch(`https://${canvasUrl}/api/v1/courses?enrollment_state=active`, {
+                    headers: {
+                        'Authorization': `Bearer ${canvasToken}`
+                    }
+                });
+                const courses = await coursesResponse.json();
+                
+                // Display courses
+                const coursesList = document.getElementById('coursesList');
+                coursesList.innerHTML = '';
+                courses.forEach(course => {
+                    const courseDiv = document.createElement('div');
+                    courseDiv.style.cssText = 'padding: 10px; margin: 5px 0; background: #f0f0f0; border-radius: 8px; cursor: pointer;';
+                    courseDiv.innerHTML = `
+                        <strong>${course.name}</strong><br>
+                        <small>${course.course_code || ''}</small>
+                    `;
+                    courseDiv.onclick = () => shareCanvasUpdate('course', course);
+                    coursesList.appendChild(courseDiv);
+                });
+                
+                // Fetch assignments
+                const assignmentsPromises = courses.map(course => 
+                    fetch(`https://${canvasUrl}/api/v1/courses/${course.id}/assignments?order_by=due_at`, {
+                        headers: {
+                            'Authorization': `Bearer ${canvasToken}`
+                        }
+                    }).then(r => r.json())
+                );
+                
+                const allAssignments = (await Promise.all(assignmentsPromises)).flat();
+                const upcomingAssignments = allAssignments
+                    .filter(a => a.due_at && new Date(a.due_at) > new Date())
+                    .sort((a, b) => new Date(a.due_at) - new Date(b.due_at))
+                    .slice(0, 5);
+                
+                // Display assignments
+                const assignmentsList = document.getElementById('assignmentsList');
+                assignmentsList.innerHTML = '';
+                upcomingAssignments.forEach(assignment => {
+                    const assignmentDiv = document.createElement('div');
+                    assignmentDiv.style.cssText = 'padding: 10px; margin: 5px 0; background: #fff3cd; border-radius: 8px; cursor: pointer;';
+                    assignmentDiv.innerHTML = `
+                        <strong>${assignment.name}</strong><br>
+                        <small>Due: ${new Date(assignment.due_at).toLocaleDateString()}</small>
+                    `;
+                    assignmentDiv.onclick = () => shareCanvasUpdate('assignment', assignment);
+                    assignmentsList.appendChild(assignmentDiv);
+                });
+                
+            } catch (error) {
+                console.error('Error fetching Canvas data:', error);
+                alert('Error loading Canvas data. Please try reconnecting.');
+            }
+        }
+
+        function shareCanvasUpdate(type, data) {
+            if (!currentChannel) {
+                alert('Please join a channel first to share Canvas updates');
+                return;
+            }
+            
+            let messageText = '';
+            
+            if (type === 'course') {
+                messageText = `📚 **Canvas Course Update**\nCourse: ${data.name}\nCode: ${data.course_code || 'N/A'}`;
+            } else if (type === 'assignment') {
+                messageText = `📝 **Canvas Assignment**\nAssignment: ${data.name}\nDue: ${new Date(data.due_at).toLocaleString()}\nPoints: ${data.points_possible || 'N/A'}`;
+            }
+            
+            const canvasMessage = {
+                author: currentUser.email,
+                nickname: currentUser.nickname,
+                text: messageText,
+                timestamp: Date.now(),
+                isCanvasUpdate: true
+            };
+            
+            database.ref('channels/' + currentChannel.substring(1) + '/messages').push(canvasMessage);
+            closeCanvasModal();
+            
+            alert('Canvas update shared in chat!');
+        }
+
+        function disconnectCanvas() {
+            localStorage.removeItem('canvasToken');
+            localStorage.removeItem('canvasUrl');
+            canvasToken = null;
+            canvasUrl = null;
+            
+            document.getElementById('canvasLoginSection').style.display = 'block';
+            document.getElementById('canvasConnectedSection').style.display = 'none';
+            document.getElementById('canvasToken').value = '';
+        }
+
         // Send email notification for failed login using Sendinblue/Brevo
         function sendFailedLoginEmail(attemptedEmail, attemptedNickname) {
             // Sendinblue API endpoint
@@ -1384,6 +1594,11 @@
         window.showReactionPicker = showReactionPicker;
         window.addReaction = addReaction;
         window.toggleReaction = toggleReaction;
+        window.connectCanvas = connectCanvas;
+        window.closeCanvasModal = closeCanvasModal;
+        window.connectCanvasAccount = connectCanvasAccount;
+        window.shareCanvasUpdate = shareCanvasUpdate;
+        window.disconnectCanvas = disconnectCanvas;
 
         // Render messages
         function renderMessages() {
@@ -1493,6 +1708,13 @@
                 }
             }
             
+            // Check for Canvas commands
+            if (text.startsWith('/canvas')) {
+                handleCanvasCommand(text);
+                input.value = '';
+                return;
+            }
+            
             const message = {
                 author: currentUser.email,
                 nickname: currentUser.nickname,
@@ -1500,10 +1722,120 @@
                 timestamp: Date.now()
             };
             
-            // Send to Firebase instead of local array
+            // Send to Firebase
             database.ref('channels/' + currentChannel.substring(1) + '/messages').push(message);
             
             input.value = '';
+        }
+
+        // Handle Canvas bot commands
+        function handleCanvasCommand(command) {
+            const parts = command.split(' ');
+            const subCommand = parts[1];
+            
+            if (!localStorage.getItem('canvasToken')) {
+                const helpMessage = {
+                    author: 'System',
+                    nickname: 'Canvas Bot',
+                    text: '🤖 Canvas not connected! Click the Canvas button in the header to connect your account.',
+                    timestamp: Date.now()
+                };
+                database.ref('channels/' + currentChannel.substring(1) + '/messages').push(helpMessage);
+                return;
+            }
+            
+            switch(subCommand) {
+                case 'help':
+                    const helpMessage = {
+                        author: 'System',
+                        nickname: 'Canvas Bot',
+                        text: '🤖 **Canvas Commands:**\n/canvas assignments - Show upcoming assignments\n/canvas courses - List your courses\n/canvas grades - Show recent grades\n/canvas announcements - Show recent announcements',
+                        timestamp: Date.now()
+                    };
+                    database.ref('channels/' + currentChannel.substring(1) + '/messages').push(helpMessage);
+                    break;
+                    
+                case 'assignments':
+                    fetchCanvasAssignments();
+                    break;
+                    
+                case 'courses':
+                    fetchCanvasCourses();
+                    break;
+                    
+                case 'grades':
+                    fetchCanvasGrades();
+                    break;
+                    
+                case 'announcements':
+                    fetchCanvasAnnouncements();
+                    break;
+                    
+                default:
+                    handleCanvasCommand('/canvas help');
+            }
+        }
+
+        async function fetchCanvasAssignments() {
+            try {
+                const response = await fetch(`https://${canvasUrl}/api/v1/courses?enrollment_state=active`, {
+                    headers: { 'Authorization': `Bearer ${canvasToken}` }
+                });
+                const courses = await response.json();
+                
+                const assignmentsPromises = courses.map(course => 
+                    fetch(`https://${canvasUrl}/api/v1/courses/${course.id}/assignments?order_by=due_at`, {
+                        headers: { 'Authorization': `Bearer ${canvasToken}` }
+                    }).then(r => r.json())
+                );
+                
+                const allAssignments = (await Promise.all(assignmentsPromises)).flat();
+                const upcoming = allAssignments
+                    .filter(a => a.due_at && new Date(a.due_at) > new Date())
+                    .sort((a, b) => new Date(a.due_at) - new Date(b.due_at))
+                    .slice(0, 5);
+                
+                let messageText = '📝 **Upcoming Assignments:**\n';
+                upcoming.forEach(a => {
+                    messageText += `• ${a.name} - Due: ${new Date(a.due_at).toLocaleDateString()}\n`;
+                });
+                
+                const message = {
+                    author: 'System',
+                    nickname: 'Canvas Bot',
+                    text: messageText || '✅ No upcoming assignments!',
+                    timestamp: Date.now()
+                };
+                database.ref('channels/' + currentChannel.substring(1) + '/messages').push(message);
+                
+            } catch (error) {
+                console.error('Canvas fetch error:', error);
+            }
+        }
+
+        async function fetchCanvasCourses() {
+            try {
+                const response = await fetch(`https://${canvasUrl}/api/v1/courses?enrollment_state=active`, {
+                    headers: { 'Authorization': `Bearer ${canvasToken}` }
+                });
+                const courses = await response.json();
+                
+                let messageText = '📚 **Your Active Courses:**\n';
+                courses.forEach(c => {
+                    messageText += `• ${c.name} (${c.course_code || 'No code'})\n`;
+                });
+                
+                const message = {
+                    author: 'System',
+                    nickname: 'Canvas Bot',
+                    text: messageText,
+                    timestamp: Date.now()
+                };
+                database.ref('channels/' + currentChannel.substring(1) + '/messages').push(message);
+                
+            } catch (error) {
+                console.error('Canvas fetch error:', error);
+            }
         }
 
         // Enter key to send
@@ -1871,4 +2203,4 @@
         }
     </script>
 </body>
-    </html>
+                    </html>
