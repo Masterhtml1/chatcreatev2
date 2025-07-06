@@ -479,6 +479,27 @@
             background: rgba(255, 255, 255, 0.3);
         }
 
+        .support-btn {
+            padding: 8px 16px;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .support-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+        }
+
         .messages-container {
             flex: 1;
             overflow-y: auto;
@@ -1011,6 +1032,9 @@
                 <span class="channel-name" id="channelName">#general</span>
             </h2>
             <div class="user-info">
+                <a href="https://ko-fi.com/chatcreatesupportme" target="_blank" class="support-btn">
+                    ☕ Support Me
+                </a>
                 <button class="theme-toggle-header" onclick="toggleTheme()" title="Toggle theme">
                     <svg id="themeIconHeader" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
