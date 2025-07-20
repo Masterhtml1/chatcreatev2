@@ -1222,7 +1222,7 @@
             document.getElementById('loginScreen').style.display = 'none';
             document.getElementById('chatInterface').style.display = 'flex';
             document.getElementById('channelName').textContent = channel;
-            document.getElementById('userNickname').textContent = nickname + (isAdmin ? ' (Admin)' : '');
+            document.getElementById('userNickname').innerHTML = isAdmin ? '<span style="color: #f44336; font-weight: bold;">(Admin)</span>' : nickname;
             
             // Add chat-active class to body
             document.body.classList.add('chat-active');
@@ -1231,8 +1231,9 @@
             const joinMessage = {
                 author: 'System',
                 nickname: 'System',
-                text: `${nickname}${isAdmin ? ' (Admin)' : ''} joined the channel`,
-                timestamp: Date.now()
+                text: isAdmin ? '<span style="color: #f44336; font-weight: bold;">(Admin)</span> joined the channel' : `${nickname} joined the channel`,
+                timestamp: Date.now(),
+                isHtml: isAdmin
             };
             database.ref('channels/' + currentChannel.substring(1) + '/messages').push(joinMessage);
             
@@ -1412,6 +1413,12 @@
                     minute: '2-digit' 
                 });
                 
+                // Set display name - show (Admin) in red for admin messages
+                let displayName = message.nickname;
+                if (message.isAdmin || (message.nickname === 'Admin' && message.author !== 'System')) {
+                    displayName = '<span style="color: #f44336; font-weight: bold;">(Admin)</span>';
+                }
+                
                 let adminControls = '';
                 let reactButton = '';
                 
@@ -1447,12 +1454,12 @@
                     <div class="message-avatar">${initial}</div>
                     <div class="message-content">
                         <div class="message-header">
-                            <span class="message-author">${message.nickname}</span>
+                            <span class="message-author">${displayName}</span>
                             <span class="message-time">${time}</span>
                             ${reactButton}
                             ${adminControls}
                         </div>
-                        <div class="message-text" id="text-${message.id}">${message.text}</div>
+                        <div class="message-text" id="text-${message.id}">${message.isHtml && message.author === 'System' ? message.text : message.text}</div>
                         ${reactionsHtml}
                         <div class="reaction-picker" id="picker-${message.id}">
                             <span class="reaction-emoji" onclick="addReaction('${message.id}', '👍')">👍</span>
@@ -1495,9 +1502,10 @@
             
             const message = {
                 author: currentUser.email,
-                nickname: currentUser.nickname,
+                nickname: currentUser.isAdmin ? 'Admin' : currentUser.nickname,
                 text: text,
-                timestamp: Date.now()
+                timestamp: Date.now(),
+                isAdmin: currentUser.isAdmin
             };
             
             // Send to Firebase instead of local array
@@ -1519,8 +1527,9 @@
             const leaveMessage = {
                 author: 'System',
                 nickname: 'System',
-                text: `${currentUser.nickname} left the channel`,
-                timestamp: Date.now()
+                text: currentUser.isAdmin ? '<span style="color: #f44336; font-weight: bold;">(Admin)</span> left the channel' : `${currentUser.nickname} left the channel`,
+                timestamp: Date.now(),
+                isHtml: currentUser.isAdmin
             };
             database.ref('channels/' + currentChannel.substring(1) + '/messages').push(leaveMessage);
             
