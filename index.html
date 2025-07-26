@@ -1040,6 +1040,18 @@
         </div>
     </div>
 
+    <!-- Support Box -->
+    <div class="support-box expanded" id="supportBox">
+        <div class="support-content">
+            <div class="support-title">Want to keep ChatCreate running?</div>
+            <div class="support-text">Help out and get your own custom 3D print or website coded by me!</div>
+            <a href="https://masterhtml1.github.io/ChatCreate-Services/" class="support-button" id="servicesLink" target="_blank">Learn More</a>
+        </div>
+        <div class="toggle-arrows" onclick="toggleSupportBox()">
+            <span id="arrowIcon">◀◀</span>
+        </div>
+    </div>
+
     <!-- Theme Toggle Button -->
     <button class="theme-toggle" onclick="toggleTheme()" title="Toggle theme">
         <svg id="themeIcon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -1376,6 +1388,37 @@
             });
         }
 
+        // Support box toggle
+        function toggleSupportBox() {
+            const supportBox = document.getElementById('supportBox');
+            const arrowIcon = document.getElementById('arrowIcon');
+            
+            if (supportBox.classList.contains('expanded')) {
+                supportBox.classList.remove('expanded');
+                supportBox.classList.add('collapsed');
+                arrowIcon.textContent = '▶▶';
+            } else {
+                supportBox.classList.remove('collapsed');
+                supportBox.classList.add('expanded');
+                arrowIcon.textContent = '◀◀';
+            }
+            
+            // Save preference
+            localStorage.setItem('supportBoxState', supportBox.classList.contains('expanded') ? 'expanded' : 'collapsed');
+        }
+
+        // Load support box state
+        document.addEventListener('DOMContentLoaded', function() {
+            const savedState = localStorage.getItem('supportBoxState');
+            if (savedState === 'collapsed') {
+                const supportBox = document.getElementById('supportBox');
+                const arrowIcon = document.getElementById('arrowIcon');
+                supportBox.classList.remove('expanded');
+                supportBox.classList.add('collapsed');
+                arrowIcon.textContent = '▶▶';
+            }
+        });
+
         // Make functions globally accessible for onclick handlers
         window.sendMessage = sendMessage;
         window.logout = logout;
@@ -1385,6 +1428,7 @@
         window.showReactionPicker = showReactionPicker;
         window.addReaction = addReaction;
         window.toggleReaction = toggleReaction;
+        window.toggleSupportBox = toggleSupportBox;
 
         // Render messages
         function renderMessages() {
@@ -1880,4 +1924,4 @@
         }
     </script>
 </body>
-    </html>
+</html>
