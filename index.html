@@ -1041,14 +1041,14 @@
     </div>
 
     <!-- Support Box -->
-    <div class="support-box expanded" id="supportBox">
+    <div class="support-box collapsed" id="supportBox">
         <div class="support-content">
-            <div class="support-title">Want to keep ChatCreate running?</div>
-            <div class="support-text">Help out and get your own custom 3D print or website coded by me!</div>
-            <a href="https://masterhtml1.github.io/ChatCreate-Services/" class="support-button" id="servicesLink" target="_blank">Learn More</a>
+            <div class="support-title">Support ChatCreate! 🎉</div>
+            <div class="support-text">Get your own custom 3D print or website coded by me!</div>
+            <a href="https://masterhtml1.github.io/ChatCreate-Services/" class="support-button" id="servicesLink" target="_blank">View Services</a>
         </div>
         <div class="toggle-arrows" onclick="toggleSupportBox()">
-            <span id="arrowIcon">◀◀</span>
+            <span id="arrowIcon">▶</span>
         </div>
     </div>
 
@@ -1396,11 +1396,11 @@
             if (supportBox.classList.contains('expanded')) {
                 supportBox.classList.remove('expanded');
                 supportBox.classList.add('collapsed');
-                arrowIcon.textContent = '▶▶';
+                arrowIcon.textContent = '▶';
             } else {
                 supportBox.classList.remove('collapsed');
                 supportBox.classList.add('expanded');
-                arrowIcon.textContent = '◀◀';
+                arrowIcon.textContent = '◀';
             }
             
             // Save preference
