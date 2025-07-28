@@ -1347,67 +1347,46 @@
             });
         }
 
-        // Send email notification for failed login using Sendinblue/Brevo
+        // Send email notification for failed login using Web3Forms
         function sendFailedLoginEmail(attemptedEmail, attemptedNickname) {
-            // Sendinblue API endpoint
-            const apiUrl = 'https://api.sendinblue.com/v3/smtp/email';
-            
-            // Email data
-            const emailData = {
-                sender: {
-                    name: 'ChatCreate Security',
-                    email: 'noreply@chatcreate.vercel.app' // You can use any email here
-                },
-                to: [{
-                    email: 'your-admin-email@usd232.org', // CHANGE THIS TO YOUR EMAIL
-                    name: 'Admin'
-                }],
-                subject: `⚠️ Failed Login Attempt: ${attemptedEmail}`,
-                htmlContent: `
-                    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-                        <div style="background: #ff69b4; color: white; padding: 20px; border-radius: 10px 10px 0 0;">
-                            <h2 style="margin: 0;">🚨 Failed Login Attempt</h2>
-                        </div>
-                        <div style="background: #f5f5f5; padding: 30px; border-radius: 0 0 10px 10px;">
-                            <p style="font-size: 16px; color: #333;">Someone tried to access ChatCreate with an unauthorized email:</p>
-                            
-                            <div style="background: white; padding: 20px; border-radius: 8px; margin: 20px 0;">
-                                <p style="margin: 10px 0;"><strong>Email Attempted:</strong> ${attemptedEmail}</p>
-                                <p style="margin: 10px 0;"><strong>Nickname Tried:</strong> ${attemptedNickname}</p>
-                                <p style="margin: 10px 0;"><strong>Time:</strong> ${new Date().toLocaleString()}</p>
-                            </div>
-                            
-                            <div style="text-align: center; margin-top: 30px;">
-                                <a href="https://chatcreate.vercel.app/admin.html" 
-                                   style="background: #4CAF50; color: white; padding: 12px 30px; text-decoration: none; border-radius: 25px; display: inline-block;">
-                                   View Admin Dashboard
-                                </a>
-                            </div>
-                            
-                            <p style="font-size: 14px; color: #666; margin-top: 20px; text-align: center;">
-                                To approve this user, add their email to the approved list in the admin dashboard.
-                            </p>
-                        </div>
-                    </div>
-                `
-            };
-            
-            // Send email via Sendinblue API
-            fetch(apiUrl, {
+            fetch('https://api.web3forms.com/submit', {
                 method: 'POST',
                 headers: {
-                    'accept': 'application/json',
-                    'api-key': 'YOUR-SENDINBLUE-API-KEY', // REPLACE WITH YOUR API KEY
-                    'content-type': 'application/json'
+                    'Content-Type': 'application/json',
                 },
-                body: JSON.stringify(emailData)
+                body: JSON.stringify({
+                    access_key: 'YOUR-ACCESS-KEY-HERE', // REPLACE WITH YOUR WEB3FORMS ACCESS KEY
+                    to: 'your-email@example.com', // REPLACE WITH YOUR EMAIL
+                    subject: `🚨 Failed Login Attempt: ${attemptedEmail}`,
+                    from_name: 'ChatCreate Security',
+                    message: `
+Failed Login Attempt on ChatCreate
+
+🔴 ATTEMPTED ACCESS DETAILS:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Email Attempted: ${attemptedEmail}
+Nickname Tried: ${attemptedNickname}
+Time: ${new Date().toLocaleString()}
+━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🔗 QUICK ACTIONS:
+• View Admin Dashboard: https://chatcreate.vercel.app/admin.html
+• To approve this user, add their email to the approved list
+
+This is an automated security notification from ChatCreate.
+                    `
+                })
             })
             .then(response => response.json())
             .then(data => {
-                console.log('Email notification sent successfully', data);
+                if (data.success) {
+                    console.log('Email notification sent successfully');
+                } else {
+                    console.error('Failed to send email notification');
+                }
             })
             .catch(error => {
-                console.error('Failed to send email notification:', error);
+                console.error('Error sending notification:', error);
             });
         }
 
