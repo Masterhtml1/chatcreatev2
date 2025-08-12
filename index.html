@@ -1033,6 +1033,11 @@
                 </p>
 
                 <button type="submit" class="submit-btn" id="submitBtn" disabled>Join Channel</button>
+                
+                <div style="text-align: center; margin-top: 15px;">
+                    <a href="#" onclick="clearSavedData()" style="color: #ff69b4; font-size: 14px; text-decoration: none;">Use Different Account</a>
+                </div>
+                
                 <div class="error-message" id="errorMessage"></div>
             </form>
         </div>
@@ -1150,6 +1155,34 @@
             return approvedEmails.includes(email.toLowerCase());
         }
 
+        // Load saved user data on page load
+        function loadSavedUserData() {
+            const savedEmail = localStorage.getItem('chatCreateEmail');
+            const savedNickname = localStorage.getItem('chatCreateNickname');
+            
+            if (savedEmail) {
+                document.getElementById('schoolEmail').value = savedEmail;
+            }
+            
+            if (savedNickname) {
+                document.getElementById('nickname').value = savedNickname;
+                // Check if it's admin nickname
+                if (savedNickname === 'LeBron') {
+                    document.getElementById('adminPasswordGroup').style.display = 'block';
+                }
+            }
+            
+            // Check form validity after loading saved data
+            if (savedEmail && savedNickname) {
+                checkFormValidity();
+            }
+        }
+
+        // Call this when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            loadSavedUserData();
+        });
+
         // Form validation
         // Terms checkbox
         document.getElementById('termsCheckbox').addEventListener('change', function() {
@@ -1249,6 +1282,10 @@
                 isAdmin: isAdmin
             };
             currentChannel = channel;
+            
+            // Save email and nickname to browser storage
+            localStorage.setItem('chatCreateEmail', email);
+            localStorage.setItem('chatCreateNickname', nickname);
             
             // Clear local messages for this channel
             messages[currentChannel] = [];
@@ -1355,8 +1392,8 @@
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                    access_key: '03ab95ef-e441-4952-a3cd-fad2b3bfe81e', // REPLACE WITH YOUR WEB3FORMS ACCESS KEY
-                    to: 'odelbro000@usd232.org', // REPLACE WITH YOUR EMAIL
+                    access_key: 'YOUR-ACCESS-KEY-HERE', // REPLACE WITH YOUR WEB3FORMS ACCESS KEY
+                    to: 'your-email@example.com', // REPLACE WITH YOUR EMAIL
                     subject: `🚨 Failed Login Attempt: ${attemptedEmail}`,
                     from_name: 'ChatCreate Security',
                     message: `
@@ -1399,6 +1436,19 @@ This is an automated security notification from ChatCreate.
         window.showReactionPicker = showReactionPicker;
         window.addReaction = addReaction;
         window.toggleReaction = toggleReaction;
+        window.clearSavedData = clearSavedData;
+
+        // Clear saved user data
+        function clearSavedData() {
+            if (confirm('This will clear your saved email and nickname. Continue?')) {
+                localStorage.removeItem('chatCreateEmail');
+                localStorage.removeItem('chatCreateNickname');
+                document.getElementById('schoolEmail').value = '';
+                document.getElementById('nickname').value = '';
+                document.getElementById('adminPasswordGroup').style.display = 'none';
+                checkFormValidity();
+            }
+        }
 
         // Render messages
         function renderMessages() {
