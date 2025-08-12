@@ -18,7 +18,7 @@ A secure, real-time chat application designed specifically for USD 232 school di
 - **Dark/Light Theme** - Easy on the eyes with theme toggle
 
 ### 🛡️ Security & Moderation
-- **Email Verification** - Restricted to @usd232.org emails only
+- **Email Verification** - Restricted to school emails only
 - **Admin Dashboard** - Comprehensive moderation tools
 - **Banned Words Filter** - Automatic content filtering
 - **User Banning System** - Remove problematic users
@@ -35,7 +35,7 @@ A secure, real-time chat application designed specifically for USD 232 school di
 ## 🚀 Quick Start
 
 ### Prerequisites
-- A valid @usd232.org email address
+- A valid school email address
 - Modern web browser (Chrome, Firefox, Safari, Edge)
 
 ### Accessing ChatCreate
@@ -69,7 +69,7 @@ A secure, real-time chat application designed specifically for USD 232 school di
 
 ## 🔒 Security Features
 
-1. **Email Whitelist** - Only approved @usd232.org emails
+1. **Email Whitelist** - Only approved shcool emails
 2. **Real-time Moderation** - Instant ban capabilities
 3. **Content Filtering** - 1000+ banned words
 4. **Failed Login Tracking** - Email notifications for attempts
