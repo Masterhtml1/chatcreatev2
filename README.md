@@ -1,10 +1,7 @@
 # ChatCreate 🎓💬
 
-A secure, real-time chat application designed specifically for USD 232 school district students and staff. Built with modern web technologies and focused on creating a safe educational environment.
+A secure, real-time chat application designed specifically for school district students. Built with modern web technologies and focused on creating a safe educational environment.
 
-![ChatCreate Banner](https://img.shields.io/badge/ChatCreate-USD%20232-ff69b4?style=for-the-badge)
-![License](https://img.shields.io/badge/license-MIT-blue.svg?style=for-the-badge)
-![Version](https://img.shields.io/badge/version-1.0.0-green.svg?style=for-the-badge)
 
 ## 🌟 Features
 
