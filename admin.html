@@ -478,6 +478,18 @@
                 </div>
             </div>
 
+            <!-- Moderator Passwords -->
+            <div class="dashboard-card">
+                <h2 class="card-title">
+                    <span class="card-icon">🔑</span>
+                    Moderator Passwords
+                </h2>
+                <button class="clear-all-btn" style="background: #2196F3; margin-bottom: 15px;" onclick="generateModPassword()">Generate New Password</button>
+                <div class="banned-list" id="modPasswordsList" style="max-height: 400px;">
+                    <div class="loading">Loading moderator passwords...</div>
+                </div>
+            </div>
+
             <!-- Failed Login Attempts -->
             <div class="dashboard-card">
                 <h2 class="card-title">
@@ -553,7 +565,77 @@
             loadBannedWords();
             loadApprovedEmails();
             loadFailedAttempts();
+            loadModPasswords();
             loadStats();
+        }
+
+        // Generate random mod password
+        function generateModPassword() {
+            const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789';
+            let password = '';
+            for (let i = 0; i < 12; i++) {
+                password += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            
+            // Add to Firebase
+            const modPassword = {
+                password: password,
+                createdAt: Date.now(),
+                createdBy: 'Admin',
+                active: true,
+                usedBy: null
+            };
+            
+            database.ref('modPasswords').push(modPassword);
+            alert(`New moderator password generated: ${password}\n\nShare this with your moderator.`);
+        }
+
+        // Load mod passwords
+        function loadModPasswords() {
+            const passwordsList = document.getElementById('modPasswordsList');
+            
+            database.ref('modPasswords').orderByChild('createdAt').on('value', (snapshot) => {
+                passwordsList.innerHTML = '';
+                const passwords = [];
+                
+                snapshot.forEach((passSnapshot) => {
+                    const passData = passSnapshot.val();
+                    passData.key = passSnapshot.key;
+                    passwords.unshift(passData); // Show newest first
+                });
+                
+                if (passwords.length > 0) {
+                    passwords.forEach(passData => {
+                        const passItem = document.createElement('div');
+                        passItem.className = 'banned-item';
+                        passItem.style.background = passData.active ? '#e8f5e9' : '#f5f5f5';
+                        passItem.innerHTML = `
+                            <div class="banned-info">
+                                <div class="banned-nickname" style="font-family: monospace; font-size: 16px;">
+                                    ${passData.password}
+                                    ${passData.active ? '<span style="color: #4CAF50; margin-left: 10px;">✓ Active</span>' : '<span style="color: #999; margin-left: 10px;">Used</span>'}
+                                </div>
+                                <div class="banned-email">
+                                    Created: ${new Date(passData.createdAt).toLocaleString()}
+                                    ${passData.usedBy ? ` | Used by: ${passData.usedBy}` : ''}
+                                </div>
+                            </div>
+                            <button class="unban-btn" style="background: #f44336;" onclick="deleteModPassword('${passData.key}')">Delete</button>
+                        `;
+                        passwordsList.appendChild(passItem);
+                    });
+                } else {
+                    passwordsList.innerHTML = '<div class="empty-state">No moderator passwords generated yet</div>';
+                }
+            });
+        }
+
+        // Delete mod password
+        function deleteModPassword(key) {
+            if (confirm('Delete this moderator password? It will no longer work for login.')) {
+                database.ref('modPasswords/' + key).remove();
+                alert('Moderator password deleted');
+            }
         }
 
         // Load failed login attempts
