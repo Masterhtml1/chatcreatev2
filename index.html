@@ -1036,6 +1036,8 @@
                 
                 <div style="text-align: center; margin-top: 15px;">
                     <a href="#" onclick="clearSavedData()" style="color: #ff69b4; font-size: 14px; text-decoration: none;">Use Different Account</a>
+                    <span style="color: #ccc; margin: 0 10px;">|</span>
+                    <a href="mod.html" style="color: #666; font-size: 14px; text-decoration: none;">Moderator Login</a>
                 </div>
                 
                 <div class="error-message" id="errorMessage"></div>
@@ -1392,8 +1394,8 @@
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                    access_key: '03ab95ef-e441-4952-a3cd-fad2b3bfe81e', // REPLACE WITH YOUR WEB3FORMS ACCESS KEY
-                    to: 'odelbro000@usd232.org', // REPLACE WITH YOUR EMAIL
+                    access_key: 'YOUR-ACCESS-KEY-HERE', // REPLACE WITH YOUR WEB3FORMS ACCESS KEY
+                    to: 'your-email@example.com', // REPLACE WITH YOUR EMAIL
                     subject: `🚨 Failed Login Attempt: ${attemptedEmail}`,
                     from_name: 'ChatCreate Security',
                     message: `
