@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Moderator Dashboard - ChatCreate</title>
+    <link rel="icon" type="image/png" href="https://yourimageshare.com/ib/53MgLPleiK.png">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+            background-color: #f5f5f5;
+            min-height: 100vh;
+            color: #333;
+        }
+
+        /* Header */
+        .header {
+            padding: 20px;
+            background: #2196F3;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .logo {
+            font-size: 28px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logout-btn {
+            padding: 10px 20px;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.2s;
+            text-decoration: none;
+        }
+
+        .logout-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        /* Login Container */
+        .login-container {
+            max-width: 400px;
+            margin: 100px auto;
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .login-title {
+            font-size: 28px;
+            color: #333;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 16px;
+            font-weight: 500;
+            color: #555;
+            margin-bottom: 8px;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            font-family: monospace;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #2196F3;
+            box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.1);
+        }
+
+        .login-btn {
+            width: 100%;
+            padding: 14px;
+            background: #2196F3;
+            color: white;
+            border: none;
+            border-radius: 25px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .login-btn:hover {
+            background: #1976D2;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(33, 150, 243, 0.3);
+        }
+
+        .error-message {
+            color: #dc3545;
+            font-size: 14px;
+            text-align: center;
+            margin-top: 15px;
+            display: none;
+        }
+
+        /* Dashboard Container */
+        .dashboard-container {
+            display: none;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 30px;
+        }
+
+        .welcome-message {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+            text-align: center;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 30px;
+        }
+
+        .dashboard-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+        }
+
+        .card-title {
+            font-size: 22px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .card-icon {
+            font-size: 24px;
+        }
+
+        /* Ban/Unban buttons */
+        .action-btn {
+            padding: 6px 16px;
+            border: none;
+            border-radius: 20px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .ban-btn {
+            background: #f44336;
+            color: white;
+        }
+
+        .ban-btn:hover {
+            background: #da190b;
+        }
+
+        .unban-btn {
+            background: #4CAF50;
+            color: white;
+        }
+
+        .unban-btn:hover {
+            background: #45a049;
+        }
+
+        /* User lists */
+        .user-list {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .user-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+
+        .user-info {
+            flex: 1;
+        }
+
+        .user-nickname {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .user-email {
+            font-size: 14px;
+            color: #666;
+        }
+
+        /* Stats */
+        .stat-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 15px;
+            background: #e3f2fd;
+            border-radius: 8px;
+            margin-bottom: 12px;
+        }
+
+        .stat-label {
+            font-weight: 500;
+            color: #555;
+        }
+
+        .stat-value {
+            font-weight: 700;
+            color: #2196F3;
+            font-size: 18px;
+        }
+
+        /* Empty state */
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+        }
+
+        /* Loading */
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #999;
+        }
+
+        /* Note */
+        .note {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            color: #856404;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <!-- Login Screen -->
+    <div id="loginScreen">
+        <header class="header">
+            <div class="logo">
+                👮 Moderator Dashboard
+            </div>
+            <a href="index.html" class="logout-btn">Back to Chat</a>
+        </header>
+
+        <div class="login-container">
+            <h1 class="login-title">Moderator Login</h1>
+            <form id="modLoginForm">
+                <div class="form-group">
+                    <label class="form-label" for="modPassword">Access Code</label>
+                    <input type="password" id="modPassword" class="form-input" placeholder="Enter your moderator code" required autofocus>
+                </div>
+                <button type="submit" class="login-btn">Login</button>
+                <div class="error-message" id="errorMessage"></div>
+            </form>
+            <p style="text-align: center; margin-top: 20px; color: #666; font-size: 14px;">
+                Access codes are provided by administrators
+            </p>
+        </div>
+    </div>
+
+    <!-- Dashboard -->
+    <div id="dashboardScreen" class="dashboard-container">
+        <header class="header">
+            <div class="logo">
+                👮 Moderator Dashboard
+            </div>
+            <button class="logout-btn" onclick="logout()">Logout</button>
+        </header>
+
+        <div class="welcome-message">
+            <h2>Welcome, Moderator!</h2>
+            <p>You have limited administrative privileges. Use them responsibly.</p>
+        </div>
+
+        <div class="dashboard-grid">
+            <!-- Banned Users Management -->
+            <div class="dashboard-card">
+                <h2 class="card-title">
+                    <span class="card-icon">🚫</span>
+                    Banned Users
+                </h2>
+                <div class="note">You can unban users but cannot ban new ones</div>
+                <div class="user-list" id="bannedUsersList">
+                    <div class="loading">Loading banned users...</div>
+                </div>
+            </div>
+
+            <!-- Channel Monitoring -->
+            <div class="dashboard-card">
+                <h2 class="card-title">
+                    <span class="card-icon">💬</span>
+                    Active Channels
+                </h2>
+                <div class="user-list" id="channelsList">
+                    <div class="loading">Loading channels...</div>
+                </div>
+            </div>
+
+            <!-- Recent Activity -->
+            <div class="dashboard-card">
+                <h2 class="card-title">
+                    <span class="card-icon">📊</span>
+                    Statistics
+                </h2>
+                <div id="statsContainer">
+                    <div class="stat-item">
+                        <span class="stat-label">Total Messages Today</span>
+                        <span class="stat-value" id="todayMessages">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Active Users</span>
+                        <span class="stat-value" id="activeUsers">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Banned Users</span>
+                        <span class="stat-value" id="bannedCount">0</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Failed Login Attempts -->
+            <div class="dashboard-card">
+                <h2 class="card-title">
+                    <span class="card-icon">⚠️</span>
+                    Recent Failed Logins
+                </h2>
+                <div class="user-list" id="failedLoginsList">
+                    <div class="loading">Loading failed attempts...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+
+    <script>
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyD6zrgjxQUboB14H5ysJsTnzsiTBfak1Rk",
+            authDomain: "chatcreate-5dfd6.firebaseapp.com",
+            databaseURL: "https://chatcreate-5dfd6-default-rtdb.firebaseio.com",
+            projectId: "chatcreate-5dfd6",
+            storageBucket: "chatcreate-5dfd6.firebasestorage.app",
+            messagingSenderId: "992462114118",
+            appId: "1:992462114118:web:dbb2711332b900baf36947",
+            measurementId: "G-W7SV1FY6NE"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+
+        // Mod login
+        document.getElementById('modLoginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const password = document.getElementById('modPassword').value;
+            const errorMsg = document.getElementById('errorMessage');
+
+            // Check password against Firebase
+            database.ref('modPasswords').orderByChild('password').equalTo(password).once('value', (snapshot) => {
+                if (snapshot.exists()) {
+                    let validPassword = false;
+                    let passwordKey = null;
+                    
+                    snapshot.forEach((passSnapshot) => {
+                        const passData = passSnapshot.val();
+                        if (passData.active) {
+                            validPassword = true;
+                            passwordKey = passSnapshot.key;
+                        }
+                    });
+                    
+                    if (validPassword) {
+                        // Mark password as used
+                        database.ref('modPasswords/' + passwordKey).update({
+                            active: false,
+                            usedBy: 'Moderator',
+                            usedAt: Date.now()
+                        });
+                        
+                        // Login successful
+                        document.getElementById('loginScreen').style.display = 'none';
+                        document.getElementById('dashboardScreen').style.display = 'block';
+                        loadModDashboard();
+                    } else {
+                        errorMsg.textContent = 'This access code has already been used.';
+                        errorMsg.style.display = 'block';
+                    }
+                } else {
+                    errorMsg.textContent = 'Invalid access code.';
+                    errorMsg.style.display = 'block';
+                }
+            });
+        });
+
+        // Load moderator dashboard
+        function loadModDashboard() {
+            loadBannedUsers();
+            loadChannels();
+            loadStats();
+            loadFailedLogins();
+        }
+
+        // Load banned users (mods can only unban)
+        function loadBannedUsers() {
+            const bannedList = document.getElementById('bannedUsersList');
+            
+            database.ref('bannedUsers').on('value', (snapshot) => {
+                bannedList.innerHTML = '';
+                let count = 0;
+                
+                if (snapshot.exists()) {
+                    snapshot.forEach((bannedSnapshot) => {
+                        const banned = bannedSnapshot.val();
+                        const key = bannedSnapshot.key;
+                        count++;
+                        
+                        const userItem = document.createElement('div');
+                        userItem.className = 'user-item';
+                        userItem.innerHTML = `
+                            <div class="user-info">
+                                <div class="user-nickname">${banned.nickname}</div>
+                                <div class="user-email">${banned.email || 'No email recorded'}</div>
+                            </div>
+                            <button class="action-btn unban-btn" onclick="unbanUser('${key}')">Unban</button>
+                        `;
+                        bannedList.appendChild(userItem);
+                    });
+                } else {
+                    bannedList.innerHTML = '<div class="empty-state">No banned users</div>';
+                }
+                
+                document.getElementById('bannedCount').textContent = count;
+            });
+        }
+
+        // Unban user
+        function unbanUser(key) {
+            if (confirm('Unban this user?')) {
+                database.ref('bannedUsers/' + key).remove();
+                alert('User unbanned successfully');
+            }
+        }
+
+        // Load channels
+        function loadChannels() {
+            const channelsList = document.getElementById('channelsList');
+            
+            database.ref('channels').on('value', (snapshot) => {
+                channelsList.innerHTML = '';
+                
+                if (snapshot.exists()) {
+                    snapshot.forEach((channelSnapshot) => {
+                        const channelName = '#' + channelSnapshot.key;
+                        const messageCount = channelSnapshot.child('messages').numChildren();
+                        
+                        const channelItem = document.createElement('div');
+                        channelItem.className = 'user-item';
+                        channelItem.innerHTML = `
+                            <div class="user-info">
+                                <div class="user-nickname">${channelName}</div>
+                                <div class="user-email">${messageCount} messages</div>
+                            </div>
+                        `;
+                        channelsList.appendChild(channelItem);
+                    });
+                } else {
+                    channelsList.innerHTML = '<div class="empty-state">No active channels</div>';
+                }
+            });
+        }
+
+        // Load stats
+        function loadStats() {
+            // Count today's messages
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            const todayTimestamp = today.getTime();
+            
+            database.ref('channels').once('value', (snapshot) => {
+                let todayCount = 0;
+                let activeUsersSet = new Set();
+                
+                snapshot.forEach((channelSnapshot) => {
+                    channelSnapshot.child('messages').forEach((messageSnapshot) => {
+                        const message = messageSnapshot.val();
+                        if (message.timestamp >= todayTimestamp) {
+                            todayCount++;
+                            if (message.author !== 'System') {
+                                activeUsersSet.add(message.nickname);
+                            }
+                        }
+                    });
+                });
+                
+                document.getElementById('todayMessages').textContent = todayCount;
+                document.getElementById('activeUsers').textContent = activeUsersSet.size;
+            });
+        }
+
+        // Load recent failed logins
+        function loadFailedLogins() {
+            const failedList = document.getElementById('failedLoginsList');
+            
+            database.ref('failedAttempts').orderByChild('timestamp').limitToLast(5).on('value', (snapshot) => {
+                failedList.innerHTML = '';
+                const attempts = [];
+                
+                snapshot.forEach((attemptSnapshot) => {
+                    attempts.unshift(attemptSnapshot.val());
+                });
+                
+                if (attempts.length > 0) {
+                    attempts.forEach(attempt => {
+                        const attemptItem = document.createElement('div');
+                        attemptItem.className = 'user-item';
+                        attemptItem.innerHTML = `
+                            <div class="user-info">
+                                <div class="user-nickname">${attempt.email}</div>
+                                <div class="user-email">${new Date(attempt.timestamp).toLocaleString()}</div>
+                            </div>
+                        `;
+                        failedList.appendChild(attemptItem);
+                    });
+                } else {
+                    failedList.innerHTML = '<div class="empty-state">No recent failed logins</div>';
+                }
+            });
+        }
+
+        // Logout
+        function logout() {
+            if (confirm('Are you sure you want to logout?')) {
+                document.getElementById('loginScreen').style.display = 'block';
+                document.getElementById('dashboardScreen').style.display = 'none';
+                document.getElementById('modPassword').value = '';
+                document.getElementById('errorMessage').style.display = 'none';
+            }
+        }
+    </script>
+</body>
+</html>
