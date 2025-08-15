@@ -535,12 +535,12 @@
                     if (validPassword) {
                         console.log('🎉 Login successful, updating usage statistics');
                         
-                        // Update usage statistics (but keep the code active for reuse)
+                        // Simplified usage tracking - just increment counter and update last used time
                         const currentUsage = passwordData.usageCount || 0;
                         database.ref('modPasswords/' + passwordKey).update({
                             usageCount: currentUsage + 1,
-                            lastUsedAt: Date.now(),
-                            lastUsedBy: 'Moderator-' + Date.now() // Unique identifier for this session
+                            lastUsedAt: Date.now()
+                            // Removed lastUsedBy to prevent screen clutter
                         }).then(() => {
                             console.log('✅ Usage statistics updated successfully');
                             
@@ -575,13 +575,13 @@
             });
         });
 
-        // Current moderator ID for tracking
+        // Current moderator ID for tracking - simplified
         let currentModeratorId = null;
 
         // Load moderator dashboard
         function loadModDashboard() {
             console.log('📊 Loading moderator dashboard...');
-            currentModeratorId = 'Mod-' + Date.now(); // Unique ID for this session
+            currentModeratorId = 'Mod-' + Math.random().toString(36).substr(2, 9); // Shorter, simpler ID
             loadBannedUsers();
             loadChannels();
             loadStats();
