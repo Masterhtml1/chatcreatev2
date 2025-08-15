@@ -390,6 +390,37 @@
             color: #999;
         }
 
+        /* Status indicator */
+        .status-indicator {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 500;
+            margin-left: 10px;
+        }
+
+        .status-active {
+            background: #e8f5e9;
+            color: #4CAF50;
+        }
+
+        .status-used {
+            background: #f5f5f5;
+            color: #999;
+        }
+
+        /* Debug info */
+        .debug-info {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            color: #856404;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+
         /* Responsive */
         @media (max-width: 768px) {
             .dashboard-grid {
@@ -484,6 +515,9 @@
                     <span class="card-icon">🔑</span>
                     Moderator Passwords
                 </h2>
+                <div class="debug-info" id="debugInfo" style="display: none;">
+                    Debug: Waiting for Firebase connection...
+                </div>
                 <button class="clear-all-btn" style="background: #2196F3; margin-bottom: 15px;" onclick="generateModPassword()">Generate New Password</button>
                 <div class="banned-list" id="modPasswordsList" style="max-height: 400px;">
                     <div class="loading">Loading moderator passwords...</div>
@@ -518,6 +552,34 @@
                     <div class="loading">Loading approved emails...</div>
                 </div>
             </div>
+
+            <!-- Statistics -->
+            <div class="dashboard-card">
+                <h2 class="card-title">
+                    <span class="card-icon">📊</span>
+                    Statistics
+                </h2>
+                <div class="stat-item">
+                    <span class="stat-label">Total Messages</span>
+                    <span class="stat-value" id="totalMessages">0</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Active Channels</span>
+                    <span class="stat-value" id="activeChannels">0</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Banned Users</span>
+                    <span class="stat-value" id="bannedCount">0</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Banned Words</span>
+                    <span class="stat-value" id="wordCount">0</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Approved Emails</span>
+                    <span class="stat-value" id="approvedCount">0</span>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -542,6 +604,29 @@
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
 
+        // Test Firebase connection
+        function testFirebaseConnection() {
+            const debugInfo = document.getElementById('debugInfo');
+            debugInfo.style.display = 'block';
+            
+            database.ref('.info/connected').on('value', (snapshot) => {
+                if (snapshot.val() === true) {
+                    debugInfo.innerHTML = '✅ Firebase connected successfully';
+                    debugInfo.style.background = '#e8f5e9';
+                    debugInfo.style.color = '#4CAF50';
+                    debugInfo.style.borderColor = '#c8e6c9';
+                    setTimeout(() => {
+                        debugInfo.style.display = 'none';
+                    }, 3000);
+                } else {
+                    debugInfo.innerHTML = '❌ Firebase connection lost';
+                    debugInfo.style.background = '#ffebee';
+                    debugInfo.style.color = '#f44336';
+                    debugInfo.style.borderColor = '#ffcdd2';
+                }
+            });
+        }
+
         // Admin login
         document.getElementById('adminLoginForm').addEventListener('submit', function(e) {
             e.preventDefault();
@@ -551,6 +636,7 @@
             if (password === 'skid') {
                 document.getElementById('loginScreen').style.display = 'none';
                 document.getElementById('dashboardScreen').style.display = 'block';
+                testFirebaseConnection();
                 loadDashboard();
             } else {
                 errorMsg.textContent = 'Invalid password';
@@ -569,55 +655,80 @@
             loadStats();
         }
 
-        // Generate random mod password
+        // Generate random mod password - FIXED VERSION
         function generateModPassword() {
+            console.log('Generating mod password...');
+            
             const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789';
             let password = '';
             for (let i = 0; i < 12; i++) {
                 password += chars.charAt(Math.floor(Math.random() * chars.length));
             }
             
-            // Add to Firebase
+            console.log('Generated password:', password);
+            
+            // Create the mod password object
             const modPassword = {
                 password: password,
                 createdAt: Date.now(),
                 createdBy: 'Admin',
                 active: true,
-                usedBy: null
+                usedBy: null,
+                usedAt: null
             };
             
-            database.ref('modPasswords').push(modPassword);
-            alert(`New moderator password generated: ${password}\n\nShare this with your moderator.`);
+            console.log('Attempting to save to Firebase...', modPassword);
+            
+            // Add to Firebase with better error handling
+            database.ref('modPasswords').push(modPassword)
+                .then((result) => {
+                    console.log('✅ Password saved successfully!', result.key);
+                    alert(`✅ New moderator password generated: ${password}\n\nShare this with your moderator.\n\nPassword saved to database with ID: ${result.key}`);
+                })
+                .catch((error) => {
+                    console.error('❌ Error saving password:', error);
+                    alert(`❌ Error saving password: ${error.message}\n\nTry again or check Firebase permissions.`);
+                });
         }
 
-        // Load mod passwords
+        // Load mod passwords - IMPROVED VERSION
         function loadModPasswords() {
+            console.log('Loading mod passwords...');
             const passwordsList = document.getElementById('modPasswordsList');
             
-            database.ref('modPasswords').orderByChild('createdAt').on('value', (snapshot) => {
+            database.ref('modPasswords').on('value', (snapshot) => {
+                console.log('Mod passwords snapshot received:', snapshot.exists());
                 passwordsList.innerHTML = '';
                 const passwords = [];
                 
-                snapshot.forEach((passSnapshot) => {
-                    const passData = passSnapshot.val();
-                    passData.key = passSnapshot.key;
-                    passwords.unshift(passData); // Show newest first
-                });
-                
-                if (passwords.length > 0) {
+                if (snapshot.exists()) {
+                    snapshot.forEach((passSnapshot) => {
+                        const passData = passSnapshot.val();
+                        passData.key = passSnapshot.key;
+                        passwords.unshift(passData); // Show newest first
+                        console.log('Found password:', passData);
+                    });
+                    
+                    console.log(`Total passwords found: ${passwords.length}`);
+                    
                     passwords.forEach(passData => {
                         const passItem = document.createElement('div');
                         passItem.className = 'banned-item';
                         passItem.style.background = passData.active ? '#e8f5e9' : '#f5f5f5';
+                        
+                        const statusClass = passData.active ? 'status-active' : 'status-used';
+                        const statusText = passData.active ? '✓ Active' : 'Used';
+                        
                         passItem.innerHTML = `
                             <div class="banned-info">
                                 <div class="banned-nickname" style="font-family: monospace; font-size: 16px;">
                                     ${passData.password}
-                                    ${passData.active ? '<span style="color: #4CAF50; margin-left: 10px;">✓ Active</span>' : '<span style="color: #999; margin-left: 10px;">Used</span>'}
+                                    <span class="status-indicator ${statusClass}">${statusText}</span>
                                 </div>
                                 <div class="banned-email">
                                     Created: ${new Date(passData.createdAt).toLocaleString()}
                                     ${passData.usedBy ? ` | Used by: ${passData.usedBy}` : ''}
+                                    ${passData.usedAt ? ` at ${new Date(passData.usedAt).toLocaleString()}` : ''}
                                 </div>
                             </div>
                             <button class="unban-btn" style="background: #f44336;" onclick="deleteModPassword('${passData.key}')">Delete</button>
@@ -625,16 +736,28 @@
                         passwordsList.appendChild(passItem);
                     });
                 } else {
-                    passwordsList.innerHTML = '<div class="empty-state">No moderator passwords generated yet</div>';
+                    console.log('No mod passwords found in database');
+                    passwordsList.innerHTML = '<div class="empty-state">No moderator passwords generated yet<br><small>Click "Generate New Password" to create one</small></div>';
                 }
+            }, (error) => {
+                console.error('Error loading mod passwords:', error);
+                passwordsList.innerHTML = '<div class="empty-state">Error loading passwords: ' + error.message + '</div>';
             });
         }
 
         // Delete mod password
         function deleteModPassword(key) {
             if (confirm('Delete this moderator password? It will no longer work for login.')) {
-                database.ref('modPasswords/' + key).remove();
-                alert('Moderator password deleted');
+                console.log('Deleting password with key:', key);
+                database.ref('modPasswords/' + key).remove()
+                    .then(() => {
+                        console.log('✅ Password deleted successfully');
+                        alert('Moderator password deleted');
+                    })
+                    .catch((error) => {
+                        console.error('❌ Error deleting password:', error);
+                        alert('Error deleting password: ' + error.message);
+                    });
             }
         }
 
@@ -662,7 +785,7 @@
                             <div class="banned-info">
                                 <div class="banned-nickname" style="color: #856404;">
                                     ${attempt.email}
-                                    <button class="admin-btn" style="background: #4CAF50; margin-left: 10px;" onclick="quickApprove('${attempt.email}')">Quick Approve</button>
+                                    <button class="unban-btn" style="background: #4CAF50; margin-left: 10px; font-size: 12px;" onclick="quickApprove('${attempt.email}')">Quick Approve</button>
                                 </div>
                                 <div class="banned-email">
                                     Nickname tried: ${attempt.nickname || 'N/A'} | 
@@ -814,6 +937,7 @@
                     document.getElementById('activeChannels').textContent = channelCount;
                 } else {
                     channelList.innerHTML = '<div class="empty-state">No active channels</div>';
+                    document.getElementById('activeChannels').textContent = '0';
                 }
             });
         }
@@ -1116,17 +1240,46 @@
             // Check if words are already initialized
             database.ref('bannedWords').once('value', (snapshot) => {
                 if (!snapshot.exists() || snapshot.numChildren() < 10) {
+                    console.log('Initializing banned words...');
                     // Add all default banned words
-                    defaultBannedWords.forEach(word => {
-                        database.ref('bannedWords').push(word.toLowerCase());
+                    const promises = defaultBannedWords.map(word => {
+                        return database.ref('bannedWords').push(word.toLowerCase());
                     });
-                    alert('Banned words list initialized with ' + defaultBannedWords.length + ' words');
+                    
+                    Promise.all(promises).then(() => {
+                        console.log('✅ Banned words initialized successfully');
+                        alert('Banned words list initialized with ' + defaultBannedWords.length + ' words');
+                    }).catch((error) => {
+                        console.error('❌ Error initializing banned words:', error);
+                        alert('Error initializing banned words: ' + error.message);
+                    });
+                } else {
+                    console.log('Banned words already initialized:', snapshot.numChildren(), 'words found');
                 }
             });
         }
 
         // Call this when dashboard loads
         setTimeout(initializeBannedWords, 2000);
+
+        // Test mod password functionality
+        function testModPasswordSystem() {
+            console.log('🧪 Testing mod password system...');
+            
+            // Test generating a password
+            generateModPassword();
+            
+            // Test reading passwords
+            database.ref('modPasswords').once('value', (snapshot) => {
+                console.log('📊 Current mod passwords in database:', snapshot.numChildren());
+                snapshot.forEach((child) => {
+                    console.log('Password entry:', child.key, child.val());
+                });
+            });
+        }
+
+        // Add test button for debugging (remove in production)
+        window.testModPasswordSystem = testModPasswordSystem;
     </script>
 </body>
 </html>
