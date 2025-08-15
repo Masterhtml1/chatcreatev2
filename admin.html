@@ -708,7 +708,7 @@
                 });
         }
 
-        // Load mod passwords - IMPROVED VERSION FOR REUSABLE CODES
+        // Load mod passwords - CLEAN VERSION WITHOUT TIMESTAMP CLUTTER
         function loadModPasswords() {
             console.log('Loading mod passwords...');
             const passwordsList = document.getElementById('modPasswordsList');
@@ -733,9 +733,9 @@
                         passItem.className = 'banned-item';
                         passItem.style.background = passData.active ? '#e8f5e9' : '#f5f5f5';
                         
-                        // For reusable codes, show usage count instead of used/active status
+                        // Clean display - just show usage count, not individual timestamps
                         const usageCount = passData.usageCount || 0;
-                        const isReusable = passData.reusable !== false; // Default to true for backward compatibility
+                        const isReusable = passData.reusable !== false;
                         
                         let statusText = '';
                         let statusClass = '';
@@ -744,12 +744,17 @@
                             statusText = '❌ Disabled';
                             statusClass = 'status-used';
                         } else if (isReusable) {
-                            statusText = `🔄 Reusable (Used ${usageCount} times)`;
+                            statusText = `🔄 Active (${usageCount} uses)`;
                             statusClass = 'status-active';
                         } else {
-                            // Legacy one-time codes
                             statusText = usageCount > 0 ? '✓ Used' : '✓ Active';
                             statusClass = usageCount > 0 ? 'status-used' : 'status-active';
+                        }
+                        
+                        // Clean timestamp display - only show creation and last use (if exists)
+                        let timeInfo = `Created: ${new Date(passData.createdAt).toLocaleDateString()}`;
+                        if (passData.lastUsedAt && usageCount > 0) {
+                            timeInfo += ` | Last used: ${new Date(passData.lastUsedAt).toLocaleDateString()}`;
                         }
                         
                         passItem.innerHTML = `
@@ -759,9 +764,7 @@
                                     <span class="status-indicator ${statusClass}">${statusText}</span>
                                 </div>
                                 <div class="banned-email">
-                                    Created: ${new Date(passData.createdAt).toLocaleString()}
-                                    ${passData.lastUsedAt ? ` | Last used: ${new Date(passData.lastUsedAt).toLocaleString()}` : ''}
-                                    ${passData.lastUsedBy ? ` by ${passData.lastUsedBy}` : ''}
+                                    ${timeInfo}
                                 </div>
                             </div>
                             <div style="display: flex; gap: 5px;">
