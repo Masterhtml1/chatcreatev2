@@ -192,9 +192,31 @@
             transition: all 0.2s;
         }
 
+        .ban-form {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .ban-input, .ban-input select, .ban-input textarea {
+            padding: 10px 14px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+            font-family: inherit;
+        }
+
         .ban-btn {
+            padding: 10px 20px;
             background: #f44336;
             color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
         }
 
         .ban-btn:hover {
@@ -328,7 +350,7 @@
         <div class="welcome-message">
             <h2>Welcome, Moderator!</h2>
             <p>You have limited administrative privileges. Use them responsibly.</p>
-            <p><small>Your access code has been marked as used and cannot be used again.</small></p>
+            <p><small>Your access code can be used multiple times - no need to request new ones!</small></p>
         </div>
 
         <div class="dashboard-grid">
@@ -336,9 +358,13 @@
             <div class="dashboard-card">
                 <h2 class="card-title">
                     <span class="card-icon">🚫</span>
-                    Banned Users
+                    User Management
                 </h2>
-                <div class="note">You can unban users but cannot ban new ones</div>
+                <div class="ban-form">
+                    <input type="text" id="banNickname" class="ban-input" placeholder="Nickname to ban">
+                    <input type="text" id="banReason" class="ban-input" placeholder="Reason for ban (optional)" style="margin-top: 5px;">
+                    <button class="ban-btn" onclick="banUser()">Ban User</button>
+                </div>
                 <div class="user-list" id="bannedUsersList">
                     <div class="loading">Loading banned users...</div>
                 </div>
@@ -377,14 +403,30 @@
                 </div>
             </div>
 
-            <!-- Failed Login Attempts -->
+            <!-- User Reports to Admin -->
             <div class="dashboard-card">
                 <h2 class="card-title">
-                    <span class="card-icon">⚠️</span>
-                    Recent Failed Logins
+                    <span class="card-icon">📢</span>
+                    Report to Admin
                 </h2>
-                <div class="user-list" id="failedLoginsList">
-                    <div class="loading">Loading failed attempts...</div>
+                <div class="ban-form">
+                    <input type="text" id="reportUser" class="ban-input" placeholder="Username to report">
+                    <select id="reportType" class="ban-input" style="margin-top: 5px;">
+                        <option value="">Select report type</option>
+                        <option value="harassment">Harassment/Bullying</option>
+                        <option value="inappropriate">Inappropriate Content</option>
+                        <option value="spam">Spam/Flooding</option>
+                        <option value="threatening">Threatening Language</option>
+                        <option value="discrimination">Discrimination</option>
+                        <option value="other">Other</option>
+                    </select>
+                    <textarea id="reportDescription" class="ban-input" placeholder="Describe the issue in detail..." rows="3" style="margin-top: 5px; resize: vertical; font-family: inherit;"></textarea>
+                    <button class="ban-btn" style="background: #ff9800;" onclick="reportToAdmin()">Send Report</button>
+                </div>
+                
+                <h3 style="margin-top: 20px; margin-bottom: 10px; font-size: 16px;">My Recent Reports</h3>
+                <div class="user-list" id="myReportsList" style="max-height: 200px;">
+                    <div class="loading">Loading your reports...</div>
                 </div>
             </div>
         </div>
@@ -447,7 +489,7 @@
         // Initialize connection test
         testFirebaseConnection();
 
-        // Mod login - IMPROVED VERSION
+        // Mod login - REUSABLE CODES VERSION
         document.getElementById('modLoginForm').addEventListener('submit', function(e) {
             e.preventDefault();
             const password = document.getElementById('modPassword').value.trim();
@@ -466,7 +508,7 @@
             errorMsg.style.color = '#2196F3';
             errorMsg.style.display = 'block';
 
-            // Check password against Firebase with better error handling
+            // Check password against Firebase - REUSABLE VERSION
             database.ref('modPasswords').orderByChild('password').equalTo(password).once('value', (snapshot) => {
                 console.log('🔍 Password check result:', snapshot.exists());
                 
@@ -479,40 +521,43 @@
                         const passData = passSnapshot.val();
                         console.log('📋 Found password entry:', passData);
                         
+                        // For reusable codes, only check if active (not if already used)
                         if (passData.active) {
                             validPassword = true;
                             passwordKey = passSnapshot.key;
                             passwordData = passData;
                             console.log('✅ Valid active password found');
                         } else {
-                            console.log('❌ Password found but already used');
+                            console.log('❌ Password found but disabled by admin');
                         }
                     });
                     
                     if (validPassword) {
-                        console.log('🎉 Login successful, marking password as used');
+                        console.log('🎉 Login successful, updating usage statistics');
                         
-                        // Mark password as used
+                        // Update usage statistics (but keep the code active for reuse)
+                        const currentUsage = passwordData.usageCount || 0;
                         database.ref('modPasswords/' + passwordKey).update({
-                            active: false,
-                            usedBy: 'Moderator',
-                            usedAt: Date.now()
+                            usageCount: currentUsage + 1,
+                            lastUsedAt: Date.now(),
+                            lastUsedBy: 'Moderator-' + Date.now() // Unique identifier for this session
                         }).then(() => {
-                            console.log('✅ Password marked as used successfully');
+                            console.log('✅ Usage statistics updated successfully');
                             
                             // Login successful
                             document.getElementById('loginScreen').style.display = 'none';
                             document.getElementById('dashboardScreen').style.display = 'block';
                             loadModDashboard();
                         }).catch((error) => {
-                            console.error('❌ Error marking password as used:', error);
-                            errorMsg.textContent = 'Error updating password status: ' + error.message;
-                            errorMsg.style.color = '#dc3545';
-                            errorMsg.style.display = 'block';
+                            console.error('❌ Error updating usage statistics:', error);
+                            // Still allow login even if stats update fails
+                            document.getElementById('loginScreen').style.display = 'none';
+                            document.getElementById('dashboardScreen').style.display = 'block';
+                            loadModDashboard();
                         });
                     } else {
-                        console.log('❌ Password found but not active');
-                        errorMsg.textContent = 'This access code has already been used.';
+                        console.log('❌ Password found but disabled');
+                        errorMsg.textContent = 'This access code has been disabled by an administrator.';
                         errorMsg.style.color = '#dc3545';
                         errorMsg.style.display = 'block';
                     }
@@ -530,16 +575,170 @@
             });
         });
 
+        // Current moderator ID for tracking
+        let currentModeratorId = null;
+
         // Load moderator dashboard
         function loadModDashboard() {
             console.log('📊 Loading moderator dashboard...');
+            currentModeratorId = 'Mod-' + Date.now(); // Unique ID for this session
             loadBannedUsers();
             loadChannels();
             loadStats();
-            loadFailedLogins();
+            loadMyReports();
         }
 
-        // Load banned users (mods can only unban)
+        // Ban user function for moderators
+        function banUser() {
+            const nickname = document.getElementById('banNickname').value.trim();
+            const reason = document.getElementById('banReason').value.trim();
+            
+            if (!nickname) {
+                alert('Please enter a nickname to ban');
+                return;
+            }
+            
+            if (confirm(`Are you sure you want to ban ${nickname}?${reason ? '\n\nReason: ' + reason : ''}`)) {
+                console.log('Banning user:', nickname);
+                
+                const banData = {
+                    nickname: nickname,
+                    bannedBy: currentModeratorId,
+                    bannedAt: Date.now(),
+                    reason: reason || 'No reason provided',
+                    bannedByType: 'Moderator'
+                };
+                
+                database.ref('bannedUsers').push(banData)
+                    .then(() => {
+                        console.log('✅ User banned successfully');
+                        alert(`${nickname} has been banned successfully`);
+                        document.getElementById('banNickname').value = '';
+                        document.getElementById('banReason').value = '';
+                        
+                        // Also send notification to admin
+                        const notification = {
+                            type: 'user_banned',
+                            moderatorId: currentModeratorId,
+                            bannedUser: nickname,
+                            reason: reason || 'No reason provided',
+                            timestamp: Date.now(),
+                            read: false
+                        };
+                        database.ref('adminNotifications').push(notification);
+                    })
+                    .catch((error) => {
+                        console.error('❌ Error banning user:', error);
+                        alert('Error banning user: ' + error.message);
+                    });
+            }
+        }
+
+        // Report user to admin
+        function reportToAdmin() {
+            const reportedUser = document.getElementById('reportUser').value.trim();
+            const reportType = document.getElementById('reportType').value;
+            const description = document.getElementById('reportDescription').value.trim();
+            
+            if (!reportedUser) {
+                alert('Please enter a username to report');
+                return;
+            }
+            
+            if (!reportType) {
+                alert('Please select a report type');
+                return;
+            }
+            
+            if (!description) {
+                alert('Please provide a description of the issue');
+                return;
+            }
+            
+            console.log('Reporting user to admin:', reportedUser);
+            
+            const reportData = {
+                reportedUser: reportedUser,
+                reportType: reportType,
+                description: description,
+                reportedBy: currentModeratorId,
+                timestamp: Date.now(),
+                status: 'pending',
+                adminResponse: null
+            };
+            
+            // Save to mod reports
+            database.ref('modReports').push(reportData)
+                .then(() => {
+                    console.log('✅ Report sent successfully');
+                    
+                    // Also create admin notification
+                    const notification = {
+                        type: 'mod_report',
+                        moderatorId: currentModeratorId,
+                        reportedUser: reportedUser,
+                        reportType: reportType,
+                        description: description,
+                        timestamp: Date.now(),
+                        read: false
+                    };
+                    
+                    return database.ref('adminNotifications').push(notification);
+                })
+                .then(() => {
+                    alert(`Report about ${reportedUser} has been sent to administrators`);
+                    document.getElementById('reportUser').value = '';
+                    document.getElementById('reportType').value = '';
+                    document.getElementById('reportDescription').value = '';
+                    loadMyReports(); // Refresh the reports list
+                })
+                .catch((error) => {
+                    console.error('❌ Error sending report:', error);
+                    alert('Error sending report: ' + error.message);
+                });
+        }
+
+        // Load moderator's reports
+        function loadMyReports() {
+            const reportsList = document.getElementById('myReportsList');
+            
+            database.ref('modReports').orderByChild('reportedBy').equalTo(currentModeratorId).on('value', (snapshot) => {
+                reportsList.innerHTML = '';
+                const reports = [];
+                
+                snapshot.forEach((reportSnapshot) => {
+                    const report = reportSnapshot.val();
+                    report.key = reportSnapshot.key;
+                    reports.unshift(report); // Show newest first
+                });
+                
+                if (reports.length > 0) {
+                    reports.slice(0, 5).forEach(report => { // Show only last 5 reports
+                        const reportItem = document.createElement('div');
+                        reportItem.className = 'user-item';
+                        
+                        const statusColor = report.status === 'pending' ? '#ff9800' : 
+                                          report.status === 'resolved' ? '#4CAF50' : '#f44336';
+                        
+                        reportItem.innerHTML = `
+                            <div class="user-info">
+                                <div class="user-nickname">${report.reportedUser} - ${report.reportType}</div>
+                                <div class="user-email" style="font-size: 12px;">
+                                    ${new Date(report.timestamp).toLocaleString()} | 
+                                    <span style="color: ${statusColor}; font-weight: bold;">${report.status.toUpperCase()}</span>
+                                    ${report.adminResponse ? ' | Response: ' + report.adminResponse : ''}
+                                </div>
+                            </div>
+                        `;
+                        reportsList.appendChild(reportItem);
+                    });
+                } else {
+                    reportsList.innerHTML = '<div class="empty-state">No reports sent yet</div>';
+                }
+            });
+        }
+
+        // Load banned users (mods can now ban and unban)
         function loadBannedUsers() {
             const bannedList = document.getElementById('bannedUsersList');
             
@@ -558,7 +757,11 @@
                         userItem.innerHTML = `
                             <div class="user-info">
                                 <div class="user-nickname">${banned.nickname}</div>
-                                <div class="user-email">${banned.email || 'No email recorded'}</div>
+                                <div class="user-email">
+                                    ${banned.email || 'No email recorded'} | 
+                                    Banned by: ${banned.bannedByType || 'Admin'} | 
+                                    ${banned.reason ? 'Reason: ' + banned.reason : 'No reason provided'}
+                                </div>
                             </div>
                             <button class="action-btn unban-btn" onclick="unbanUser('${key}')">Unban</button>
                         `;
