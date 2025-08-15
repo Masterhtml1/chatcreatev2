@@ -126,6 +126,18 @@
             display: none;
         }
 
+        /* Debug info */
+        .debug-info {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            color: #856404;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            text-align: center;
+        }
+
         /* Dashboard Container */
         .dashboard-container {
             display: none;
@@ -287,6 +299,9 @@
 
         <div class="login-container">
             <h1 class="login-title">Moderator Login</h1>
+            <div class="debug-info" id="debugInfo" style="display: none;">
+                Debug: Checking Firebase connection...
+            </div>
             <form id="modLoginForm">
                 <div class="form-group">
                     <label class="form-label" for="modPassword">Access Code</label>
@@ -313,6 +328,7 @@
         <div class="welcome-message">
             <h2>Welcome, Moderator!</h2>
             <p>You have limited administrative privileges. Use them responsibly.</p>
+            <p><small>Your access code has been marked as used and cannot be used again.</small></p>
         </div>
 
         <div class="dashboard-grid">
@@ -395,51 +411,128 @@
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
 
-        // Mod login
+        // Test Firebase connection
+        function testFirebaseConnection() {
+            const debugInfo = document.getElementById('debugInfo');
+            debugInfo.style.display = 'block';
+            
+            database.ref('.info/connected').on('value', (snapshot) => {
+                if (snapshot.val() === true) {
+                    debugInfo.innerHTML = '✅ Firebase connected successfully';
+                    debugInfo.style.background = '#e8f5e9';
+                    debugInfo.style.color = '#4CAF50';
+                    debugInfo.style.borderColor = '#c8e6c9';
+                    
+                    // Also check mod passwords exist
+                    database.ref('modPasswords').once('value', (snapshot) => {
+                        const count = snapshot.numChildren();
+                        debugInfo.innerHTML += `<br>📊 Found ${count} moderator passwords in database`;
+                        if (count === 0) {
+                            debugInfo.innerHTML += '<br>⚠️ No mod passwords found - admin needs to generate some';
+                        }
+                    });
+                    
+                    setTimeout(() => {
+                        debugInfo.style.display = 'none';
+                    }, 5000);
+                } else {
+                    debugInfo.innerHTML = '❌ Firebase connection lost';
+                    debugInfo.style.background = '#ffebee';
+                    debugInfo.style.color = '#f44336';
+                    debugInfo.style.borderColor = '#ffcdd2';
+                }
+            });
+        }
+
+        // Initialize connection test
+        testFirebaseConnection();
+
+        // Mod login - IMPROVED VERSION
         document.getElementById('modLoginForm').addEventListener('submit', function(e) {
             e.preventDefault();
-            const password = document.getElementById('modPassword').value;
+            const password = document.getElementById('modPassword').value.trim();
             const errorMsg = document.getElementById('errorMessage');
 
-            // Check password against Firebase
+            console.log('🔐 Attempting mod login with password:', password);
+
+            if (!password) {
+                errorMsg.textContent = 'Please enter an access code';
+                errorMsg.style.display = 'block';
+                return;
+            }
+
+            // Show loading state
+            errorMsg.textContent = 'Checking access code...';
+            errorMsg.style.color = '#2196F3';
+            errorMsg.style.display = 'block';
+
+            // Check password against Firebase with better error handling
             database.ref('modPasswords').orderByChild('password').equalTo(password).once('value', (snapshot) => {
+                console.log('🔍 Password check result:', snapshot.exists());
+                
                 if (snapshot.exists()) {
                     let validPassword = false;
                     let passwordKey = null;
+                    let passwordData = null;
                     
                     snapshot.forEach((passSnapshot) => {
                         const passData = passSnapshot.val();
+                        console.log('📋 Found password entry:', passData);
+                        
                         if (passData.active) {
                             validPassword = true;
                             passwordKey = passSnapshot.key;
+                            passwordData = passData;
+                            console.log('✅ Valid active password found');
+                        } else {
+                            console.log('❌ Password found but already used');
                         }
                     });
                     
                     if (validPassword) {
+                        console.log('🎉 Login successful, marking password as used');
+                        
                         // Mark password as used
                         database.ref('modPasswords/' + passwordKey).update({
                             active: false,
                             usedBy: 'Moderator',
                             usedAt: Date.now()
+                        }).then(() => {
+                            console.log('✅ Password marked as used successfully');
+                            
+                            // Login successful
+                            document.getElementById('loginScreen').style.display = 'none';
+                            document.getElementById('dashboardScreen').style.display = 'block';
+                            loadModDashboard();
+                        }).catch((error) => {
+                            console.error('❌ Error marking password as used:', error);
+                            errorMsg.textContent = 'Error updating password status: ' + error.message;
+                            errorMsg.style.color = '#dc3545';
+                            errorMsg.style.display = 'block';
                         });
-                        
-                        // Login successful
-                        document.getElementById('loginScreen').style.display = 'none';
-                        document.getElementById('dashboardScreen').style.display = 'block';
-                        loadModDashboard();
                     } else {
+                        console.log('❌ Password found but not active');
                         errorMsg.textContent = 'This access code has already been used.';
+                        errorMsg.style.color = '#dc3545';
                         errorMsg.style.display = 'block';
                     }
                 } else {
+                    console.log('❌ No password found in database');
                     errorMsg.textContent = 'Invalid access code.';
+                    errorMsg.style.color = '#dc3545';
                     errorMsg.style.display = 'block';
                 }
+            }).catch((error) => {
+                console.error('❌ Database error during login:', error);
+                errorMsg.textContent = 'Database error: ' + error.message;
+                errorMsg.style.color = '#dc3545';
+                errorMsg.style.display = 'block';
             });
         });
 
         // Load moderator dashboard
         function loadModDashboard() {
+            console.log('📊 Loading moderator dashboard...');
             loadBannedUsers();
             loadChannels();
             loadStats();
@@ -482,8 +575,13 @@
         // Unban user
         function unbanUser(key) {
             if (confirm('Unban this user?')) {
-                database.ref('bannedUsers/' + key).remove();
-                alert('User unbanned successfully');
+                database.ref('bannedUsers/' + key).remove()
+                    .then(() => {
+                        alert('User unbanned successfully');
+                    })
+                    .catch((error) => {
+                        alert('Error unbanning user: ' + error.message);
+                    });
             }
         }
 
