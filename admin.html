@@ -553,6 +553,16 @@
                 </div>
             </div>
 
+            <!-- Moderator Reports -->
+            <div class="dashboard-card">
+                <h2 class="card-title">
+                    <span class="card-icon">📢</span>
+                    Moderator Reports
+                    <span id="unreadReportsBadge" style="background: #ff9800; color: white; padding: 2px 8px; border-radius: 12px; font-size: 14px; margin-left: 10px; display: none;">0</span>
+                </h2>
+                <div class="banned-list" id="modReportsList" style="max-height: 400px;">
+                    <div class="loading">Loading moderator reports...</div>
+                </div>
             <!-- Statistics -->
             <div class="dashboard-card">
                 <h2 class="card-title">
@@ -578,6 +588,10 @@
                 <div class="stat-item">
                     <span class="stat-label">Approved Emails</span>
                     <span class="stat-value" id="approvedCount">0</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Pending Reports</span>
+                    <span class="stat-value" id="pendingReports">0</span>
                 </div>
             </div>
         </div>
@@ -652,10 +666,11 @@
             loadApprovedEmails();
             loadFailedAttempts();
             loadModPasswords();
+            loadModReports();
             loadStats();
         }
 
-        // Generate random mod password - FIXED VERSION
+        // Generate random mod password - REUSABLE VERSION
         function generateModPassword() {
             console.log('Generating mod password...');
             
@@ -667,14 +682,16 @@
             
             console.log('Generated password:', password);
             
-            // Create the mod password object
+            // Create the mod password object - REUSABLE
             const modPassword = {
                 password: password,
                 createdAt: Date.now(),
                 createdBy: 'Admin',
                 active: true,
-                usedBy: null,
-                usedAt: null
+                reusable: true,
+                usageCount: 0,
+                lastUsedAt: null,
+                lastUsedBy: null
             };
             
             console.log('Attempting to save to Firebase...', modPassword);
@@ -683,7 +700,7 @@
             database.ref('modPasswords').push(modPassword)
                 .then((result) => {
                     console.log('✅ Password saved successfully!', result.key);
-                    alert(`✅ New moderator password generated: ${password}\n\nShare this with your moderator.\n\nPassword saved to database with ID: ${result.key}`);
+                    alert(`✅ New moderator password generated: ${password}\n\n🔄 This code can be used multiple times!\n\nShare this with your moderators.\n\nPassword saved to database with ID: ${result.key}`);
                 })
                 .catch((error) => {
                     console.error('❌ Error saving password:', error);
@@ -691,7 +708,7 @@
                 });
         }
 
-        // Load mod passwords - IMPROVED VERSION
+        // Load mod passwords - IMPROVED VERSION FOR REUSABLE CODES
         function loadModPasswords() {
             console.log('Loading mod passwords...');
             const passwordsList = document.getElementById('modPasswordsList');
@@ -716,8 +733,24 @@
                         passItem.className = 'banned-item';
                         passItem.style.background = passData.active ? '#e8f5e9' : '#f5f5f5';
                         
-                        const statusClass = passData.active ? 'status-active' : 'status-used';
-                        const statusText = passData.active ? '✓ Active' : 'Used';
+                        // For reusable codes, show usage count instead of used/active status
+                        const usageCount = passData.usageCount || 0;
+                        const isReusable = passData.reusable !== false; // Default to true for backward compatibility
+                        
+                        let statusText = '';
+                        let statusClass = '';
+                        
+                        if (!passData.active) {
+                            statusText = '❌ Disabled';
+                            statusClass = 'status-used';
+                        } else if (isReusable) {
+                            statusText = `🔄 Reusable (Used ${usageCount} times)`;
+                            statusClass = 'status-active';
+                        } else {
+                            // Legacy one-time codes
+                            statusText = usageCount > 0 ? '✓ Used' : '✓ Active';
+                            statusClass = usageCount > 0 ? 'status-used' : 'status-active';
+                        }
                         
                         passItem.innerHTML = `
                             <div class="banned-info">
@@ -727,11 +760,14 @@
                                 </div>
                                 <div class="banned-email">
                                     Created: ${new Date(passData.createdAt).toLocaleString()}
-                                    ${passData.usedBy ? ` | Used by: ${passData.usedBy}` : ''}
-                                    ${passData.usedAt ? ` at ${new Date(passData.usedAt).toLocaleString()}` : ''}
+                                    ${passData.lastUsedAt ? ` | Last used: ${new Date(passData.lastUsedAt).toLocaleString()}` : ''}
+                                    ${passData.lastUsedBy ? ` by ${passData.lastUsedBy}` : ''}
                                 </div>
                             </div>
-                            <button class="unban-btn" style="background: #f44336;" onclick="deleteModPassword('${passData.key}')">Delete</button>
+                            <div style="display: flex; gap: 5px;">
+                                <button class="unban-btn" style="background: ${passData.active ? '#f44336' : '#4CAF50'};" onclick="toggleModPassword('${passData.key}', ${passData.active})">${passData.active ? 'Disable' : 'Enable'}</button>
+                                <button class="unban-btn" style="background: #ff5722;" onclick="deleteModPassword('${passData.key}')">Delete</button>
+                            </div>
                         `;
                         passwordsList.appendChild(passItem);
                     });
@@ -745,9 +781,28 @@
             });
         }
 
+        // Toggle mod password (enable/disable)
+        function toggleModPassword(key, currentStatus) {
+            const newStatus = !currentStatus;
+            const action = newStatus ? 'enable' : 'disable';
+            
+            if (confirm(`Are you sure you want to ${action} this moderator password?`)) {
+                console.log(`${action === 'enable' ? 'Enabling' : 'Disabling'} password with key:`, key);
+                database.ref('modPasswords/' + key).update({ active: newStatus })
+                    .then(() => {
+                        console.log(`✅ Password ${action}d successfully`);
+                        alert(`Moderator password ${action}d successfully`);
+                    })
+                    .catch((error) => {
+                        console.error(`❌ Error ${action}ing password:`, error);
+                        alert(`Error ${action}ing password: ` + error.message);
+                    });
+            }
+        }
+
         // Delete mod password
         function deleteModPassword(key) {
-            if (confirm('Delete this moderator password? It will no longer work for login.')) {
+            if (confirm('Delete this moderator password permanently? This cannot be undone.')) {
                 console.log('Deleting password with key:', key);
                 database.ref('modPasswords/' + key).remove()
                     .then(() => {
@@ -1262,24 +1317,120 @@
         // Call this when dashboard loads
         setTimeout(initializeBannedWords, 2000);
 
-        // Test mod password functionality
-        function testModPasswordSystem() {
-            console.log('🧪 Testing mod password system...');
+        // Load moderator reports
+        function loadModReports() {
+            const reportsList = document.getElementById('modReportsList');
             
-            // Test generating a password
-            generateModPassword();
-            
-            // Test reading passwords
-            database.ref('modPasswords').once('value', (snapshot) => {
-                console.log('📊 Current mod passwords in database:', snapshot.numChildren());
-                snapshot.forEach((child) => {
-                    console.log('Password entry:', child.key, child.val());
+            database.ref('modReports').orderByChild('timestamp').on('value', (snapshot) => {
+                reportsList.innerHTML = '';
+                const reports = [];
+                let pendingCount = 0;
+                
+                snapshot.forEach((reportSnapshot) => {
+                    const report = reportSnapshot.val();
+                    report.key = reportSnapshot.key;
+                    reports.unshift(report); // Show newest first
+                    
+                    if (report.status === 'pending') {
+                        pendingCount++;
+                    }
                 });
+                
+                // Update badge
+                const badge = document.getElementById('unreadReportsBadge');
+                if (pendingCount > 0) {
+                    badge.style.display = 'inline-block';
+                    badge.textContent = pendingCount;
+                } else {
+                    badge.style.display = 'none';
+                }
+                
+                // Update stats
+                document.getElementById('pendingReports').textContent = pendingCount;
+                
+                if (reports.length > 0) {
+                    reports.forEach(report => {
+                        const reportItem = document.createElement('div');
+                        reportItem.className = 'banned-item';
+                        
+                        const statusColor = report.status === 'pending' ? '#fff3cd' : 
+                                          report.status === 'resolved' ? '#e8f5e9' : '#ffebee';
+                        const statusTextColor = report.status === 'pending' ? '#856404' : 
+                                              report.status === 'resolved' ? '#4CAF50' : '#f44336';
+                        
+                        reportItem.style.background = statusColor;
+                        reportItem.innerHTML = `
+                            <div class="banned-info">
+                                <div class="banned-nickname" style="color: ${statusTextColor};">
+                                    <strong>${report.reportedUser}</strong> - ${report.reportType}
+                                    <span style="font-size: 12px; background: ${statusTextColor}; color: white; padding: 2px 6px; border-radius: 10px; margin-left: 10px;">
+                                        ${report.status.toUpperCase()}
+                                    </span>
+                                </div>
+                                <div class="banned-email">
+                                    <strong>Reported by:</strong> ${report.reportedBy} | 
+                                    <strong>Time:</strong> ${new Date(report.timestamp).toLocaleString()}<br>
+                                    <strong>Description:</strong> ${report.description}
+                                    ${report.adminResponse ? '<br><strong>Admin Response:</strong> ' + report.adminResponse : ''}
+                                </div>
+                            </div>
+                            <div style="display: flex; flex-direction: column; gap: 5px;">
+                                ${report.status === 'pending' ? `
+                                    <button class="unban-btn" style="background: #4CAF50;" onclick="resolveReport('${report.key}')">Mark Resolved</button>
+                                    <button class="unban-btn" style="background: #2196F3;" onclick="respondToReport('${report.key}')">Respond</button>
+                                ` : ''}
+                                <button class="unban-btn" style="background: #ff5722;" onclick="deleteReport('${report.key}')">Delete</button>
+                            </div>
+                        `;
+                        reportsList.appendChild(reportItem);
+                    });
+                } else {
+                    reportsList.innerHTML = '<div class="empty-state">No moderator reports yet</div>';
+                }
             });
         }
 
-        // Add test button for debugging (remove in production)
-        window.testModPasswordSystem = testModPasswordSystem;
+        // Resolve moderator report
+        function resolveReport(reportKey) {
+            if (confirm('Mark this report as resolved?')) {
+                database.ref('modReports/' + reportKey).update({
+                    status: 'resolved',
+                    resolvedAt: Date.now(),
+                    resolvedBy: 'Admin'
+                }).then(() => {
+                    alert('Report marked as resolved');
+                }).catch((error) => {
+                    alert('Error resolving report: ' + error.message);
+                });
+            }
+        }
+
+        // Respond to moderator report
+        function respondToReport(reportKey) {
+            const response = prompt('Enter your response to the moderator:');
+            if (response && response.trim()) {
+                database.ref('modReports/' + reportKey).update({
+                    adminResponse: response.trim(),
+                    respondedAt: Date.now(),
+                    respondedBy: 'Admin'
+                }).then(() => {
+                    alert('Response sent to moderator');
+                }).catch((error) => {
+                    alert('Error sending response: ' + error.message);
+                });
+            }
+        }
+
+        // Delete moderator report
+        function deleteReport(reportKey) {
+            if (confirm('Delete this report permanently?')) {
+                database.ref('modReports/' + reportKey).remove().then(() => {
+                    alert('Report deleted');
+                }).catch((error) => {
+                    alert('Error deleting report: ' + error.message);
+                });
+            }
+        }
     </script>
 </body>
 </html>
