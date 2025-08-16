@@ -1569,8 +1569,16 @@ This is an automated security notification from ChatCreate.
             };
             database.ref('channels/' + currentChannel.substring(1) + '/messages').push(leaveMessage);
             
-            database.ref('presence/' + currentUser.nickname).remove();
-            database.ref('channels/' + currentChannel.substring(1) + '/typing/' + currentUser.nickname).remove();
+            // Clean up presence and typing with display names
+            let displayName = currentUser.nickname;
+            if (currentUser.isAdmin) {
+                displayName = '(Admin)';
+            } else if (currentUser.isMod) {
+                displayName = '(MOD)';
+            }
+            
+            database.ref('presence/' + displayName).remove();
+            database.ref('channels/' + currentChannel.substring(1) + '/typing/' + displayName).remove();
             
             const channelRef = database.ref('channels/' + currentChannel.substring(1) + '/messages');
             channelRef.off();
@@ -1605,7 +1613,15 @@ This is an automated security notification from ChatCreate.
         document.getElementById('messageInput').addEventListener('input', function() {
             if (!isTyping) {
                 isTyping = true;
-                database.ref('channels/' + currentChannel.substring(1) + '/typing/' + currentUser.nickname).set({
+                // Use display name for typing indicator
+                let typingName = currentUser.nickname;
+                if (currentUser.isAdmin) {
+                    typingName = '(Admin)';
+                } else if (currentUser.isMod) {
+                    typingName = '(MOD)';
+                }
+                
+                database.ref('channels/' + currentChannel.substring(1) + '/typing/' + typingName).set({
                     timestamp: Date.now()
                 });
             }
@@ -1613,7 +1629,13 @@ This is an automated security notification from ChatCreate.
             clearTimeout(typingTimer);
             typingTimer = setTimeout(() => {
                 isTyping = false;
-                database.ref('channels/' + currentChannel.substring(1) + '/typing/' + currentUser.nickname).remove();
+                let typingName = currentUser.nickname;
+                if (currentUser.isAdmin) {
+                    typingName = '(Admin)';
+                } else if (currentUser.isMod) {
+                    typingName = '(MOD)';
+                }
+                database.ref('channels/' + currentChannel.substring(1) + '/typing/' + typingName).remove();
             }, 1000);
         });
 
@@ -1671,7 +1693,15 @@ This is an automated security notification from ChatCreate.
             typingRef.on('value', (snapshot) => {
                 const typing = snapshot.val() || {};
                 const typingUsers = Object.keys(typing).filter(user => {
-                    return user !== currentUser.nickname && Date.now() - typing[user].timestamp < 2000;
+                    // Exclude current user from typing display
+                    let currentTypingName = currentUser.nickname;
+                    if (currentUser.isAdmin) {
+                        currentTypingName = '(Admin)';
+                    } else if (currentUser.isMod) {
+                        currentTypingName = '(MOD)';
+                    }
+                    
+                    return user !== currentTypingName && Date.now() - typing[user].timestamp < 2000;
                 });
                 
                 const indicator = document.getElementById('typingIndicator');
@@ -1836,6 +1866,12 @@ This is an automated security notification from ChatCreate.
         }
 
         function banUser(nickname, email) {
+            // Prevent mods from banning admins
+            if (isMod && !isAdmin && (nickname.toLowerCase() === 'lebron' || nickname === 'Admin')) {
+                alert('You cannot ban an administrator.');
+                return;
+            }
+            
             if (confirm(`Are you sure you want to ban ${nickname}?`)) {
                 database.ref('bannedUsers').push({
                     nickname: nickname,
@@ -1905,4 +1941,4 @@ This is an automated security notification from ChatCreate.
         }
     </script>
 </body>
-</html>
+    </html>
