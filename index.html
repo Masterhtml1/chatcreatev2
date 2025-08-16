@@ -1065,6 +1065,8 @@
         function isApprovedEmail(email) {
             // If auto-approve is enabled, approve all @usd232.org emails
             if (autoApproveEnabled && email.endsWith('@usd232.org')) {
+                // Add email to approved list for permanent record
+                addEmailToApprovedList(email.toLowerCase());
                 return true;
             }
             
@@ -1075,6 +1077,21 @@
             
             // Check if email is in the approved list
             return approvedEmails.includes(email.toLowerCase());
+        }
+
+        // Add email to approved list (only if not already there)
+        function addEmailToApprovedList(email) {
+            // Check if email is already in the list
+            if (!approvedEmails.includes(email)) {
+                console.log(`Auto-adding email to approved list: ${email}`);
+                database.ref('approvedEmails').push(email)
+                    .then(() => {
+                        console.log(`✅ Email ${email} automatically added to approved list`);
+                    })
+                    .catch((error) => {
+                        console.error(`❌ Error adding email to approved list:`, error);
+                    });
+            }
         }
 
         // Load saved user data on page load
