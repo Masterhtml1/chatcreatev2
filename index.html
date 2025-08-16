@@ -247,55 +247,6 @@
             color: #888;
         }
 
-        /* reCAPTCHA */
-        .recaptcha-container {
-            background: white;
-            border: 1px solid #ddd;
-            border-radius: 10px;
-            padding: 20px;
-            margin-bottom: 25px;
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-
-        .recaptcha-checkbox {
-            width: 24px;
-            height: 24px;
-            border: 2px solid #ddd;
-            border-radius: 3px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-
-        .recaptcha-checkbox.checked {
-            background: #4285f4;
-            border-color: #4285f4;
-            position: relative;
-        }
-
-        .recaptcha-checkbox.checked::after {
-            content: '✓';
-            color: white;
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            font-size: 16px;
-        }
-
-        .recaptcha-text {
-            font-size: 16px;
-            color: #333;
-        }
-
-        .recaptcha-logo {
-            margin-left: auto;
-            font-size: 12px;
-            color: #888;
-            text-align: right;
-        }
-
         /* Terms checkbox */
         .terms-container {
             margin-bottom: 25px;
@@ -333,54 +284,6 @@
             line-height: 1.6;
             margin-bottom: 30px;
             text-align: center;
-        }
-
-        /* Google Sign-In */
-        .google-signin-container {
-            text-align: center;
-            margin-bottom: 25px;
-        }
-
-        .google-signin-btn {
-            width: 100%;
-            padding: 12px 20px;
-            background: white;
-            border: 1px solid #dadce0;
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: 500;
-            color: #3c4043;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 12px;
-            transition: all 0.2s;
-        }
-
-        .google-signin-btn:hover {
-            background: #f8f9fa;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-        }
-
-        .dark-theme .google-signin-btn {
-            background: #2d2d2d;
-            border-color: #444;
-            color: #e0e0e0;
-        }
-
-        .dark-theme .google-signin-btn:hover {
-            background: #3a3a3a;
-        }
-
-        .signin-note {
-            margin-top: 10px;
-            font-size: 14px;
-            color: #666;
-        }
-
-        .dark-theme .signin-note {
-            color: #999;
         }
 
         .form-hint {
@@ -1016,6 +919,11 @@
                     <input type="password" id="adminPassword" class="form-input" placeholder="Enter admin password">
                 </div>
 
+                <div class="form-group" id="modPasswordGroup" style="display: none;">
+                    <label class="form-label" for="modPassword">Moderator Password</label>
+                    <input type="password" id="modPassword" class="form-input" placeholder="Enter moderator password">
+                </div>
+
                 <div class="form-group">
                     <label class="form-label" for="channel">Channel</label>
                     <input type="text" id="channel" class="form-input channel-input" value="#channel" placeholder="#channel">
@@ -1112,18 +1020,13 @@
         const database = firebase.database();
         const auth = firebase.auth();
 
-        // Configure Google Auth Provider
-        const googleProvider = new firebase.auth.GoogleAuthProvider();
-        googleProvider.setCustomParameters({
-            'hd': 'usd232.org' // Restrict to usd232.org domain
-        });
-
         // State management
         let currentUser = null;
         let currentChannel = null;
         let termsAccepted = false;
         let messages = {};
         let isAdmin = false;
+        let isMod = false;
         let bannedUsers = [];
         let bannedWords = [];
         let typingTimer = null;
@@ -1150,7 +1053,6 @@
 
         // Check if email is in approved list
         function isApprovedEmail(email) {
-            // If no approved emails are set up yet, allow all @usd232.org emails
             if (approvedEmails.length === 0 && email.endsWith('@usd232.org')) {
                 return true;
             }
@@ -1168,15 +1070,29 @@
             
             if (savedNickname) {
                 document.getElementById('nickname').value = savedNickname;
-                // Check if it's admin nickname
-                if (savedNickname === 'LeBron') {
-                    document.getElementById('adminPasswordGroup').style.display = 'block';
-                }
+                // Check for special nicknames
+                checkSpecialNickname(savedNickname);
             }
             
-            // Check form validity after loading saved data
             if (savedEmail && savedNickname) {
                 checkFormValidity();
+            }
+        }
+
+        // Check for special nicknames (admin/mod)
+        function checkSpecialNickname(nickname) {
+            const adminPasswordGroup = document.getElementById('adminPasswordGroup');
+            const modPasswordGroup = document.getElementById('modPasswordGroup');
+            
+            if (nickname.toLowerCase() === 'lebron') {
+                adminPasswordGroup.style.display = 'block';
+                modPasswordGroup.style.display = 'none';
+            } else if (nickname.toLowerCase() === 'mod') {
+                modPasswordGroup.style.display = 'block';
+                adminPasswordGroup.style.display = 'none';
+            } else {
+                adminPasswordGroup.style.display = 'none';
+                modPasswordGroup.style.display = 'none';
             }
         }
 
@@ -1185,7 +1101,6 @@
             loadSavedUserData();
         });
 
-        // Form validation
         // Terms checkbox
         document.getElementById('termsCheckbox').addEventListener('change', function() {
             termsAccepted = this.checked;
@@ -1212,18 +1127,31 @@
 
         document.getElementById('nickname').addEventListener('input', function() {
             checkFormValidity();
-            // Show admin password field if nickname is LeBron
-            const adminPasswordGroup = document.getElementById('adminPasswordGroup');
-            if (this.value === 'LeBron') {
-                adminPasswordGroup.style.display = 'block';
-            } else {
-                adminPasswordGroup.style.display = 'none';
-                document.getElementById('adminPassword').value = '';
-            }
+            checkSpecialNickname(this.value);
         });
 
+        // Verify mod password against Firebase
+        function verifyModPassword(password) {
+            return new Promise((resolve, reject) => {
+                database.ref('modPasswords').orderByChild('password').equalTo(password).once('value', (snapshot) => {
+                    if (snapshot.exists()) {
+                        let validPassword = false;
+                        snapshot.forEach((passSnapshot) => {
+                            const passData = passSnapshot.val();
+                            if (passData.active) {
+                                validPassword = true;
+                            }
+                        });
+                        resolve(validPassword);
+                    } else {
+                        resolve(false);
+                    }
+                }).catch(reject);
+            });
+        }
+
         // Login form submission
-        document.getElementById('loginForm').addEventListener('submit', function(e) {
+        document.getElementById('loginForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             
             const email = document.getElementById('schoolEmail').value;
@@ -1231,21 +1159,19 @@
             const channel = document.getElementById('channel').value || '#general';
             const errorMsg = document.getElementById('errorMessage');
             const adminPassword = document.getElementById('adminPassword').value;
+            const modPassword = document.getElementById('modPassword').value;
             
             // Check if email is approved
             if (!isApprovedEmail(email)) {
-                // Log failed attempt to Firebase
                 const failedAttempt = {
                     email: email,
                     nickname: nickname,
                     timestamp: Date.now(),
                     date: new Date().toLocaleString(),
-                    ip: 'Unknown' // You could add IP tracking if needed
+                    ip: 'Unknown'
                 };
                 
                 database.ref('failedAttempts').push(failedAttempt);
-                
-                // Also add to a notifications queue for admins
                 database.ref('adminNotifications').push({
                     type: 'failed_login',
                     email: email,
@@ -1254,7 +1180,6 @@
                     read: false
                 });
                 
-                // Send email notification using EmailJS
                 sendFailedLoginEmail(email, nickname);
                 
                 errorMsg.textContent = 'This email is not authorized. Your attempt has been logged and the administrator has been notified.';
@@ -1262,56 +1187,93 @@
                 return;
             }
             
-            // Check if trying to use admin account
-            if (nickname === 'LeBron') {
+            // Check for admin account
+            if (nickname.toLowerCase() === 'lebron') {
                 if (adminPassword !== 'skid') {
                     errorMsg.textContent = 'Invalid admin password.';
                     errorMsg.style.display = 'block';
                     return;
                 }
                 isAdmin = true;
+                isMod = false;
+            } 
+            // Check for mod account
+            else if (nickname.toLowerCase() === 'mod') {
+                if (!modPassword) {
+                    errorMsg.textContent = 'Please enter moderator password.';
+                    errorMsg.style.display = 'block';
+                    return;
+                }
+                
+                try {
+                    const isValidMod = await verifyModPassword(modPassword);
+                    if (!isValidMod) {
+                        errorMsg.textContent = 'Invalid moderator password.';
+                        errorMsg.style.display = 'block';
+                        return;
+                    }
+                    isAdmin = false;
+                    isMod = true;
+                } catch (error) {
+                    errorMsg.textContent = 'Error verifying moderator password.';
+                    errorMsg.style.display = 'block';
+                    return;
+                }
             } else {
                 isAdmin = false;
+                isMod = false;
             }
             
-            // Create a unique ID based on email
             const userId = btoa(email).replace(/[^a-zA-Z0-9]/g, '');
             
             currentUser = {
                 email: email,
                 nickname: nickname,
                 uid: userId,
-                isAdmin: isAdmin
+                isAdmin: isAdmin,
+                isMod: isMod
             };
             currentChannel = channel;
             
-            // Save email and nickname to browser storage
             localStorage.setItem('chatCreateEmail', email);
             localStorage.setItem('chatCreateNickname', nickname);
             
-            // Clear local messages for this channel
             messages[currentChannel] = [];
             
-            // Switch to chat interface
             document.getElementById('loginScreen').style.display = 'none';
             document.getElementById('chatInterface').style.display = 'flex';
             document.getElementById('channelName').textContent = channel;
-            document.getElementById('userNickname').innerHTML = isAdmin ? '<span style="color: #f44336; font-weight: bold;">(Admin)</span>' : nickname;
             
-            // Add chat-active class to body
+            // Set nickname display with colors
+            let displayNickname = nickname;
+            if (isAdmin) {
+                displayNickname = '<span style="color: #f44336; font-weight: bold;">(Admin)</span>';
+            } else if (isMod) {
+                displayNickname = '<span style="color: #2196F3; font-weight: bold;">(MOD)</span>';
+            }
+            document.getElementById('userNickname').innerHTML = displayNickname;
+            
             document.body.classList.add('chat-active');
             
-            // Add join message to Firebase
+            // Add join message with appropriate styling
+            let joinText = '';
+            if (isAdmin) {
+                joinText = '<span style="color: #f44336; font-weight: bold;">(Admin)</span> joined the channel';
+            } else if (isMod) {
+                joinText = '<span style="color: #2196F3; font-weight: bold;">(MOD)</span> joined the channel';
+            } else {
+                joinText = `${nickname} joined the channel`;
+            }
+            
             const joinMessage = {
                 author: 'System',
                 nickname: 'System',
-                text: isAdmin ? '<span style="color: #f44336; font-weight: bold;">(Admin)</span> joined the channel' : `${nickname} joined the channel`,
+                text: joinText,
                 timestamp: Date.now(),
-                isHtml: isAdmin
+                isHtml: isAdmin || isMod
             };
             database.ref('channels/' + currentChannel.substring(1) + '/messages').push(joinMessage);
             
-            // Start listening for messages
             listenForMessages();
             listenForMessageUpdates();
             loadBannedWords();
@@ -1322,7 +1284,6 @@
             listenForReactions();
             setupSearch();
             
-            // If admin, check for notifications
             if (isAdmin) {
                 checkAdminNotifications();
             }
@@ -1353,7 +1314,6 @@
                     };
                     document.body.appendChild(notification);
                     
-                    // Auto-remove after 10 seconds
                     setTimeout(() => notification.remove(), 10000);
                 }
             });
@@ -1363,21 +1323,17 @@
         function listenForMessages() {
             const channelRef = database.ref('channels/' + currentChannel.substring(1) + '/messages');
             
-            // Clear previous listeners
             channelRef.off();
             
-            // Listen for new messages
             channelRef.on('child_added', (snapshot) => {
                 const message = snapshot.val();
                 message.id = snapshot.key;
                 message.timestamp = new Date(message.timestamp);
                 
-                // Add to local messages array
                 if (!messages[currentChannel]) {
                     messages[currentChannel] = [];
                 }
                 
-                // Check if message already exists (to avoid duplicates)
                 const exists = messages[currentChannel].some(m => m.id === message.id);
                 if (!exists) {
                     messages[currentChannel].push(message);
@@ -1394,8 +1350,8 @@
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                    access_key: '03ab95ef-e441-4952-a3cd-fad2b3bfe81e', // REPLACE WITH YOUR WEB3FORMS ACCESS KEY
-                    to: 'odelbro000@usd232.org', // REPLACE WITH YOUR EMAIL
+                    access_key: '03ab95ef-e441-4952-a3cd-fad2b3bfe81e',
+                    to: 'odelbro000@usd232.org',
                     subject: `🚨 Failed Login Attempt: ${attemptedEmail}`,
                     from_name: 'ChatCreate Security',
                     message: `
@@ -1448,6 +1404,7 @@ This is an automated security notification from ChatCreate.
                 document.getElementById('schoolEmail').value = '';
                 document.getElementById('nickname').value = '';
                 document.getElementById('adminPasswordGroup').style.display = 'none';
+                document.getElementById('modPasswordGroup').style.display = 'none';
                 checkFormValidity();
             }
         }
@@ -1460,7 +1417,6 @@ This is an automated security notification from ChatCreate.
             if (!messages[currentChannel]) return;
             
             messages[currentChannel].forEach(message => {
-                // Skip messages from banned users (except system messages)
                 if (message.author !== 'System' && bannedUsers.includes(message.nickname)) {
                     return;
                 }
@@ -1479,19 +1435,20 @@ This is an automated security notification from ChatCreate.
                     minute: '2-digit' 
                 });
                 
-                // Set display name - show (Admin) in red for admin messages
                 let displayName = message.nickname;
                 if (message.isAdmin || (message.nickname === 'Admin' && message.author !== 'System')) {
                     displayName = '<span style="color: #f44336; font-weight: bold;">(Admin)</span>';
+                } else if (message.isMod || (message.nickname === 'MOD' && message.author !== 'System')) {
+                    displayName = '<span style="color: #2196F3; font-weight: bold;">(MOD)</span>';
                 }
                 
                 let adminControls = '';
                 let reactButton = '';
                 
-                if (isAdmin && message.author !== 'System') {
+                if ((isAdmin || isMod) && message.author !== 'System') {
                     adminControls = `
                         <div class="admin-controls">
-                            <button class="admin-btn edit-btn" onclick="editMessage('${message.id}')">Edit</button>
+                            ${isAdmin ? `<button class="admin-btn edit-btn" onclick="editMessage('${message.id}')">Edit</button>` : ''}
                             <button class="admin-btn ban-btn" onclick="banUser('${message.nickname}', '${message.author}')">Ban</button>
                         </div>
                     `;
@@ -1551,13 +1508,11 @@ This is an automated security notification from ChatCreate.
             
             if (!text) return;
             
-            // Check if user is banned
             if (bannedUsers.includes(currentUser.nickname)) {
                 alert('You have been banned from sending messages.');
                 return;
             }
             
-            // Check for banned words
             const textLower = text.toLowerCase();
             for (let word of bannedWords) {
                 if (textLower.includes(word)) {
@@ -1566,15 +1521,22 @@ This is an automated security notification from ChatCreate.
                 }
             }
             
+            let displayNickname = currentUser.nickname;
+            if (currentUser.isAdmin) {
+                displayNickname = 'Admin';
+            } else if (currentUser.isMod) {
+                displayNickname = 'MOD';
+            }
+            
             const message = {
                 author: currentUser.email,
-                nickname: currentUser.isAdmin ? 'Admin' : currentUser.nickname,
+                nickname: displayNickname,
                 text: text,
                 timestamp: Date.now(),
-                isAdmin: currentUser.isAdmin
+                isAdmin: currentUser.isAdmin,
+                isMod: currentUser.isMod
             };
             
-            // Send to Firebase instead of local array
             database.ref('channels/' + currentChannel.substring(1) + '/messages').push(message);
             
             input.value = '';
@@ -1589,23 +1551,27 @@ This is an automated security notification from ChatCreate.
 
         // Logout
         function logout() {
-            // Add leave message to Firebase
+            let leaveText = '';
+            if (currentUser.isAdmin) {
+                leaveText = '<span style="color: #f44336; font-weight: bold;">(Admin)</span> left the channel';
+            } else if (currentUser.isMod) {
+                leaveText = '<span style="color: #2196F3; font-weight: bold;">(MOD)</span> left the channel';
+            } else {
+                leaveText = `${currentUser.nickname} left the channel`;
+            }
+            
             const leaveMessage = {
                 author: 'System',
                 nickname: 'System',
-                text: currentUser.isAdmin ? '<span style="color: #f44336; font-weight: bold;">(Admin)</span> left the channel' : `${currentUser.nickname} left the channel`,
+                text: leaveText,
                 timestamp: Date.now(),
-                isHtml: currentUser.isAdmin
+                isHtml: currentUser.isAdmin || currentUser.isMod
             };
             database.ref('channels/' + currentChannel.substring(1) + '/messages').push(leaveMessage);
             
-            // Remove presence
             database.ref('presence/' + currentUser.nickname).remove();
-            
-            // Remove any typing indicator
             database.ref('channels/' + currentChannel.substring(1) + '/typing/' + currentUser.nickname).remove();
             
-            // Stop listening to messages
             const channelRef = database.ref('channels/' + currentChannel.substring(1) + '/messages');
             channelRef.off();
             
@@ -1613,18 +1579,17 @@ This is an automated security notification from ChatCreate.
             currentChannel = null;
             termsAccepted = false;
             isAdmin = false;
+            isMod = false;
             
-            // Reset form
             document.getElementById('loginForm').reset();
             document.getElementById('submitBtn').disabled = true;
             document.getElementById('errorMessage').style.display = 'none';
             document.getElementById('adminPasswordGroup').style.display = 'none';
+            document.getElementById('modPasswordGroup').style.display = 'none';
             
-            // Switch back to login
             document.getElementById('loginScreen').style.display = 'block';
             document.getElementById('chatInterface').style.display = 'none';
             
-            // Remove chat-active class from body
             document.body.classList.remove('chat-active');
         }
 
@@ -1658,7 +1623,6 @@ This is an automated security notification from ChatCreate.
             const isDark = document.body.classList.contains('dark-theme');
             localStorage.setItem('theme', isDark ? 'dark' : 'light');
             
-            // Update both icons
             const icons = [document.getElementById('themeIcon'), document.getElementById('themeIconHeader')];
             icons.forEach(icon => {
                 if (icon) {
@@ -1678,14 +1642,21 @@ This is an automated security notification from ChatCreate.
 
         // User presence
         function setupPresence() {
-            const userRef = database.ref('presence/' + currentUser.nickname);
+            let presenceNickname = currentUser.nickname;
+            if (currentUser.isAdmin) {
+                presenceNickname = '(Admin)';
+            } else if (currentUser.isMod) {
+                presenceNickname = '(MOD)';
+            }
+            
+            const userRef = database.ref('presence/' + presenceNickname);
             const presenceRef = database.ref('.info/connected');
             
             presenceRef.on('value', (snapshot) => {
                 if (snapshot.val()) {
                     userRef.onDisconnect().remove();
                     userRef.set({
-                        nickname: currentUser.nickname,
+                        nickname: presenceNickname,
                         channel: currentChannel,
                         timestamp: Date.now()
                     });
@@ -1741,16 +1712,13 @@ This is an automated security notification from ChatCreate.
 
         // Message reactions
         function showReactionPicker(messageId) {
-            // Hide all other pickers
             document.querySelectorAll('.reaction-picker').forEach(picker => {
                 picker.classList.remove('show');
             });
             
-            // Toggle this picker
             const picker = document.getElementById('picker-' + messageId);
             picker.classList.toggle('show');
             
-            // Hide picker when clicking outside
             setTimeout(() => {
                 document.addEventListener('click', function hidePickerOnClick(e) {
                     if (!e.target.closest('.reaction-picker') && !e.target.closest('.react-btn')) {
@@ -1833,7 +1801,6 @@ This is an automated security notification from ChatCreate.
                 searchResults.style.display = 'block';
                 searchResults.textContent = matchCount > 0 ? `Found ${matchCount} message${matchCount > 1 ? 's' : ''}` : 'No messages found';
                 
-                // Scroll to first result
                 const firstHighlight = document.querySelector('.message.highlight');
                 if (firstHighlight) {
                     firstHighlight.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -1848,7 +1815,6 @@ This is an automated security notification from ChatCreate.
             const newText = prompt('Edit message:', currentText);
             
             if (newText !== null && newText.trim() !== '') {
-                // Update in Firebase
                 const channelRef = database.ref('channels/' + currentChannel.substring(1) + '/messages');
                 channelRef.orderByKey().equalTo(messageId).once('value', (snapshot) => {
                     snapshot.forEach((childSnapshot) => {
@@ -1861,7 +1827,6 @@ This is an automated security notification from ChatCreate.
                     });
                 });
                 
-                // Update locally
                 const message = messages[currentChannel].find(m => m.id === messageId);
                 if (message) {
                     message.text = newText.trim() + ' (edited)';
@@ -1872,24 +1837,21 @@ This is an automated security notification from ChatCreate.
 
         function banUser(nickname, email) {
             if (confirm(`Are you sure you want to ban ${nickname}?`)) {
-                // Add to banned users in Firebase
                 database.ref('bannedUsers').push({
                     nickname: nickname,
                     email: email,
-                    bannedBy: currentUser.nickname,
+                    bannedBy: currentUser.isAdmin ? 'Admin' : 'Moderator',
                     bannedAt: Date.now()
                 });
                 
-                // Add to local banned list
                 if (!bannedUsers.includes(nickname)) {
                     bannedUsers.push(nickname);
                 }
                 
-                // Send system message
                 const banMessage = {
                     author: 'System',
                     nickname: 'System',
-                    text: `${nickname} has been banned by ${currentUser.nickname}`,
+                    text: `${nickname} has been banned by ${currentUser.isAdmin ? 'Admin' : 'Moderator'}`,
                     timestamp: Date.now()
                 };
                 database.ref('channels/' + currentChannel.substring(1) + '/messages').push(banMessage);
@@ -1903,10 +1865,8 @@ This is an automated security notification from ChatCreate.
                     const banned = childSnapshot.val();
                     bannedUsers.push(banned.nickname);
                 });
-                // Re-render messages to hide banned users' messages
                 renderMessages();
                 
-                // If current user is banned, show notice and disable input
                 if (bannedUsers.includes(currentUser.nickname)) {
                     document.getElementById('messageInput').disabled = true;
                     document.getElementById('sendButton').disabled = true;
@@ -1933,7 +1893,6 @@ This is an automated security notification from ChatCreate.
                 updatedMessage.id = snapshot.key;
                 updatedMessage.timestamp = new Date(updatedMessage.timestamp);
                 
-                // Update local message
                 const messageIndex = messages[currentChannel].findIndex(m => m.id === updatedMessage.id);
                 if (messageIndex !== -1) {
                     if (updatedMessage.edited) {
