@@ -1051,12 +1051,27 @@
         // Call this on page load
         loadApprovedEmails();
 
-        // Check if email is in approved list
+        // Check if email is in approved list or auto-approve is enabled
         function isApprovedEmail(email) {
-            if (approvedEmails.length === 0 && email.endsWith('@usd232.org')) {
-                return true;
-            }
-            return approvedEmails.includes(email.toLowerCase());
+            return new Promise((resolve) => {
+                // First check if auto-approve is enabled
+                database.ref('settings/autoApproveEmails').once('value', (autoSnapshot) => {
+                    const autoApprove = autoSnapshot.val() || false;
+                    
+                    if (autoApprove && email.endsWith('@usd232.org')) {
+                        resolve(true);
+                        return;
+                    }
+                    
+                    // If auto-approve is disabled, check manual approval list
+                    if (approvedEmails.length === 0 && email.endsWith('@usd232.org')) {
+                        resolve(true);
+                        return;
+                    }
+                    
+                    resolve(approvedEmails.includes(email.toLowerCase()));
+                });
+            });
         }
 
         // Load saved user data on page load
@@ -1161,8 +1176,9 @@
             const adminPassword = document.getElementById('adminPassword').value;
             const modPassword = document.getElementById('modPassword').value;
             
-            // Check if email is approved
-            if (!isApprovedEmail(email)) {
+            // Check if email is approved (now async)
+            const emailApproved = await isApprovedEmail(email);
+            if (!emailApproved) {
                 const failedAttempt = {
                     email: email,
                     nickname: nickname,
