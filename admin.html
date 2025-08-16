@@ -410,13 +410,69 @@
             color: #999;
         }
 
-        /* Toggle Switch Styles */
-        #autoApproveToggle:checked + #toggleSlider {
+        /* Toggle switch styles */
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 24px;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: 0.3s;
+            border-radius: 24px;
+        }
+
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: 0.3s;
+            border-radius: 50%;
+        }
+
+        input:checked + .toggle-slider {
             background-color: #4CAF50;
         }
 
-        #autoApproveToggle:checked + #toggleSlider + #toggleButton {
-            transform: translateX(30px);
+        input:checked + .toggle-slider:before {
+            transform: translateX(26px);
+        }
+
+        /* Auto-approve section */
+        .auto-approve-section {
+            background: #f0f7ff;
+            border: 1px solid #b3d9ff;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+
+        .auto-approve-enabled {
+            background: #e8f5e9 !important;
+            border-color: #c8e6c9 !important;
+        }
+
+        .auto-approve-enabled .auto-approve-status {
+            color: #4CAF50 !important;
+            font-weight: 600;
         }
 
         /* Debug info */
@@ -476,6 +532,77 @@
         </header>
 
         <div class="dashboard-grid">
+            <!-- Channel Management -->
+            <div class="dashboard-card">
+                <h2 class="card-title">
+                    <span class="card-icon">💬</span>
+                    Channel Management
+                </h2>
+                <div class="channel-list" id="channelList">
+                    <div class="loading">Loading channels...</div>
+                </div>
+                <button class="clear-all-btn" onclick="clearAllChannels()">Clear All Channels</button>
+            </div>
+
+            <!-- Banned Users -->
+            <div class="dashboard-card">
+                <h2 class="card-title">
+                    <span class="card-icon">🚫</span>
+                    Banned Users
+                </h2>
+                <div class="ban-form">
+                    <input type="text" id="banNickname" class="ban-input" placeholder="Nickname to ban">
+                    <button class="ban-btn" onclick="banUser()">Ban User</button>
+                </div>
+                <div class="banned-list" id="bannedList">
+                    <div class="loading">Loading banned users...</div>
+                </div>
+            </div>
+
+            <!-- Banned Words -->
+            <div class="dashboard-card">
+                <h2 class="card-title">
+                    <span class="card-icon">🔤</span>
+                    Banned Words
+                </h2>
+                <div class="word-form">
+                    <input type="text" id="bannedWord" class="word-input" placeholder="Add banned word">
+                    <button class="add-word-btn" onclick="addBannedWord()">Add Word</button>
+                </div>
+                <div class="word-list" id="wordList">
+                    <div class="loading">Loading banned words...</div>
+                </div>
+            </div>
+
+            <!-- Moderator Passwords -->
+            <div class="dashboard-card">
+                <h2 class="card-title">
+                    <span class="card-icon">🔑</span>
+                    Moderator Passwords
+                </h2>
+                <div class="debug-info" id="debugInfo" style="display: none;">
+                    Debug: Waiting for Firebase connection...
+                </div>
+                <button class="clear-all-btn" style="background: #2196F3; margin-bottom: 15px;" onclick="generateModPassword()">Generate New Password</button>
+                <div class="banned-list" id="modPasswordsList" style="max-height: 400px;">
+                    <div class="loading">Loading moderator passwords...</div>
+                </div>
+            </div>
+
+            <!-- Failed Login Attempts -->
+            <div class="dashboard-card">
+                <h2 class="card-title">
+                    <span class="card-icon">⚠️</span>
+                    Failed Login Attempts
+                    <span id="unreadBadge" style="background: #f44336; color: white; padding: 2px 8px; border-radius: 12px; font-size: 14px; margin-left: 10px; display: none;">0</span>
+                </h2>
+                <button class="clear-all-btn" style="background: #2196F3; margin-bottom: 15px;" onclick="markAllAsRead()">Mark All as Read</button>
+                <button class="clear-all-btn" onclick="clearFailedAttempts()">Clear All Attempts</button>
+                <div class="banned-list" id="failedAttemptsList" style="max-height: 400px;">
+                    <div class="loading">Loading failed attempts...</div>
+                </div>
+            </div>
+
             <!-- Approved Emails -->
             <div class="dashboard-card">
                 <h2 class="card-title">
@@ -484,18 +611,17 @@
                 </h2>
                 
                 <!-- Auto-Approve Toggle -->
-                <div style="background: #e3f2fd; padding: 15px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #2196F3;">
+                <div style="background: #f0f7ff; border: 1px solid #b3d9ff; border-radius: 8px; padding: 15px; margin-bottom: 20px;">
                     <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;">
-                        <strong style="color: #1976D2;">Auto-Approve Mode</strong>
-                        <label style="position: relative; display: inline-block; width: 60px; height: 30px;">
-                            <input type="checkbox" id="autoApproveToggle" style="opacity: 0; width: 0; height: 0;">
-                            <span style="position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; border-radius: 30px;" id="toggleSlider"></span>
-                            <span style="position: absolute; content: ''; height: 22px; width: 22px; left: 4px; bottom: 4px; background-color: white; transition: .4s; border-radius: 50%;" id="toggleButton"></span>
+                        <span style="font-weight: 600; color: #1976d2;">Auto-Approve @usd232.org Emails</span>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="autoApproveToggle" onchange="toggleAutoApprove()">
+                            <span class="toggle-slider"></span>
                         </label>
                     </div>
-                    <div style="font-size: 14px; color: #666; line-height: 1.4;">
-                        <span id="autoApproveStatus">When enabled, all @usd232.org emails are automatically approved for access.</span>
-                    </div>
+                    <p style="font-size: 14px; color: #666; margin: 0;">
+                        <span id="autoApproveStatus">When enabled, all @usd232.org emails will be automatically approved for access.</span>
+                    </p>
                 </div>
                 
                 <div class="ban-form">
@@ -507,6 +633,16 @@
                 </div>
             </div>
 
+            <!-- Moderator Reports -->
+            <div class="dashboard-card">
+                <h2 class="card-title">
+                    <span class="card-icon">📢</span>
+                    Moderator Reports
+                    <span id="unreadReportsBadge" style="background: #ff9800; color: white; padding: 2px 8px; border-radius: 12px; font-size: 14px; margin-left: 10px; display: none;">0</span>
+                </h2>
+                <div class="banned-list" id="modReportsList" style="max-height: 400px;">
+                    <div class="loading">Loading moderator reports...</div>
+                </div>
             <!-- Statistics -->
             <div class="dashboard-card">
                 <h2 class="card-title">
@@ -562,21 +698,41 @@
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
 
+        // Test Firebase connection
+        function testFirebaseConnection() {
+            const debugInfo = document.getElementById('debugInfo');
+            debugInfo.style.display = 'block';
+            
+            database.ref('.info/connected').on('value', (snapshot) => {
+                if (snapshot.val() === true) {
+                    debugInfo.innerHTML = '✅ Firebase connected successfully';
+                    debugInfo.style.background = '#e8f5e9';
+                    debugInfo.style.color = '#4CAF50';
+                    debugInfo.style.borderColor = '#c8e6c9';
+                    setTimeout(() => {
+                        debugInfo.style.display = 'none';
+                    }, 3000);
+                } else {
+                    debugInfo.innerHTML = '❌ Firebase connection lost';
+                    debugInfo.style.background = '#ffebee';
+                    debugInfo.style.color = '#f44336';
+                    debugInfo.style.borderColor = '#ffcdd2';
+                }
+            });
+        }
+
         // Admin login
         document.getElementById('adminLoginForm').addEventListener('submit', function(e) {
             e.preventDefault();
             const password = document.getElementById('adminPassword').value;
             const errorMsg = document.getElementById('errorMessage');
 
-            console.log('Attempting admin login with password:', password);
-
             if (password === 'skid') {
-                console.log('Password correct, switching to dashboard');
                 document.getElementById('loginScreen').style.display = 'none';
                 document.getElementById('dashboardScreen').style.display = 'block';
+                testFirebaseConnection();
                 loadDashboard();
             } else {
-                console.log('Invalid password');
                 errorMsg.textContent = 'Invalid password';
                 errorMsg.style.display = 'block';
             }
@@ -584,48 +740,248 @@
 
         // Load dashboard data
         function loadDashboard() {
-            console.log('Loading dashboard...');
+            loadChannels();
+            loadBannedUsers();
+            loadBannedWords();
             loadApprovedEmails();
+            loadFailedAttempts();
+            loadModPasswords();
+            loadModReports();
             loadAutoApproveSettings();
             loadStats();
         }
 
-        // Load auto-approve settings
-        function loadAutoApproveSettings() {
-            const toggle = document.getElementById('autoApproveToggle');
-            const status = document.getElementById('autoApproveStatus');
+        // Generate random mod password - REUSABLE VERSION
+        function generateModPassword() {
+            console.log('Generating mod password...');
             
-            // Load current setting from Firebase
-            database.ref('settings/autoApproveEmails').on('value', (snapshot) => {
-                const isEnabled = snapshot.val() || false;
-                toggle.checked = isEnabled;
+            const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789';
+            let password = '';
+            for (let i = 0; i < 12; i++) {
+                password += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            
+            console.log('Generated password:', password);
+            
+            // Create the mod password object - REUSABLE
+            const modPassword = {
+                password: password,
+                createdAt: Date.now(),
+                createdBy: 'Admin',
+                active: true,
+                reusable: true,
+                usageCount: 0,
+                lastUsedAt: null,
+                lastUsedBy: null
+            };
+            
+            console.log('Attempting to save to Firebase...', modPassword);
+            
+            // Add to Firebase with better error handling
+            database.ref('modPasswords').push(modPassword)
+                .then((result) => {
+                    console.log('✅ Password saved successfully!', result.key);
+                    alert(`✅ New moderator password generated: ${password}\n\n🔄 This code can be used multiple times!\n\nShare this with your moderators.\n\nPassword saved to database with ID: ${result.key}`);
+                })
+                .catch((error) => {
+                    console.error('❌ Error saving password:', error);
+                    alert(`❌ Error saving password: ${error.message}\n\nTry again or check Firebase permissions.`);
+                });
+        }
+
+        // Load mod passwords - CLEAN VERSION WITHOUT TIMESTAMP CLUTTER
+        function loadModPasswords() {
+            console.log('Loading mod passwords...');
+            const passwordsList = document.getElementById('modPasswordsList');
+            
+            database.ref('modPasswords').on('value', (snapshot) => {
+                console.log('Mod passwords snapshot received:', snapshot.exists());
+                passwordsList.innerHTML = '';
+                const passwords = [];
                 
-                if (isEnabled) {
-                    status.innerHTML = '✅ <strong>ENABLED:</strong> All @usd232.org emails are automatically approved.';
-                    status.style.color = '#4CAF50';
+                if (snapshot.exists()) {
+                    snapshot.forEach((passSnapshot) => {
+                        const passData = passSnapshot.val();
+                        passData.key = passSnapshot.key;
+                        passwords.unshift(passData); // Show newest first
+                        console.log('Found password:', passData);
+                    });
+                    
+                    console.log(`Total passwords found: ${passwords.length}`);
+                    
+                    passwords.forEach(passData => {
+                        const passItem = document.createElement('div');
+                        passItem.className = 'banned-item';
+                        passItem.style.background = passData.active ? '#e8f5e9' : '#f5f5f5';
+                        
+                        // Clean display - just show usage count, not individual timestamps
+                        const usageCount = passData.usageCount || 0;
+                        const isReusable = passData.reusable !== false;
+                        
+                        let statusText = '';
+                        let statusClass = '';
+                        
+                        if (!passData.active) {
+                            statusText = '❌ Disabled';
+                            statusClass = 'status-used';
+                        } else if (isReusable) {
+                            statusText = `🔄 Active (${usageCount} uses)`;
+                            statusClass = 'status-active';
+                        } else {
+                            statusText = usageCount > 0 ? '✓ Used' : '✓ Active';
+                            statusClass = usageCount > 0 ? 'status-used' : 'status-active';
+                        }
+                        
+                        // Clean timestamp display - only show creation and last use (if exists)
+                        let timeInfo = `Created: ${new Date(passData.createdAt).toLocaleDateString()}`;
+                        if (passData.lastUsedAt && usageCount > 0) {
+                            timeInfo += ` | Last used: ${new Date(passData.lastUsedAt).toLocaleDateString()}`;
+                        }
+                        
+                        passItem.innerHTML = `
+                            <div class="banned-info">
+                                <div class="banned-nickname" style="font-family: monospace; font-size: 16px;">
+                                    ${passData.password}
+                                    <span class="status-indicator ${statusClass}">${statusText}</span>
+                                </div>
+                                <div class="banned-email">
+                                    ${timeInfo}
+                                </div>
+                            </div>
+                            <div style="display: flex; gap: 5px;">
+                                <button class="unban-btn" style="background: ${passData.active ? '#f44336' : '#4CAF50'};" onclick="toggleModPassword('${passData.key}', ${passData.active})">${passData.active ? 'Disable' : 'Enable'}</button>
+                                <button class="unban-btn" style="background: #ff5722;" onclick="deleteModPassword('${passData.key}')">Delete</button>
+                            </div>
+                        `;
+                        passwordsList.appendChild(passItem);
+                    });
                 } else {
-                    status.innerHTML = '❌ <strong>DISABLED:</strong> Only manually approved emails can access the chat.';
-                    status.style.color = '#f44336';
+                    console.log('No mod passwords found in database');
+                    passwordsList.innerHTML = '<div class="empty-state">No moderator passwords generated yet<br><small>Click "Generate New Password" to create one</small></div>';
+                }
+            }, (error) => {
+                console.error('Error loading mod passwords:', error);
+                passwordsList.innerHTML = '<div class="empty-state">Error loading passwords: ' + error.message + '</div>';
+            });
+        }
+
+        // Toggle mod password (enable/disable)
+        function toggleModPassword(key, currentStatus) {
+            const newStatus = !currentStatus;
+            const action = newStatus ? 'enable' : 'disable';
+            
+            if (confirm(`Are you sure you want to ${action} this moderator password?`)) {
+                console.log(`${action === 'enable' ? 'Enabling' : 'Disabling'} password with key:`, key);
+                database.ref('modPasswords/' + key).update({ active: newStatus })
+                    .then(() => {
+                        console.log(`✅ Password ${action}d successfully`);
+                        alert(`Moderator password ${action}d successfully`);
+                    })
+                    .catch((error) => {
+                        console.error(`❌ Error ${action}ing password:`, error);
+                        alert(`Error ${action}ing password: ` + error.message);
+                    });
+            }
+        }
+
+        // Delete mod password
+        function deleteModPassword(key) {
+            if (confirm('Delete this moderator password permanently? This cannot be undone.')) {
+                console.log('Deleting password with key:', key);
+                database.ref('modPasswords/' + key).remove()
+                    .then(() => {
+                        console.log('✅ Password deleted successfully');
+                        alert('Moderator password deleted');
+                    })
+                    .catch((error) => {
+                        console.error('❌ Error deleting password:', error);
+                        alert('Error deleting password: ' + error.message);
+                    });
+            }
+        }
+
+        // Load failed login attempts
+        function loadFailedAttempts() {
+            const failedList = document.getElementById('failedAttemptsList');
+            
+            database.ref('failedAttempts').orderByChild('timestamp').limitToLast(50).on('value', (snapshot) => {
+                failedList.innerHTML = '';
+                const attempts = [];
+                
+                snapshot.forEach((attemptSnapshot) => {
+                    const attempt = attemptSnapshot.val();
+                    attempt.key = attemptSnapshot.key;
+                    attempts.unshift(attempt); // Show newest first
+                });
+                
+                if (attempts.length > 0) {
+                    attempts.forEach(attempt => {
+                        const attemptItem = document.createElement('div');
+                        attemptItem.className = 'banned-item';
+                        attemptItem.style.background = '#fff3cd';
+                        attemptItem.style.borderLeft = '4px solid #ffc107';
+                        attemptItem.innerHTML = `
+                            <div class="banned-info">
+                                <div class="banned-nickname" style="color: #856404;">
+                                    ${attempt.email}
+                                    <button class="unban-btn" style="background: #4CAF50; margin-left: 10px; font-size: 12px;" onclick="quickApprove('${attempt.email}')">Quick Approve</button>
+                                </div>
+                                <div class="banned-email">
+                                    Nickname tried: ${attempt.nickname || 'N/A'} | 
+                                    Time: ${new Date(attempt.timestamp).toLocaleString()}
+                                </div>
+                            </div>
+                            <button class="unban-btn" style="background: #ff5722;" onclick="removeFailedAttempt('${attempt.key}')">Delete</button>
+                        `;
+                        failedList.appendChild(attemptItem);
+                    });
+                } else {
+                    failedList.innerHTML = '<div class="empty-state">No failed login attempts</div>';
                 }
             });
             
-            // Handle toggle changes
-            toggle.addEventListener('change', function() {
-                const newValue = this.checked;
-                database.ref('settings/autoApproveEmails').set(newValue)
-                    .then(() => {
-                        if (newValue) {
-                            alert('✅ Auto-approve enabled!\n\nAll @usd232.org emails can now access the chat automatically.');
-                        } else {
-                            alert('❌ Auto-approve disabled!\n\nOnly manually approved emails can access the chat.');
-                        }
-                    })
-                    .catch((error) => {
-                        alert('Error updating setting: ' + error.message);
-                        // Revert toggle on error
-                        this.checked = !newValue;
-                    });
+            // Check for unread notifications
+            database.ref('adminNotifications').orderByChild('read').equalTo(false).on('value', (snapshot) => {
+                const unreadCount = snapshot.numChildren();
+                const badge = document.getElementById('unreadBadge');
+                if (unreadCount > 0) {
+                    badge.style.display = 'inline-block';
+                    badge.textContent = unreadCount;
+                } else {
+                    badge.style.display = 'none';
+                }
             });
+        }
+
+        // Quick approve email from failed attempts
+        function quickApprove(email) {
+            if (confirm(`Add ${email} to approved list?`)) {
+                database.ref('approvedEmails').push(email.toLowerCase());
+                alert(`${email} has been approved!`);
+            }
+        }
+
+        // Remove failed attempt
+        function removeFailedAttempt(key) {
+            database.ref('failedAttempts/' + key).remove();
+        }
+
+        // Clear all failed attempts
+        function clearFailedAttempts() {
+            if (confirm('Clear all failed login attempts?')) {
+                database.ref('failedAttempts').remove();
+                alert('All failed attempts cleared');
+            }
+        }
+
+        // Mark all notifications as read
+        function markAllAsRead() {
+            database.ref('adminNotifications').once('value', (snapshot) => {
+                snapshot.forEach((notifSnapshot) => {
+                    notifSnapshot.ref.update({ read: true });
+                });
+            });
+            alert('All notifications marked as read');
         }
 
         // Load approved emails
@@ -655,15 +1011,7 @@
                     
                     document.getElementById('approvedCount').textContent = approvedCount;
                 } else {
-                    // Check if auto-approve is enabled
-                    database.ref('settings/autoApproveEmails').once('value', (autoSnapshot) => {
-                        const autoApprove = autoSnapshot.val() || false;
-                        if (autoApprove) {
-                            approvedList.innerHTML = '<div class="empty-state">Auto-approve is enabled - all @usd232.org emails are automatically approved</div>';
-                        } else {
-                            approvedList.innerHTML = '<div class="empty-state">No approved emails. Add some to allow access or enable auto-approve mode.</div>';
-                        }
-                    });
+                    approvedList.innerHTML = '<div class="empty-state">No approved emails. Add some to allow access.</div>';
                     document.getElementById('approvedCount').textContent = '0';
                 }
             });
@@ -703,14 +1051,177 @@
             }
         }
 
+        // Load channels
+        function loadChannels() {
+            const channelList = document.getElementById('channelList');
+            
+            database.ref('channels').on('value', (snapshot) => {
+                channelList.innerHTML = '';
+                let channelCount = 0;
+                
+                if (snapshot.exists()) {
+                    snapshot.forEach((channelSnapshot) => {
+                        const channelName = '#' + channelSnapshot.key;
+                        channelCount++;
+                        
+                        const channelItem = document.createElement('div');
+                        channelItem.className = 'channel-item';
+                        channelItem.innerHTML = `
+                            <span class="channel-name">${channelName}</span>
+                            <button class="clear-btn" onclick="clearChannel('${channelSnapshot.key}')">Clear</button>
+                        `;
+                        channelList.appendChild(channelItem);
+                    });
+                    
+                    document.getElementById('activeChannels').textContent = channelCount;
+                } else {
+                    channelList.innerHTML = '<div class="empty-state">No active channels</div>';
+                    document.getElementById('activeChannels').textContent = '0';
+                }
+            });
+        }
+
+        // Clear single channel
+        function clearChannel(channel) {
+            if (confirm(`Clear all messages in #${channel}?`)) {
+                database.ref('channels/' + channel + '/messages').remove();
+                alert(`Channel #${channel} cleared`);
+            }
+        }
+
+        // Clear all channels
+        function clearAllChannels() {
+            if (confirm('Are you sure you want to clear ALL channels? This cannot be undone!')) {
+                database.ref('channels').remove();
+                alert('All channels cleared');
+            }
+        }
+
+        // Load banned users
+        function loadBannedUsers() {
+            const bannedList = document.getElementById('bannedList');
+            
+            database.ref('bannedUsers').on('value', (snapshot) => {
+                bannedList.innerHTML = '';
+                let bannedCount = 0;
+                
+                if (snapshot.exists()) {
+                    snapshot.forEach((bannedSnapshot) => {
+                        const banned = bannedSnapshot.val();
+                        const key = bannedSnapshot.key;
+                        bannedCount++;
+                        
+                        const bannedItem = document.createElement('div');
+                        bannedItem.className = 'banned-item';
+                        bannedItem.innerHTML = `
+                            <div class="banned-info">
+                                <div class="banned-nickname">${banned.nickname}</div>
+                                <div class="banned-email">${banned.email || 'Email not recorded'} | Banned by: ${banned.bannedBy || 'Unknown'}</div>
+                            </div>
+                            <button class="unban-btn" onclick="unbanUser('${key}')">Unban</button>
+                        `;
+                        bannedList.appendChild(bannedItem);
+                    });
+                    
+                    document.getElementById('bannedCount').textContent = bannedCount;
+                } else {
+                    bannedList.innerHTML = '<div class="empty-state">No banned users</div>';
+                    document.getElementById('bannedCount').textContent = '0';
+                }
+            });
+        }
+
+        // Ban user
+        function banUser() {
+            const nickname = document.getElementById('banNickname').value.trim();
+            
+            if (!nickname) {
+                alert('Please enter a nickname');
+                return;
+            }
+            
+            database.ref('bannedUsers').push({
+                nickname: nickname,
+                bannedBy: 'Admin Dashboard',
+                bannedAt: Date.now()
+            });
+            
+            document.getElementById('banNickname').value = '';
+            alert(`${nickname} has been banned`);
+        }
+
+        // Unban user
+        function unbanUser(key) {
+            if (confirm('Unban this user?')) {
+                database.ref('bannedUsers/' + key).remove();
+                alert('User unbanned');
+            }
+        }
+
+        // Load banned words
+        function loadBannedWords() {
+            const wordList = document.getElementById('wordList');
+            
+            database.ref('bannedWords').on('value', (snapshot) => {
+                wordList.innerHTML = '';
+                let wordCount = 0;
+                
+                if (snapshot.exists()) {
+                    snapshot.forEach((wordSnapshot) => {
+                        const word = wordSnapshot.val();
+                        const key = wordSnapshot.key;
+                        wordCount++;
+                        
+                        const wordTag = document.createElement('div');
+                        wordTag.className = 'word-tag';
+                        wordTag.innerHTML = `
+                            ${word}
+                            <span class="remove-word" onclick="removeBannedWord('${key}')">×</span>
+                        `;
+                        wordList.appendChild(wordTag);
+                    });
+                    
+                    document.getElementById('wordCount').textContent = wordCount;
+                } else {
+                    wordList.innerHTML = '<div class="empty-state">No banned words</div>';
+                    document.getElementById('wordCount').textContent = '0';
+                }
+            });
+        }
+
+        // Add banned word
+        function addBannedWord() {
+            const word = document.getElementById('bannedWord').value.trim().toLowerCase();
+            
+            if (!word) {
+                alert('Please enter a word');
+                return;
+            }
+            
+            database.ref('bannedWords').push(word);
+            document.getElementById('bannedWord').value = '';
+        }
+
+        // Remove banned word
+        function removeBannedWord(key) {
+            database.ref('bannedWords/' + key).remove();
+        }
+
         // Load statistics
         function loadStats() {
-            // Set default values for stats that aren't implemented yet
-            document.getElementById('totalMessages').textContent = '0';
-            document.getElementById('activeChannels').textContent = '0';
-            document.getElementById('bannedCount').textContent = '0';
-            document.getElementById('wordCount').textContent = '0';
-            document.getElementById('pendingReports').textContent = '0';
+            // Count total messages
+            database.ref('channels').once('value', (snapshot) => {
+                let totalMessages = 0;
+                
+                if (snapshot.exists()) {
+                    snapshot.forEach((channelSnapshot) => {
+                        const messages = channelSnapshot.child('messages').numChildren();
+                        totalMessages += messages;
+                    });
+                }
+                
+                document.getElementById('totalMessages').textContent = totalMessages;
+            });
         }
 
         // Logout
@@ -719,6 +1230,326 @@
             document.getElementById('dashboardScreen').style.display = 'none';
             document.getElementById('adminPassword').value = '';
             document.getElementById('errorMessage').style.display = 'none';
+        }
+
+        // Initialize banned words list (run this once)
+        function initializeBannedWords() {
+            const defaultBannedWords = [
+                "abbo", "abo", "abortion", "abuse", "addict", "addicts", "adult", "africa", "african", "alla",
+                "allah", "alligatorbait", "amateur", "american", "anal", "analannie", "analsex", "angie", "angry", "anus",
+                "arab", "arabs", "areola", "argie", "aroused", "arse", "arsehole", "asian", "ass", "assassin",
+                "assassinate", "assassination", "assault", "assbagger", "assblaster", "assclown", "asscowboy", "asses", "assfuck", "assfucker",
+                "asshat", "asshole", "assholes", "asshore", "assjockey", "asskiss", "asskisser", "assklown", "asslick", "asslicker",
+                "asslover", "assman", "assmonkey", "assmunch", "assmuncher", "asspacker", "asspirate", "asspuppies", "assranger", "asswhore",
+                "asswipe", "athletesfoot", "attack", "australian", "babe", "babies", "backdoor", "backdoorman", "backseat", "badfuck",
+                "balllicker", "balls", "ballsack", "banging", "baptist", "barelylegal", "barf", "barface", "barfface", "bast",
+                "bastard", "bazongas", "bazooms", "beaner", "beast", "beastality", "beastial", "beastiality", "beatoff", "beat-off",
+                "beatyourmeat", "beaver", "bestial", "bestiality", "bi", "biatch", "bible", "bicurious", "bigass", "bigbastard",
+                "bigbutt", "bigger", "bisexual", "bi-sexual", "bitch", "bitcher", "bitches", "bitchez", "bitchin", "bitching",
+                "bitchslap", "bitchy", "biteme", "black", "blackman", "blackout", "blacks", "blind", "blow", "blowjob",
+                "boang", "bogan", "bohunk", "bollick", "bollock", "bomb", "bombers", "bombing", "bombs", "bomd",
+                "bondage", "boner", "bong", "boob", "boobies", "boobs", "booby", "boody", "boom", "boong",
+                "boonga", "boonie", "booty", "bootycall", "bountybar", "bra", "brea5t", "breast", "breastjob", "breastlover",
+                "breastman", "brothel", "bugger", "buggered", "buggery", "bullcrap", "bulldike", "bulldyke", "bullshit", "bumblefuck",
+                "bumfuck", "bunga", "bunghole", "buried", "burn", "butchbabes", "butchdike", "butchdyke", "butt", "buttbang",
+                "butt-bang", "buttface", "buttfuck", "butt-fuck", "buttfucker", "butt-fucker", "buttfuckers", "butt-fuckers", "butthead", "buttman",
+                "buttmunch", "buttmuncher", "buttpirate", "buttplug", "buttstain", "byatch", "cacker", "cameljockey", "cameltoe", "canadian",
+                "cancer", "carpetmuncher", "carruth", "catholic", "catholics", "cemetery", "chav", "cherrypopper", "chickslick", "children's",
+                "chin", "chinaman", "chinamen", "chinese", "chink", "chinky", "choad", "chode", "christ", "christian",
+                "church", "cigarette", "cigs", "clamdigger", "clamdiver", "clit", "clitoris", "clogwog", "cocaine", "cock",
+                "cockblock", "cockblocker", "cockcowboy", "cockfight", "cockhead", "cockknob", "cocklicker", "cocklover", "cocknob", "cockqueen",
+                "cockrider", "cocksman", "cocksmith", "cocksmoker", "cocksucer", "cocksuck", "cocksucked", "cocksucker", "cocksucking", "cocktail",
+                "cocktease", "cocky", "cohee", "coitus", "color", "colored", "coloured", "commie", "communist", "condom",
+                "conservative", "conspiracy", "coolie", "cooly", "coon", "coondog", "copulate", "cornhole", "corruption", "cra5h",
+                "crabs", "crack", "crackpipe", "crackwhore", "crack-whore", "crap", "crapola", "crapper", "crappy", "crash",
+                "creamy", "crime", "crimes", "criminal", "criminals", "crotch", "crotchjockey", "crotchmonkey", "crotchrot", "cum",
+                "cumbubble", "cumfest", "cumjockey", "cumm", "cummer", "cumming", "cumquat", "cumqueen", "cumshot", "cunilingus",
+                "cunillingus", "cunn", "cunnilingus", "cunntt", "cunt", "cunteyed", "cuntfuck", "cuntfucker", "cuntlick", "cuntlicker",
+                "cuntlicking", "cuntsucker", "cybersex", "cyberslimer", "dago", "dahmer", "dammit", "damn", "damnation", "damnit",
+                "darkie", "darky", "datnigga", "dead", "deapthroat", "death", "deepthroat", "defecate", "dego", "demon",
+                "deposit", "desire", "destroy", "deth", "devil", "devilworshipper", "dick", "dickbrain", "dickforbrains", "dickhead",
+                "dickless", "dicklick", "dicklicker", "dickman", "dickwad", "dickweed", "diddle", "die", "died", "dies",
+                "dike", "dildo", "dingleberry", "dink", "dipshit", "dipstick", "dirty", "disease", "diseases", "disturbed",
+                "dive", "dix", "dixiedike", "dixiedyke", "doggiestyle", "doggystyle", "dong", "doodoo", "doo-doo", "doom",
+                "dope", "dragqueen", "dragqween", "dripdick", "drug", "drunk", "drunken", "dumb", "dumbass", "dumbbitch",
+                "dumbfuck", "dyefly", "dyke", "easyslut", "eatballs", "eatme", "eatpussy", "ecstacy", "ejaculate", "ejaculated",
+                "ejaculating", "ejaculation", "enema", "enemy", "erect", "erection", "ero", "escort", "ethiopian", "ethnic",
+                "european", "evl", "excrement", "execute", "executed", "execution", "executioner", "explosion", "facefucker", "faeces",
+                "fag", "fagging", "faggot", "fagot", "failed", "failure", "fairies", "fairy", "faith", "fannyfucker",
+                "fart", "farted", "farting", "farty", "fastfuck", "fat", "fatah", "fatass", "fatfuck", "fatfucker",
+                "fatso", "fckcum", "fear", "feces", "felatio", "felch", "felcher", "felching", "fellatio", "feltch",
+                "feltcher", "feltching", "fetish", "fight", "filipina", "filipino", "fingerfood", "fingerfuck", "fingerfucked", "fingerfucker",
+                "fingerfuckers", "fingerfucking", "fire", "firing", "fister", "fistfuck", "fistfucked", "fistfucker", "fistfucking", "fisting",
+                "flange", "flasher", "flatulence", "floo", "flydie", "flydye", "fok", "fondle", "footaction", "footfuck",
+                "footfucker", "footlicker", "footstar", "fore", "foreskin", "forni", "fornicate", "foursome", "fourtwenty", "fraud",
+                "freakfuck", "freakyfucker", "freefuck", "fu", "fubar", "fuc", "fucck", "fuck", "fucka", "fuckable",
+                "fuckbag", "fuckbuddy", "fucked", "fuckedup", "fucker", "fuckers", "fuckface", "fuckfest", "fuckfreak", "fuckfriend",
+                "fuckhead", "fuckher", "fuckin", "fuckina", "fucking", "fuckingbitch", "fuckinnuts", "fuckinright", "fuckit", "fuckknob",
+                "fuckme", "fuckmehard", "fuckmonkey", "fuckoff", "fuckpig", "fucks", "fucktard", "fuckwhore", "fuckyou", "fudgepacker",
+                "fugly", "fuk", "fuks", "funeral", "funfuck", "fungus", "fuuck", "gangbang", "gangbanged", "gangbanger",
+                "gangsta", "gatorbait", "gay", "gaymuthafuckinwhore", "gaysex", "geez", "geezer", "geni", "genital", "german",
+                "getiton", "gin", "ginzo", "gipp", "girls", "givehead", "glazeddonut", "gob", "god", "godammit",
+                "goddamit", "goddammit", "goddamn", "goddamned", "goddamnes", "goddamnit", "goddamnmuthafucker", "goldenshower", "gonorrehea",
+                "gonzagas", "gook", "gotohell", "goy", "goyim", "greaseball", "gringo", "groe", "gross", "grostulation",
+                "gubba", "gummer", "gun", "gyp", "gypo", "gypp", "gyppie", "gyppo", "gyppy", "hamas",
+                "handjob", "hapa", "harder", "hardon", "harem", "headfuck", "headlights", "hebe", "heeb", "hell",
+                "henhouse", "heroin", "herpes", "heterosexual", "hijack", "hijacker", "hijacking", "hillbillies", "hindoo", "hiscock",
+                "hitler", "hitlerism", "hitlerist", "hiv", "ho", "hobo", "hodgie", "hoes", "hole", "holestuffer",
+                "homicide", "homo", "homobangers", "homosexual", "honger", "honk", "honkers", "honkey", "honky", "hook",
+                "hooker", "hookers", "hooters", "hore", "hork", "horn", "horney", "horniest", "horny", "horseshit",
+                "hosejob", "hoser", "hostage", "hotdamn", "hotpussy", "hottotrot", "hummer", "husky", "hussy", "hustler",
+                "hymen", "hymie", "iblowu", "idiot", "ikey", "illegal", "incest", "insest", "intercourse", "interracial",
+                "intheass", "inthebuff", "israel", "israeli", "israel's", "italiano", "itch", "jackass", "jackoff", "jackshit",
+                "jacktheripper", "jade", "jap", "japanese", "japcrap", "jebus", "jeez", "jerkoff", "jesus", "jesuschrist",
+                "jew", "jewish", "jiga", "jigaboo", "jigg", "jigga", "jiggabo", "jigger", "jiggy", "jihad",
+                "jijjiboo", "jimfish", "jism", "jiz", "jizim", "jizjuice", "jizm", "jizz", "jizzim", "jizzum",
+                "joint", "juggalo", "jugs", "junglebunny", "kaffer", "kaffir", "kaffre", "kafir", "kanake", "kid",
+                "kigger", "kike", "kill", "killed", "killer", "killing", "kills", "kink", "kinky", "kissass",
+                "kkk", "knife", "knockers", "kock", "kondum", "koon", "kotex", "krap", "krappy", "kraut",
+                "kum", "kumbubble", "kumbullbe", "kummer", "kumming", "kumquat", "kums", "kunilingus", "kunnilingus", "kunt",
+                "ky", "kyke", "lactate", "laid", "lapdance", "latin", "lesbain", "lesbayn", "lesbian", "lesbin",
+                "lesbo", "lez", "lezbe", "lezbefriends", "lezbo", "lezz", "lezzo", "liberal", "libido", "licker",
+                "lickme", "lies", "limey", "limpdick", "limy", "lingerie", "liquor", "livesex", "loadedgun", "lolita",
+                "looser", "loser", "lotion", "lovebone", "lovegoo", "lovegun", "lovejuice", "lovemuscle", "lovepistol", "loverocket",
+                "lowlife", "lsd", "lubejob", "lucifer", "luckycammeltoe", "lugan", "lynch", "macaca", "mad", "mafia",
+                "magicwand", "mams", "manhater", "manpaste", "marijuana", "mastabate", "mastabater", "masterbate", "masterblaster", "mastrabator",
+                "masturbate", "masturbating", "mattressprincess", "meatbeatter", "meatrack", "meth", "mexican", "mgger", "mggor", "mickeyfinn",
+                "mideast", "milf", "minority", "mockey", "mockie", "mocky", "mofo", "moky", "moles", "molest",
+                "molestation", "molester", "molestor", "moneyshot", "mooncricket", "mormon", "moron", "moslem", "mosshead", "mothafuck",
+                "mothafucka", "mothafuckaz", "mothafucked", "mothafucker", "mothafuckin", "mothafucking", "mothafuckings", "motherfuck", "motherfucked",
+                "motherfucker", "motherfuckin", "motherfucking", "motherfuckings", "motherlovebone", "muff", "muffdive", "muffdiver", "muffindiver", "mufflikcer",
+                "mulatto", "muncher", "munt", "murder", "murderer", "muslim", "naked", "narcotic", "nasty", "nastybitch",
+                "nastyho", "nastyslut", "nastywhore", "nazi", "necro", "negro", "negroes", "negroid", "negro's", "nig",
+                "niger", "nigerian", "nigerians", "nigg", "nigga", "niggah", "niggaracci", "niggard", "niggarded", "niggarding",
+                "niggardliness", "niggardliness's", "niggardly", "niggards", "niggard's", "niggaz", "nigger", "niggerhead", "niggerhole", "niggers",
+                "nigger's", "niggle", "niggled", "niggles", "niggling", "nigglings", "niggor", "niggur", "niglet", "nignog",
+                "nigr", "nigra", "nigre", "nip", "nipple", "nipplering", "nittit", "nlgger", "nlggor", "nofuckingway",
+                "nook", "nookey", "nookie", "noonan", "nooner", "nude", "nudger", "nuke", "nutfucker", "nymph",
+                "ontherag", "oral", "orga", "orgasim", "orgasm", "orgies", "orgy", "osama", "paki", "palesimian",
+                "palestinian", "pansies", "pansy", "panti", "panties", "payo", "pearlnecklace", "peck", "pecker", "peckerwood",
+                "pee", "peehole", "pee-pee", "peepshow", "peepshpw", "pendy", "penetration", "peni5", "penile", "penis",
+                "penises", "penthouse", "period", "perv", "phonesex", "phuk", "phuked", "phuking", "phukked", "phukking",
+                "phungky", "phuq", "pi55", "picaninny", "piccaninny", "pickaninny", "piker", "pikey", "piky", "pimp",
+                "pimped", "pimper", "pimpjuic", "pimpjuice", "pimpsimp", "pindick", "piss", "pissed", "pisser", "pisses",
+                "pisshead", "pissin", "pissing", "pissoff", "pistol", "pixie", "pixy", "playboy", "playgirl", "pocha",
+                "pocho", "pocketpool", "pohm", "polack", "pom", "pommie", "pommy", "poo", "poon", "poontang",
+                "poop", "pooper", "pooperscooper", "pooping", "poorwhitetrash", "popimp", "porchmonkey", "porn", "pornflick", "pornking",
+                "porno", "pornography", "pornprincess", "pot", "poverty", "premature", "pric", "prick", "prickhead", "primetime",
+                "propaganda", "pros", "prostitute", "protestant", "pu55i", "pu55y", "pube", "pubic", "pubiclice", "pud",
+                "pudboy", "pudd", "puddboy", "puke", "puntang", "purinapricness", "puss", "pussie", "pussies", "pussy",
+                "pussycat", "pussyeater", "pussyfucker", "pussylicker", "pussylips", "pussylover", "pussypounder", "pusy", "quashie", "queef",
+                "queer", "quickie", "quim", "ra8s", "rabbi", "racial", "racist", "radical", "radicals", "raghead",
+                "randy", "rape", "raped", "raper", "rapist", "rearend", "rearentry", "rectum", "redlight", "redneck",
+                "reefer", "reestie", "refugee", "reject", "remains", "rentafuck", "republican", "rere", "retard", "retarded",
+                "ribbed", "rigger", "rimjob", "rimming", "roach", "robber", "roundeye", "rump", "russki", "russkie",
+                "sadis", "sadom", "samckdaddy", "sandm", "sandnigger", "satan", "scag", "scallywag", "scat", "schlong",
+                "screw", "screwyou", "scrotum", "scum", "semen", "seppo", "servant", "sex", "sexed", "sexfarm",
+                "sexhound", "sexhouse", "sexing", "sexkitten", "sexpot", "sexslave", "sextogo", "sextoy", "sextoys", "sexual",
+                "sexually", "sexwhore", "sexy", "sexymoma", "sexy-slim", "shag", "shaggin", "shagging", "shat", "shav",
+                "shawtypimp", "sheeney", "shhit", "shinola", "shit", "shitcan", "shitdick", "shite", "shiteater", "shited",
+                "shitface", "shitfaced", "shitfit", "shitforbrains", "shitfuck", "shitfucker", "shitfull", "shithapens", "shithappens", "shithead",
+                "shithouse", "shiting", "shitlist", "shitola", "shitoutofluck", "shits", "shitstain", "shitted", "shitter", "shitting",
+                "shitty", "shoot", "shooting", "shortfuck", "showtime", "sick", "sissy", "sixsixsix", "sixtynine", "sixtyniner",
+                "skank", "skankbitch", "skankfuck", "skankwhore", "skanky", "skankybitch", "skankywhore", "skinflute", "skum", "skumbag",
+                "slant", "slanteye", "slapper", "slaughter", "slav", "slave", "slavedriver", "sleezebag", "sleezeball", "slideitin",
+                "slime", "slimeball", "slimebucket", "slopehead", "slopey", "slopy", "slut", "sluts", "slutt", "slutting",
+                "slutty", "slutwear", "slutwhore", "smack", "smackthemonkey", "smut", "snatch", "snatchpatch", "snigger", "sniggered",
+                "sniggering", "sniggers", "snigger's", "sniper", "snot", "snowback", "snownigger", "sob", "sodom", "sodomise",
+                "sodomite", "sodomize", "sodomy", "sonofabitch", "sonofbitch", "sooty", "sos", "soviet", "spaghettibender", "spaghettinigger",
+                "spank", "spankthemonkey", "sperm", "spermacide", "spermbag", "spermhearder", "spermherder", "spic", "spick", "spig",
+                "spigotty", "spik", "spit", "spitter", "splittail", "spooge", "spreadeagle", "spunk", "spunky", "squaw",
+                "stagg", "stiffy", "strapon", "stringer", "stripclub", "stroke", "stroking", "stupid", "stupidfuck", "stupidfucker",
+                "suck", "suckdick", "sucker", "suckme", "suckmyass", "suckmydick", "suckmytit", "suckoff", "suicide", "swallow",
+                "swallower", "swalow", "swastika", "sweetness", "syphilis", "taboo", "taff", "tampon", "tang", "tantra",
+                "tarbaby", "tard", "teat", "terror", "terrorist", "teste", "testicle", "testicles", "thicklips", "thirdeye",
+                "thirdleg", "threesome", "threeway", "timbernigger", "tinkle", "tit", "titbitnipply", "titfuck", "titfucker", "titfuckin",
+                "titjob", "titlicker", "titlover", "tits", "tittie", "titties", "titty", "tnt", "toilet", "tongethruster",
+                "tongue", "tonguethrust", "tonguetramp", "tortur", "torture", "tosser", "towelhead", "trailertrash", "tramp", "trannie",
+                "tranny", "transexual", "transsexual", "transvestite", "triplex", "trisexual", "trojan", "trots", "tuckahoe", "tunneloflove",
+                "turd", "turnon", "twat", "twink", "twinkie", "twobitwhore", "uck", "uk", "unfuckable", "upskirt",
+                "uptheass", "upthebutt", "urinary", "urinate", "urine", "usama", "uterus", "vagina", "vaginal", "vatican",
+                "vibr", "vibrater", "vibrator", "vietcong", "violence", "virgin", "virginbreaker", "vomit", "vulva", "wab",
+                "wank", "wanker", "wanking", "waysted", "weapon", "weenie", "weewee", "welcher", "welfare", "wetb",
+                "wetback", "wetspot", "whacker", "whash", "whigger", "whiskey", "whiskeydick", "whiskydick", "whit", "whitenigger",
+                "whites", "whitetrash", "whitey", "whiz", "whop", "whore", "whorefucker", "whorehouse", "wigger", "willie",
+                "williewanker", "willy", "wn", "wog", "women's", "wop", "wtf", "wuss", "wuzzie", "xtc",
+                "xxx", "yankee", "yellowman", "zigabo", "zipperhead"
+            ];
+
+            // Check if words are already initialized
+            database.ref('bannedWords').once('value', (snapshot) => {
+                if (!snapshot.exists() || snapshot.numChildren() < 10) {
+                    console.log('Initializing banned words...');
+                    // Add all default banned words
+                    const promises = defaultBannedWords.map(word => {
+                        return database.ref('bannedWords').push(word.toLowerCase());
+                    });
+                    
+                    Promise.all(promises).then(() => {
+                        console.log('✅ Banned words initialized successfully');
+                        alert('Banned words list initialized with ' + defaultBannedWords.length + ' words');
+                    }).catch((error) => {
+                        console.error('❌ Error initializing banned words:', error);
+                        alert('Error initializing banned words: ' + error.message);
+                    });
+                } else {
+                    console.log('Banned words already initialized:', snapshot.numChildren(), 'words found');
+                }
+            });
+        }
+
+        // Call this when dashboard loads
+        setTimeout(initializeBannedWords, 2000);
+
+        // Load moderator reports
+        function loadModReports() {
+            const reportsList = document.getElementById('modReportsList');
+            
+            database.ref('modReports').orderByChild('timestamp').on('value', (snapshot) => {
+                reportsList.innerHTML = '';
+                const reports = [];
+                let pendingCount = 0;
+                
+                snapshot.forEach((reportSnapshot) => {
+                    const report = reportSnapshot.val();
+                    report.key = reportSnapshot.key;
+                    reports.unshift(report); // Show newest first
+                    
+                    if (report.status === 'pending') {
+                        pendingCount++;
+                    }
+                });
+                
+                // Update badge
+                const badge = document.getElementById('unreadReportsBadge');
+                if (pendingCount > 0) {
+                    badge.style.display = 'inline-block';
+                    badge.textContent = pendingCount;
+                } else {
+                    badge.style.display = 'none';
+                }
+                
+                // Update stats
+                document.getElementById('pendingReports').textContent = pendingCount;
+                
+                if (reports.length > 0) {
+                    reports.forEach(report => {
+                        const reportItem = document.createElement('div');
+                        reportItem.className = 'banned-item';
+                        
+                        const statusColor = report.status === 'pending' ? '#fff3cd' : 
+                                          report.status === 'resolved' ? '#e8f5e9' : '#ffebee';
+                        const statusTextColor = report.status === 'pending' ? '#856404' : 
+                                              report.status === 'resolved' ? '#4CAF50' : '#f44336';
+                        
+                        reportItem.style.background = statusColor;
+                        reportItem.innerHTML = `
+                            <div class="banned-info">
+                                <div class="banned-nickname" style="color: ${statusTextColor};">
+                                    <strong>${report.reportedUser}</strong> - ${report.reportType}
+                                    <span style="font-size: 12px; background: ${statusTextColor}; color: white; padding: 2px 6px; border-radius: 10px; margin-left: 10px;">
+                                        ${report.status.toUpperCase()}
+                                    </span>
+                                </div>
+                                <div class="banned-email">
+                                    <strong>Reported by:</strong> ${report.reportedBy} | 
+                                    <strong>Time:</strong> ${new Date(report.timestamp).toLocaleString()}<br>
+                                    <strong>Description:</strong> ${report.description}
+                                    ${report.adminResponse ? '<br><strong>Admin Response:</strong> ' + report.adminResponse : ''}
+                                </div>
+                            </div>
+                            <div style="display: flex; flex-direction: column; gap: 5px;">
+                                ${report.status === 'pending' ? `
+                                    <button class="unban-btn" style="background: #4CAF50;" onclick="resolveReport('${report.key}')">Mark Resolved</button>
+                                    <button class="unban-btn" style="background: #2196F3;" onclick="respondToReport('${report.key}')">Respond</button>
+                                ` : ''}
+                                <button class="unban-btn" style="background: #ff5722;" onclick="deleteReport('${report.key}')">Delete</button>
+                            </div>
+                        `;
+                        reportsList.appendChild(reportItem);
+                    });
+                } else {
+                    reportsList.innerHTML = '<div class="empty-state">No moderator reports yet</div>';
+                }
+            });
+        }
+
+        // Resolve moderator report
+        function resolveReport(reportKey) {
+            if (confirm('Mark this report as resolved?')) {
+                database.ref('modReports/' + reportKey).update({
+                    status: 'resolved',
+                    resolvedAt: Date.now(),
+                    resolvedBy: 'Admin'
+                }).then(() => {
+                    alert('Report marked as resolved');
+                }).catch((error) => {
+                    alert('Error resolving report: ' + error.message);
+                });
+            }
+        }
+
+        // Respond to moderator report
+        function respondToReport(reportKey) {
+            const response = prompt('Enter your response to the moderator:');
+            if (response && response.trim()) {
+                database.ref('modReports/' + reportKey).update({
+                    adminResponse: response.trim(),
+                    respondedAt: Date.now(),
+                    respondedBy: 'Admin'
+                }).then(() => {
+                    alert('Response sent to moderator');
+                }).catch((error) => {
+                    alert('Error sending response: ' + error.message);
+                });
+            }
+        }
+
+        // Auto-approve email functions
+        function loadAutoApproveSettings() {
+            database.ref('settings/autoApproveEmails').on('value', (snapshot) => {
+                const isEnabled = snapshot.val() || false;
+                document.getElementById('autoApproveToggle').checked = isEnabled;
+                updateAutoApproveStatus(isEnabled);
+            });
+        }
+
+        function toggleAutoApprove() {
+            const toggle = document.getElementById('autoApproveToggle');
+            const isEnabled = toggle.checked;
+            
+            database.ref('settings/autoApproveEmails').set(isEnabled)
+                .then(() => {
+                    updateAutoApproveStatus(isEnabled);
+                    alert(isEnabled ? 
+                        'Auto-approve enabled! All @usd232.org emails will now be automatically approved.' : 
+                        'Auto-approve disabled! You must manually approve emails again.');
+                })
+                .catch((error) => {
+                    console.error('Error updating auto-approve setting:', error);
+                    alert('Error updating setting: ' + error.message);
+                    // Revert toggle on error
+                    toggle.checked = !isEnabled;
+                });
+        }
+
+        function updateAutoApproveStatus(isEnabled) {
+            const statusText = document.getElementById('autoApproveStatus');
+            const section = statusText.closest('div').parentElement;
+            
+            if (isEnabled) {
+                statusText.textContent = '✅ Auto-approve is ENABLED. All @usd232.org emails are automatically approved.';
+                statusText.style.color = '#4CAF50';
+                statusText.style.fontWeight = '600';
+                section.style.background = '#e8f5e9';
+                section.style.borderColor = '#c8e6c9';
+            } else {
+                statusText.textContent = 'When enabled, all @usd232.org emails will be automatically approved for access.';
+                statusText.style.color = '#666';
+                statusText.style.fontWeight = 'normal';
+                section.style.background = '#f0f7ff';
+                section.style.borderColor = '#b3d9ff';
+            }
         }
     </script>
 </body>
