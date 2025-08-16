@@ -421,6 +421,27 @@
             font-size: 14px;
         }
 
+        /* Toggle Switch Styles */
+        #autoApproveToggle:checked + #toggleSlider {
+            background-color: #4CAF50;
+        }
+
+        #autoApproveToggle:checked + #toggleSlider + #toggleButton {
+            transform: translateX(30px);
+        }
+
+        #toggleSlider:before {
+            position: absolute;
+            content: "";
+            height: 22px;
+            width: 22px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
         /* Responsive */
         @media (max-width: 768px) {
             .dashboard-grid {
@@ -544,6 +565,22 @@
                     <span class="card-icon">✉️</span>
                     Approved Emails
                 </h2>
+                
+                <!-- Auto-Approve Toggle -->
+                <div style="background: #e3f2fd; padding: 15px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #2196F3;">
+                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;">
+                        <strong style="color: #1976D2;">Auto-Approve Mode</strong>
+                        <label style="position: relative; display: inline-block; width: 60px; height: 30px;">
+                            <input type="checkbox" id="autoApproveToggle" style="opacity: 0; width: 0; height: 0;">
+                            <span style="position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; border-radius: 30px;" id="toggleSlider"></span>
+                            <span style="position: absolute; content: ''; height: 22px; width: 22px; left: 4px; bottom: 4px; background-color: white; transition: .4s; border-radius: 50%;" id="toggleButton"></span>
+                        </label>
+                    </div>
+                    <div style="font-size: 14px; color: #666; line-height: 1.4;">
+                        <span id="autoApproveStatus">When enabled, all @usd232.org emails are automatically approved for access.</span>
+                    </div>
+                </div>
+                
                 <div class="ban-form">
                     <input type="email" id="approveEmail" class="ban-input" placeholder="email@usd232.org">
                     <button class="ban-btn" style="background: #4CAF50;" onclick="approveEmail()">Add Email</button>
@@ -667,6 +704,7 @@
             loadFailedAttempts();
             loadModPasswords();
             loadModReports();
+            loadAutoApproveSettings();
             loadStats();
         }
 
@@ -903,7 +941,18 @@
             alert('All notifications marked as read');
         }
 
-        // Load approved emails
+        // Delete moderator report
+        function deleteReport(reportKey) {
+            if (confirm('Delete this report permanently?')) {
+                database.ref('modReports/' + reportKey).remove().then(() => {
+                    alert('Report deleted');
+                }).catch((error) => {
+                    alert('Error deleting report: ' + error.message);
+                });
+            }
+        }
+
+        // Load approved emails - UPDATED FOR AUTO-APPROVE
         function loadApprovedEmails() {
             const approvedList = document.getElementById('approvedEmailsList');
             
@@ -929,6 +978,20 @@
                     });
                     
                     document.getElementById('approvedCount').textContent = approvedCount;
+                } else {
+                    // Check if auto-approve is enabled
+                    database.ref('settings/autoApproveEmails').once('value', (autoSnapshot) => {
+                        const autoApprove = autoSnapshot.val() || false;
+                        if (autoApprove) {
+                            approvedList.innerHTML = '<div class="empty-state">Auto-approve is enabled - all @usd232.org emails are automatically approved</div>';
+                        } else {
+                            approvedList.innerHTML = '<div class="empty-state">No approved emails. Add some to allow access or enable auto-approve mode.</div>';
+                        }
+                    });
+                    document.getElementById('approvedCount').textContent = '0';
+                }
+            });
+        }
                 } else {
                     approvedList.innerHTML = '<div class="empty-state">No approved emails. Add some to allow access.</div>';
                     document.getElementById('approvedCount').textContent = '0';
@@ -1424,16 +1487,43 @@
             }
         }
 
-        // Delete moderator report
-        function deleteReport(reportKey) {
-            if (confirm('Delete this report permanently?')) {
-                database.ref('modReports/' + reportKey).remove().then(() => {
-                    alert('Report deleted');
-                }).catch((error) => {
-                    alert('Error deleting report: ' + error.message);
-                });
-            }
+        // Load auto-approve settings
+        function loadAutoApproveSettings() {
+            const toggle = document.getElementById('autoApproveToggle');
+            const status = document.getElementById('autoApproveStatus');
+            
+            // Load current setting from Firebase
+            database.ref('settings/autoApproveEmails').on('value', (snapshot) => {
+                const isEnabled = snapshot.val() || false;
+                toggle.checked = isEnabled;
+                
+                if (isEnabled) {
+                    status.innerHTML = '✅ <strong>ENABLED:</strong> All @usd232.org emails are automatically approved.';
+                    status.style.color = '#4CAF50';
+                } else {
+                    status.innerHTML = '❌ <strong>DISABLED:</strong> Only manually approved emails can access the chat.';
+                    status.style.color = '#f44336';
+                }
+            });
+            
+            // Handle toggle changes
+            toggle.addEventListener('change', function() {
+                const newValue = this.checked;
+                database.ref('settings/autoApproveEmails').set(newValue)
+                    .then(() => {
+                        if (newValue) {
+                            alert('✅ Auto-approve enabled!\n\nAll @usd232.org emails can now access the chat automatically.');
+                        } else {
+                            alert('❌ Auto-approve disabled!\n\nOnly manually approved emails can access the chat.');
+                        }
+                    })
+                    .catch((error) => {
+                        alert('Error updating setting: ' + error.message);
+                        // Revert toggle on error
+                        this.checked = !newValue;
+                    });
+            });
         }
     </script>
 </body>
-</html>
+                        </html>
