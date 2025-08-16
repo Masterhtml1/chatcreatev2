@@ -838,38 +838,156 @@
             font-size: 13px;
         }
 
-        .dark-theme .online-user {
-            background: #2d2d2d;
+        /* Link preview styles */
+        .link-preview {
+            margin: 10px 0;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            overflow: hidden;
+            max-width: 400px;
+            background: white;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
-        @media (max-width: 768px) {
-            .header {
-                padding: 15px;
-            }
 
-            .logo {
-                font-size: 28px;
-            }
+        .dark-theme .link-preview {
+            border-color: #444;
+            background: #2d2d2d;
+            color: #e0e0e0;
+        }
 
-            .header-buttons {
-                gap: 10px;
-            }
+        .preview-header {
+            padding: 12px 15px;
+            background: #f8f9fa;
+            border-bottom: 1px solid #e0e0e0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 600;
+            font-size: 14px;
+        }
 
-            .header-btn {
-                padding: 8px 18px;
-                font-size: 14px;
-            }
+        .dark-theme .preview-header {
+            background: #3a3a3a;
+            border-bottom-color: #444;
+        }
 
-            .hero h1 {
-                font-size: 36px;
-            }
+        .github-preview .preview-header {
+            background: #f6f8fa;
+            color: #24292f;
+        }
 
-            .hero p {
-                font-size: 18px;
-            }
+        .dark-theme .github-preview .preview-header {
+            background: #21262d;
+            color: #f0f6fc;
+        }
 
-            .login-form {
-                padding: 30px 20px;
-            }
+        .drive-preview .preview-header {
+            background: #e8f0fe;
+            color: #1a73e8;
+        }
+
+        .dark-theme .drive-preview .preview-header {
+            background: #1a4dab;
+            color: #8ab4f8;
+        }
+
+        .preview-icon {
+            font-size: 16px;
+        }
+
+        .preview-title {
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .preview-content {
+            padding: 12px 15px;
+            font-size: 14px;
+        }
+
+        .preview-content strong {
+            color: #333;
+            font-family: monospace;
+        }
+
+        .dark-theme .preview-content strong {
+            color: #e0e0e0;
+        }
+
+        .preview-content small {
+            color: #666;
+            font-size: 12px;
+        }
+
+        .dark-theme .preview-content small {
+            color: #aaa;
+        }
+
+        .preview-link {
+            display: block;
+            padding: 10px 15px;
+            background: #f8f9fa;
+            color: #1976d2;
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 500;
+            border-top: 1px solid #e0e0e0;
+            transition: background 0.2s;
+        }
+
+        .dark-theme .preview-link {
+            background: #3a3a3a;
+            border-top-color: #444;
+            color: #64b5f6;
+        }
+
+        .preview-link:hover {
+            background: #e3f2fd;
+        }
+
+        .dark-theme .preview-link:hover {
+            background: #444;
+        }
+
+        .message-link {
+            color: #1976d2;
+            text-decoration: underline;
+            word-break: break-all;
+        }
+
+        .dark-theme .message-link {
+            color: #64b5f6;
+        }
+
+        .youtube-preview .preview-header {
+            background: #ff0000;
+            color: white;
+        }
+
+        .dark-theme .youtube-preview .preview-header {
+            background: #cc0000;
+        }
+
+        .youtube-thumbnail {
+            width: 100%;
+            max-width: 200px;
+            height: auto;
+            border-radius: 4px;
+            margin-bottom: 8px;
+        }
+
+        .youtube-info {
+            padding-left: 0;
+        }
+
+        .universal-preview .preview-header {
+            background: #f5f5f5;
+            color: #333;
+        }
+
+        .dark-theme .universal-preview .preview-header {
+            background: #404040;
+            color: #e0e0e0;
         }
     </style>
 </head>
@@ -1444,7 +1562,7 @@ This is an automated security notification from ChatCreate.
             }
         }
 
-        // Render messages
+        // Enhanced message rendering with link previews
         function renderMessages() {
             const container = document.getElementById('messagesContainer');
             container.innerHTML = '';
@@ -1508,6 +1626,9 @@ This is an automated security notification from ChatCreate.
                     reactionsHtml += '</div>';
                 }
                 
+                // Enhanced message text with link previews
+                const enhancedMessageText = enhanceMessageWithPreviews(message.text);
+                
                 messageDiv.innerHTML = `
                     <div class="message-avatar">${initial}</div>
                     <div class="message-content">
@@ -1517,7 +1638,7 @@ This is an automated security notification from ChatCreate.
                             ${reactButton}
                             ${adminControls}
                         </div>
-                        <div class="message-text" id="text-${message.id}">${message.isHtml && message.author === 'System' ? message.text : message.text}</div>
+                        <div class="message-text" id="text-${message.id}">${message.isHtml && message.author === 'System' ? message.text : enhancedMessageText}</div>
                         ${reactionsHtml}
                         <div class="reaction-picker" id="picker-${message.id}">
                             <span class="reaction-emoji" onclick="addReaction('${message.id}', '👍')">👍</span>
@@ -1534,6 +1655,194 @@ This is an automated security notification from ChatCreate.
             });
             
             container.scrollTop = container.scrollHeight;
+        }
+
+        // Enhanced message processing with universal link previews
+        function enhanceMessageWithPreviews(text) {
+            let enhancedText = text;
+            
+            // GitHub link detection and preview
+            const githubRegex = /https?:\/\/github\.com\/([^\/\s]+)\/([^\/\s]+)(?:\/([^\/\s]+))?(?:\/([^\/\s]+))?/g;
+            enhancedText = enhancedText.replace(githubRegex, (match, owner, repo, type, path) => {
+                return `
+                    <div class="link-preview github-preview">
+                        <div class="preview-header">
+                            <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                                <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/>
+                            </svg>
+                            <span class="preview-title">GitHub Repository</span>
+                        </div>
+                        <div class="preview-content">
+                            <strong>${owner}/${repo}</strong>
+                            ${type ? `<br><small>📁 ${type}${path ? '/' + path : ''}</small>` : ''}
+                        </div>
+                        <a href="${match}" target="_blank" class="preview-link">View on GitHub →</a>
+                    </div>
+                `;
+            });
+            
+            // Google Drive link detection and preview
+            const driveRegex = /https?:\/\/(?:drive\.google\.com|docs\.google\.com)\/[^\s]+/g;
+            enhancedText = enhancedText.replace(driveRegex, (match) => {
+                let driveType = 'File';
+                let icon = '📄';
+                
+                if (match.includes('/document/')) {
+                    driveType = 'Google Doc';
+                    icon = '📝';
+                } else if (match.includes('/spreadsheets/')) {
+                    driveType = 'Google Sheets';
+                    icon = '📊';
+                } else if (match.includes('/presentation/')) {
+                    driveType = 'Google Slides';
+                    icon = '📊';
+                } else if (match.includes('/forms/')) {
+                    driveType = 'Google Form';
+                    icon = '📋';
+                } else if (match.includes('/drive/')) {
+                    driveType = 'Google Drive';
+                    icon = '📁';
+                }
+                
+                return `
+                    <div class="link-preview drive-preview">
+                        <div class="preview-header">
+                            <span class="preview-icon">${icon}</span>
+                            <span class="preview-title">${driveType}</span>
+                        </div>
+                        <div class="preview-content">
+                            <small>Shared ${driveType.toLowerCase()}</small>
+                        </div>
+                        <a href="${match}" target="_blank" class="preview-link">Open in Google Drive →</a>
+                    </div>
+                `;
+            });
+            
+            // YouTube link detection and preview
+            const youtubeRegex = /https?:\/\/(?:www\.)?(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]+)/g;
+            enhancedText = enhancedText.replace(youtubeRegex, (match, videoId) => {
+                return `
+                    <div class="link-preview youtube-preview">
+                        <div class="preview-header">
+                            <span class="preview-icon">📺</span>
+                            <span class="preview-title">YouTube Video</span>
+                        </div>
+                        <div class="preview-content">
+                            <img src="https://img.youtube.com/vi/${videoId}/mqdefault.jpg" alt="YouTube Thumbnail" class="youtube-thumbnail">
+                            <div class="youtube-info">
+                                <small>YouTube Video</small>
+                            </div>
+                        </div>
+                        <a href="${match}" target="_blank" class="preview-link">Watch on YouTube →</a>
+                    </div>
+                `;
+            });
+            
+            // Universal link detection and preview for other websites
+            const universalUrlRegex = /https?:\/\/(?!github\.com|drive\.google\.com|docs\.google\.com|youtube\.com|youtu\.be)[^\s]+/g;
+            enhancedText = enhancedText.replace(universalUrlRegex, (match) => {
+                const domain = extractDomain(match);
+                const domainInfo = getDomainInfo(domain);
+                
+                return `
+                    <div class="link-preview universal-preview">
+                        <div class="preview-header">
+                            <span class="preview-icon">${domainInfo.icon}</span>
+                            <span class="preview-title">${domainInfo.name}</span>
+                        </div>
+                        <div class="preview-content">
+                            <strong>${domain}</strong>
+                            <br><small>${domainInfo.description}</small>
+                        </div>
+                        <a href="${match}" target="_blank" class="preview-link">Visit ${domainInfo.name} →</a>
+                    </div>
+                `;
+            });
+            
+            return enhancedText;
+        }
+
+        // Extract domain from URL
+        function extractDomain(url) {
+            try {
+                const urlObj = new URL(url);
+                return urlObj.hostname.replace('www.', '');
+            } catch (e) {
+                return url.split('/')[2] || url;
+            }
+        }
+
+        // Get domain-specific information
+        function getDomainInfo(domain) {
+            const domainMap = {
+                // Educational
+                'khan-academy.org': { icon: '🎓', name: 'Khan Academy', description: 'Educational content and courses' },
+                'coursera.org': { icon: '🎓', name: 'Coursera', description: 'Online courses and degrees' },
+                'edx.org': { icon: '🎓', name: 'edX', description: 'University-level courses' },
+                'udemy.com': { icon: '🎓', name: 'Udemy', description: 'Online learning platform' },
+                
+                // Social Media
+                'twitter.com': { icon: '🐦', name: 'Twitter', description: 'Social media platform' },
+                'instagram.com': { icon: '📷', name: 'Instagram', description: 'Photo and video sharing' },
+                'facebook.com': { icon: '👥', name: 'Facebook', description: 'Social networking' },
+                'linkedin.com': { icon: '💼', name: 'LinkedIn', description: 'Professional networking' },
+                'tiktok.com': { icon: '🎵', name: 'TikTok', description: 'Short video platform' },
+                'snapchat.com': { icon: '👻', name: 'Snapchat', description: 'Multimedia messaging' },
+                'discord.com': { icon: '🎮', name: 'Discord', description: 'Voice and text chat' },
+                
+                // Tech & Development
+                'stackoverflow.com': { icon: '❓', name: 'Stack Overflow', description: 'Programming Q&A community' },
+                'codepen.io': { icon: '✏️', name: 'CodePen', description: 'Code playground' },
+                'replit.com': { icon: '💻', name: 'Replit', description: 'Online IDE' },
+                'glitch.com': { icon: '✨', name: 'Glitch', description: 'Web app platform' },
+                'vercel.com': { icon: '▲', name: 'Vercel', description: 'Web deployment platform' },
+                'netlify.com': { icon: '🌐', name: 'Netlify', description: 'Web hosting service' },
+                
+                // News & Information
+                'wikipedia.org': { icon: '📚', name: 'Wikipedia', description: 'Free encyclopedia' },
+                'reddit.com': { icon: '🤖', name: 'Reddit', description: 'Discussion platform' },
+                'quora.com': { icon: '❓', name: 'Quora', description: 'Question and answer site' },
+                'medium.com': { icon: '📝', name: 'Medium', description: 'Publishing platform' },
+                
+                // Entertainment
+                'netflix.com': { icon: '🎬', name: 'Netflix', description: 'Streaming service' },
+                'spotify.com': { icon: '🎵', name: 'Spotify', description: 'Music streaming' },
+                'twitch.tv': { icon: '🎮', name: 'Twitch', description: 'Live streaming platform' },
+                
+                // Productivity
+                'notion.so': { icon: '📋', name: 'Notion', description: 'Productivity workspace' },
+                'slack.com': { icon: '💬', name: 'Slack', description: 'Team communication' },
+                'zoom.us': { icon: '📹', name: 'Zoom', description: 'Video conferencing' },
+                'canva.com': { icon: '🎨', name: 'Canva', description: 'Design platform' },
+                
+                // School Specific
+                'usd232.org': { icon: '🏫', name: 'USD 232', description: 'School district website' },
+                'canvas.instructure.com': { icon: '📚', name: 'Canvas', description: 'Learning management system' },
+                'schoology.com': { icon: '🎓', name: 'Schoology', description: 'Educational platform' },
+                'classroom.google.com': { icon: '📖', name: 'Google Classroom', description: 'Online classroom' },
+                
+                // Default
+                'default': { icon: '🔗', name: 'Website', description: 'External link' }
+            };
+            
+            // Check for exact domain match
+            if (domainMap[domain]) {
+                return domainMap[domain];
+            }
+            
+            // Check for partial matches (subdomains)
+            for (const [key, value] of Object.entries(domainMap)) {
+                if (domain.includes(key) || key.includes(domain)) {
+                    return value;
+                }
+            }
+            
+            // Default fallback
+            return { 
+                icon: '🔗', 
+                name: domain.charAt(0).toUpperCase() + domain.slice(1), 
+                description: 'External website' 
+            };
         }
 
         // Send message to Firebase
@@ -1976,4 +2285,4 @@ This is an automated security notification from ChatCreate.
         }
     </script>
 </body>
-</html>
+    </html>
