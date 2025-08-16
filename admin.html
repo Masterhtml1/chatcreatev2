@@ -992,6 +992,40 @@
                 }
             });
         }
+
+        // Approve email
+        function approveEmail() {
+            const email = document.getElementById('approveEmail').value.trim().toLowerCase();
+            
+            if (!email) {
+                alert('Please enter an email address');
+                return;
+            }
+            
+            if (!email.endsWith('@usd232.org')) {
+                alert('Email must be a @usd232.org address');
+                return;
+            }
+            
+            // Check if already exists
+            database.ref('approvedEmails').orderByValue().equalTo(email).once('value', (snapshot) => {
+                if (snapshot.exists()) {
+                    alert('This email is already approved');
+                } else {
+                    database.ref('approvedEmails').push(email);
+                    document.getElementById('approveEmail').value = '';
+                    alert(`${email} has been approved`);
+                }
+            });
+        }
+
+        // Remove approved email
+        function removeApprovedEmail(key) {
+            if (confirm('Remove this email from approved list?')) {
+                database.ref('approvedEmails/' + key).remove();
+                alert('Email removed from approved list');
+            }
+        }
                 } else {
                     approvedList.innerHTML = '<div class="empty-state">No approved emails. Add some to allow access.</div>';
                     document.getElementById('approvedCount').textContent = '0';
@@ -1526,4 +1560,4 @@
         }
     </script>
 </body>
-                        </html>
+</html>
