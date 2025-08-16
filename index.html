@@ -508,6 +508,66 @@
             align-items: center;
         }
 
+        .voice-btn {
+            width: 45px;
+            height: 45px;
+            border: none;
+            border-radius: 50%;
+            background: #ff69b4;
+            color: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            font-size: 18px;
+        }
+
+        .voice-btn:hover {
+            background: #ff1493;
+            transform: scale(1.05);
+        }
+
+        .voice-btn.recording {
+            background: #f44336;
+            animation: pulse 1.5s infinite;
+        }
+
+        .voice-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        .voice-status {
+            position: absolute;
+            top: -35px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #333;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 12px;
+            white-space: nowrap;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .voice-status.show {
+            opacity: 1;
+        }
+
+        .dark-theme .voice-status {
+            background: #666;
+        }
+
         .message-input {
             flex: 1;
             padding: 12px 20px;
@@ -985,7 +1045,13 @@
         <div class="typing-indicator" id="typingIndicator"></div>
 
         <div class="message-input-container">
-            <input type="text" class="message-input" id="messageInput" placeholder="Type a message...">
+            <div style="position: relative;">
+                <button class="voice-btn" id="voiceBtn" onclick="toggleVoiceRecognition()" title="Voice to text">
+                    🎤
+                </button>
+                <div class="voice-status" id="voiceStatus">Listening...</div>
+            </div>
+            <input type="text" class="message-input" id="messageInput" placeholder="Type a message or use voice...">
             <button class="send-btn" id="sendButton" onclick="sendMessage()">Send</button>
         </div>
     </div>
@@ -1309,19 +1375,7 @@
             };
             database.ref('channels/' + currentChannel.substring(1) + '/messages').push(joinMessage);
             
-            listenForMessages();
-            listenForMessageUpdates();
-            loadBannedWords();
-            loadBannedUsers();
-            setupPresence();
-            listenForTyping();
-            listenForOnlineUsers();
-            listenForReactions();
-            setupSearch();
-            
-            if (isAdmin) {
-                checkAdminNotifications();
-            }
+            initializeChatFeatures();
         });
 
         // Check for admin notifications
@@ -1430,6 +1484,162 @@ This is an automated security notification from ChatCreate.
         window.addReaction = addReaction;
         window.toggleReaction = toggleReaction;
         window.clearSavedData = clearSavedData;
+        window.toggleVoiceRecognition = toggleVoiceRecognition;
+
+        // Voice Recognition System
+        let recognition = null;
+        let isRecording = false;
+
+        // Initialize voice recognition
+        function initVoiceRecognition() {
+            if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+                const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+                recognition = new SpeechRecognition();
+                
+                recognition.continuous = false;
+                recognition.interimResults = true;
+                recognition.lang = 'en-US';
+                
+                recognition.onstart = function() {
+                    console.log('Voice recognition started');
+                    isRecording = true;
+                    updateVoiceButton();
+                    showVoiceStatus('Listening...');
+                };
+                
+                recognition.onresult = function(event) {
+                    let finalTranscript = '';
+                    let interimTranscript = '';
+                    
+                    for (let i = event.resultIndex; i < event.results.length; i++) {
+                        const transcript = event.results[i][0].transcript;
+                        if (event.results[i].isFinal) {
+                            finalTranscript += transcript;
+                        } else {
+                            interimTranscript += transcript;
+                        }
+                    }
+                    
+                    const messageInput = document.getElementById('messageInput');
+                    if (finalTranscript) {
+                        // Add to existing text or replace
+                        const currentText = messageInput.value;
+                        messageInput.value = currentText + (currentText ? ' ' : '') + finalTranscript;
+                        showVoiceStatus('Text added!');
+                    } else if (interimTranscript) {
+                        showVoiceStatus(`Hearing: "${interimTranscript}"`);
+                    }
+                };
+                
+                recognition.onerror = function(event) {
+                    console.error('Voice recognition error:', event.error);
+                    isRecording = false;
+                    updateVoiceButton();
+                    
+                    let errorMessage = 'Voice recognition error';
+                    switch(event.error) {
+                        case 'no-speech':
+                            errorMessage = 'No speech detected';
+                            break;
+                        case 'audio-capture':
+                            errorMessage = 'Microphone not found';
+                            break;
+                        case 'not-allowed':
+                            errorMessage = 'Microphone permission denied';
+                            break;
+                        case 'network':
+                            errorMessage = 'Network error';
+                            break;
+                    }
+                    showVoiceStatus(errorMessage);
+                };
+                
+                recognition.onend = function() {
+                    console.log('Voice recognition ended');
+                    isRecording = false;
+                    updateVoiceButton();
+                    hideVoiceStatus();
+                };
+                
+            } else {
+                console.log('Speech recognition not supported');
+                // Hide voice button if not supported
+                document.getElementById('voiceBtn').style.display = 'none';
+            }
+        }
+
+        function toggleVoiceRecognition() {
+            if (!recognition) {
+                alert('Voice recognition is not supported in your browser.');
+                return;
+            }
+            
+            if (isRecording) {
+                recognition.stop();
+            } else {
+                try {
+                    recognition.start();
+                } catch (error) {
+                    console.error('Error starting voice recognition:', error);
+                    showVoiceStatus('Error starting microphone');
+                }
+            }
+        }
+
+        function updateVoiceButton() {
+            const voiceBtn = document.getElementById('voiceBtn');
+            const messageInput = document.getElementById('messageInput');
+            
+            if (isRecording) {
+                voiceBtn.classList.add('recording');
+                voiceBtn.innerHTML = '🔴';
+                voiceBtn.title = 'Stop recording';
+                messageInput.placeholder = 'Listening... Click mic to stop';
+            } else {
+                voiceBtn.classList.remove('recording');
+                voiceBtn.innerHTML = '🎤';
+                voiceBtn.title = 'Voice to text';
+                messageInput.placeholder = 'Type a message or use voice...';
+            }
+        }
+
+        function showVoiceStatus(message) {
+            const voiceStatus = document.getElementById('voiceStatus');
+            voiceStatus.textContent = message;
+            voiceStatus.classList.add('show');
+            
+            // Auto-hide positive messages after 2 seconds
+            if (message.includes('added') || message.includes('Hearing:')) {
+                setTimeout(() => {
+                    if (voiceStatus.textContent === message) {
+                        hideVoiceStatus();
+                    }
+                }, 2000);
+            }
+        }
+
+        function hideVoiceStatus() {
+            const voiceStatus = document.getElementById('voiceStatus');
+            voiceStatus.classList.remove('show');
+        }
+
+        // Initialize voice recognition when chat loads
+        function initializeChatFeatures() {
+            initVoiceRecognition();
+            listenForMessages();
+            listenForMessageUpdates();
+            loadBannedWords();
+            loadBannedUsers();
+            setupPresence();
+            listenForTyping();
+            listenForOnlineUsers();
+            listenForReactions();
+            setupSearch();
+            
+            if (isAdmin) {
+                checkAdminNotifications();
+            }
+        }
 
         // Clear saved user data
         function clearSavedData() {
