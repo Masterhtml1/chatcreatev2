@@ -126,10 +126,22 @@
             display: none;
         }
 
+        /* Debug info */
+        .debug-info {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            color: #856404;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            text-align: center;
+        }
+
         /* Dashboard Container */
         .dashboard-container {
             display: none;
-            max-width: 1400px;
+            max-width: 1200px;
             margin: 0 auto;
             padding: 30px;
         }
@@ -170,208 +182,16 @@
             font-size: 24px;
         }
 
-        /* Live Messages Monitor */
-        .live-messages {
-            height: 400px;
-            overflow-y: auto;
-            border: 1px solid #eee;
-            border-radius: 8px;
-            padding: 15px;
-            background: #fafafa;
-        }
-
-        .live-message {
-            background: white;
-            border-radius: 8px;
-            padding: 12px;
-            margin-bottom: 10px;
-            border-left: 4px solid #2196F3;
-            position: relative;
-        }
-
-        .message-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 8px;
-        }
-
-        .message-info {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .message-author {
-            font-weight: bold;
-            color: #333;
-        }
-
-        .message-channel {
-            background: #e3f2fd;
-            color: #1976d2;
-            padding: 2px 8px;
-            border-radius: 12px;
-            font-size: 12px;
-        }
-
-        .message-time {
-            font-size: 12px;
-            color: #666;
-        }
-
-        .message-text {
-            color: #555;
-            margin-bottom: 8px;
-        }
-
-        .message-actions {
-            display: flex;
-            gap: 5px;
-            flex-wrap: wrap;
-        }
-
+        /* Ban/Unban buttons */
         .action-btn {
-            padding: 4px 8px;
+            padding: 6px 16px;
             border: none;
-            border-radius: 4px;
-            font-size: 11px;
+            border-radius: 20px;
+            font-size: 14px;
             cursor: pointer;
             transition: all 0.2s;
         }
 
-        .warn-btn {
-            background: #ff9800;
-            color: white;
-        }
-
-        .mute-btn {
-            background: #9c27b0;
-            color: white;
-        }
-
-        .ban-btn {
-            background: #f44336;
-            color: white;
-        }
-
-        .profile-btn {
-            background: #2196f3;
-            color: white;
-        }
-
-        .action-btn:hover {
-            transform: scale(1.05);
-        }
-
-        /* User Profile Modal */
-        .modal {
-            display: none;
-            position: fixed;
-            z-index: 1000;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.5);
-        }
-
-        .modal-content {
-            background-color: white;
-            margin: 5% auto;
-            padding: 30px;
-            border-radius: 15px;
-            width: 90%;
-            max-width: 800px;
-            max-height: 80vh;
-            overflow-y: auto;
-        }
-
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-            border-bottom: 1px solid #eee;
-            padding-bottom: 15px;
-        }
-
-        .close {
-            color: #aaa;
-            float: right;
-            font-size: 28px;
-            font-weight: bold;
-            cursor: pointer;
-        }
-
-        .close:hover {
-            color: #000;
-        }
-
-        .profile-section {
-            margin-bottom: 25px;
-        }
-
-        .profile-section h3 {
-            color: #333;
-            margin-bottom: 15px;
-            font-size: 18px;
-        }
-
-        .violation-item {
-            background: #ffebee;
-            border-left: 4px solid #f44336;
-            padding: 12px;
-            margin-bottom: 10px;
-            border-radius: 4px;
-        }
-
-        .violation-date {
-            font-size: 12px;
-            color: #666;
-            font-weight: bold;
-        }
-
-        .violation-reason {
-            margin-top: 5px;
-            color: #333;
-        }
-
-        /* Direct Message System */
-        .dm-form {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-
-        .dm-input, .dm-textarea {
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            font-size: 14px;
-        }
-
-        .dm-textarea {
-            resize: vertical;
-            min-height: 80px;
-        }
-
-        .dm-btn {
-            padding: 12px 20px;
-            background: #4caf50;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 600;
-        }
-
-        .dm-btn:hover {
-            background: #45a049;
-        }
-
-        /* Ban/Unban buttons */
         .ban-form {
             display: flex;
             flex-direction: column;
@@ -477,21 +297,15 @@
             color: #999;
         }
 
-        /* Responsive */
-        @media (max-width: 768px) {
-            .dashboard-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            .message-actions {
-                flex-wrap: wrap;
-            }
-
-            .action-btn {
-                flex: 1;
-                min-width: 60px;
-                margin-bottom: 3px;
-            }
+        /* Note */
+        .note {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            color: #856404;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            text-align: center;
         }
     </style>
 </head>
@@ -507,6 +321,9 @@
 
         <div class="login-container">
             <h1 class="login-title">Moderator Login</h1>
+            <div class="debug-info" id="debugInfo" style="display: none;">
+                Debug: Checking Firebase connection...
+            </div>
             <form id="modLoginForm">
                 <div class="form-group">
                     <label class="form-label" for="modPassword">Access Code</label>
@@ -532,43 +349,12 @@
 
         <div class="welcome-message">
             <h2>Welcome, Moderator!</h2>
-            <p>You now have enhanced moderation powers including live monitoring, user profiles, and direct messaging.</p>
+            <p>You have limited administrative privileges. Use them responsibly.</p>
             <p><small>Your access code can be used multiple times - no need to request new ones!</small></p>
         </div>
 
         <div class="dashboard-grid">
-            <!-- Live Messages Monitor -->
-            <div class="dashboard-card" style="grid-column: span 2;">
-                <h2 class="card-title">
-                    <span class="card-icon">👁️</span>
-                    Live Messages Monitor
-                </h2>
-                <div class="live-messages" id="liveMessages">
-                    <div style="text-align: center; color: #666; padding: 20px;">
-                        Monitoring all channels for new messages...
-                    </div>
-                </div>
-            </div>
-
-            <!-- Direct Messaging -->
-            <div class="dashboard-card">
-                <h2 class="card-title">
-                    <span class="card-icon">💬</span>
-                    Direct Message User
-                </h2>
-                <div class="dm-form">
-                    <input type="text" id="dmRecipient" class="dm-input" placeholder="Enter username">
-                    <select id="dmPriority" class="dm-input">
-                        <option value="normal">Normal Message</option>
-                        <option value="important">Important</option>
-                        <option value="urgent">Urgent</option>
-                    </select>
-                    <textarea id="dmMessage" class="dm-textarea" placeholder="Type your message..."></textarea>
-                    <button class="dm-btn" onclick="sendDirectMessage()">Send Message</button>
-                </div>
-            </div>
-
-            <!-- User Management with Enhanced Features -->
+            <!-- Banned Users Management -->
             <div class="dashboard-card">
                 <h2 class="card-title">
                     <span class="card-icon">🚫</span>
@@ -576,14 +362,7 @@
                 </h2>
                 <div class="ban-form">
                     <input type="text" id="banNickname" class="ban-input" placeholder="Nickname to ban">
-                    <select id="banDuration" class="ban-input">
-                        <option value="permanent">Permanent Ban</option>
-                        <option value="24">24 Hours</option>
-                        <option value="12">12 Hours</option>
-                        <option value="6">6 Hours</option>
-                        <option value="1">1 Hour</option>
-                    </select>
-                    <input type="text" id="banReason" class="ban-input" placeholder="Reason for ban">
+                    <input type="text" id="banReason" class="ban-input" placeholder="Reason for ban (optional)" style="margin-top: 5px;">
                     <button class="ban-btn" onclick="banUser()">Ban User</button>
                 </div>
                 <div class="user-list" id="bannedUsersList">
@@ -602,7 +381,7 @@
                 </div>
             </div>
 
-            <!-- Statistics -->
+            <!-- Recent Activity -->
             <div class="dashboard-card">
                 <h2 class="card-title">
                     <span class="card-icon">📊</span>
@@ -621,10 +400,6 @@
                         <span class="stat-label">Banned Users</span>
                         <span class="stat-value" id="bannedCount">0</span>
                     </div>
-                    <div class="stat-item">
-                        <span class="stat-label">Your Actions Today</span>
-                        <span class="stat-value" id="modActions">0</span>
-                    </div>
                 </div>
             </div>
 
@@ -636,7 +411,7 @@
                 </h2>
                 <div class="ban-form">
                     <input type="text" id="reportUser" class="ban-input" placeholder="Username to report">
-                    <select id="reportType" class="ban-input">
+                    <select id="reportType" class="ban-input" style="margin-top: 5px;">
                         <option value="">Select report type</option>
                         <option value="harassment">Harassment/Bullying</option>
                         <option value="inappropriate">Inappropriate Content</option>
@@ -645,49 +420,13 @@
                         <option value="discrimination">Discrimination</option>
                         <option value="other">Other</option>
                     </select>
-                    <textarea id="reportDescription" class="ban-input" placeholder="Describe the issue in detail..." rows="3"></textarea>
+                    <textarea id="reportDescription" class="ban-input" placeholder="Describe the issue in detail..." rows="3" style="margin-top: 5px; resize: vertical; font-family: inherit;"></textarea>
                     <button class="ban-btn" style="background: #ff9800;" onclick="reportToAdmin()">Send Report</button>
                 </div>
-            </div>
-        </div>
-
-        <!-- User Profile Modal -->
-        <div id="userProfileModal" class="modal">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h2 id="profileUsername">User Profile</h2>
-                    <span class="close" onclick="closeProfile()">&times;</span>
-                </div>
                 
-                <div class="profile-section">
-                    <h3>User Information</h3>
-                    <div id="profileInfo">
-                        <!-- User info will be loaded here -->
-                    </div>
-                </div>
-                
-                <div class="profile-section">
-                    <h3>Recent Messages</h3>
-                    <div id="profileMessages">
-                        <!-- Recent messages will be loaded here -->
-                    </div>
-                </div>
-                
-                <div class="profile-section">
-                    <h3>Violations & Warnings</h3>
-                    <div id="profileViolations">
-                        <!-- Violations will be loaded here -->
-                    </div>
-                </div>
-                
-                <div class="profile-section">
-                    <h3>Moderator Actions</h3>
-                    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-                        <button class="action-btn warn-btn" onclick="warnUser(currentProfileUser)">⚠️ Warn</button>
-                        <button class="action-btn mute-btn" onclick="muteUser(currentProfileUser)">🔇 Mute</button>
-                        <button class="action-btn ban-btn" onclick="quickBanUser(currentProfileUser.nickname, currentProfileUser.email)">🚫 Ban</button>
-                        <button class="dm-btn" onclick="openDMToUser(currentProfileUser)">💬 Send DM</button>
-                    </div>
+                <h3 style="margin-top: 20px; margin-bottom: 10px; font-size: 16px;">My Recent Reports</h3>
+                <div class="user-list" id="myReportsList" style="max-height: 200px;">
+                    <div class="loading">Loading your reports...</div>
                 </div>
             </div>
         </div>
@@ -714,15 +453,49 @@
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
 
-        let currentModeratorId = null;
-        let currentProfileUser = null;
-        let dailyActions = 0;
+        // Test Firebase connection
+        function testFirebaseConnection() {
+            const debugInfo = document.getElementById('debugInfo');
+            debugInfo.style.display = 'block';
+            
+            database.ref('.info/connected').on('value', (snapshot) => {
+                if (snapshot.val() === true) {
+                    debugInfo.innerHTML = '✅ Firebase connected successfully';
+                    debugInfo.style.background = '#e8f5e9';
+                    debugInfo.style.color = '#4CAF50';
+                    debugInfo.style.borderColor = '#c8e6c9';
+                    
+                    // Also check mod passwords exist
+                    database.ref('modPasswords').once('value', (snapshot) => {
+                        const count = snapshot.numChildren();
+                        debugInfo.innerHTML += `<br>📊 Found ${count} moderator passwords in database`;
+                        if (count === 0) {
+                            debugInfo.innerHTML += '<br>⚠️ No mod passwords found - admin needs to generate some';
+                        }
+                    });
+                    
+                    setTimeout(() => {
+                        debugInfo.style.display = 'none';
+                    }, 5000);
+                } else {
+                    debugInfo.innerHTML = '❌ Firebase connection lost';
+                    debugInfo.style.background = '#ffebee';
+                    debugInfo.style.color = '#f44336';
+                    debugInfo.style.borderColor = '#ffcdd2';
+                }
+            });
+        }
+
+        // Initialize connection test
+        testFirebaseConnection();
 
         // Mod login - REUSABLE CODES VERSION
         document.getElementById('modLoginForm').addEventListener('submit', function(e) {
             e.preventDefault();
             const password = document.getElementById('modPassword').value.trim();
             const errorMsg = document.getElementById('errorMessage');
+
+            console.log('🔐 Attempting mod login with password:', password);
 
             if (!password) {
                 errorMsg.textContent = 'Please enter an access code';
@@ -735,8 +508,10 @@
             errorMsg.style.color = '#2196F3';
             errorMsg.style.display = 'block';
 
-            // Check password against Firebase
+            // Check password against Firebase - REUSABLE VERSION
             database.ref('modPasswords').orderByChild('password').equalTo(password).once('value', (snapshot) => {
+                console.log('🔍 Password check result:', snapshot.exists());
+                
                 if (snapshot.exists()) {
                     let validPassword = false;
                     let passwordKey = null;
@@ -744,296 +519,78 @@
                     
                     snapshot.forEach((passSnapshot) => {
                         const passData = passSnapshot.val();
+                        console.log('📋 Found password entry:', passData);
+                        
+                        // For reusable codes, only check if active (not if already used)
                         if (passData.active) {
                             validPassword = true;
                             passwordKey = passSnapshot.key;
                             passwordData = passData;
+                            console.log('✅ Valid active password found');
+                        } else {
+                            console.log('❌ Password found but disabled by admin');
                         }
                     });
                     
                     if (validPassword) {
-                        // Update usage statistics
+                        console.log('🎉 Login successful, updating usage statistics');
+                        
+                        // Simplified usage tracking - just increment counter and update last used time
                         const currentUsage = passwordData.usageCount || 0;
                         database.ref('modPasswords/' + passwordKey).update({
                             usageCount: currentUsage + 1,
                             lastUsedAt: Date.now()
+                            // Removed lastUsedBy to prevent screen clutter
                         }).then(() => {
+                            console.log('✅ Usage statistics updated successfully');
+                            
                             // Login successful
+                            document.getElementById('loginScreen').style.display = 'none';
+                            document.getElementById('dashboardScreen').style.display = 'block';
+                            loadModDashboard();
+                        }).catch((error) => {
+                            console.error('❌ Error updating usage statistics:', error);
+                            // Still allow login even if stats update fails
                             document.getElementById('loginScreen').style.display = 'none';
                             document.getElementById('dashboardScreen').style.display = 'block';
                             loadModDashboard();
                         });
                     } else {
+                        console.log('❌ Password found but disabled');
                         errorMsg.textContent = 'This access code has been disabled by an administrator.';
                         errorMsg.style.color = '#dc3545';
                         errorMsg.style.display = 'block';
                     }
                 } else {
+                    console.log('❌ No password found in database');
                     errorMsg.textContent = 'Invalid access code.';
                     errorMsg.style.color = '#dc3545';
                     errorMsg.style.display = 'block';
                 }
+            }).catch((error) => {
+                console.error('❌ Database error during login:', error);
+                errorMsg.textContent = 'Database error: ' + error.message;
+                errorMsg.style.color = '#dc3545';
+                errorMsg.style.display = 'block';
             });
         });
 
+        // Current moderator ID for tracking - simplified
+        let currentModeratorId = null;
+
         // Load moderator dashboard
         function loadModDashboard() {
-            currentModeratorId = 'Mod-' + Math.random().toString(36).substr(2, 9);
-            startLiveMessageMonitoring();
+            console.log('📊 Loading moderator dashboard...');
+            currentModeratorId = 'Mod-' + Math.random().toString(36).substr(2, 9); // Shorter, simpler ID
             loadBannedUsers();
             loadChannels();
             loadStats();
-            trackDailyActions();
+            loadMyReports();
         }
 
-        // Live Message Monitoring (Same as Admin)
-        function startLiveMessageMonitoring() {
-            const liveContainer = document.getElementById('liveMessages');
-            
-            database.ref('channels').on('child_added', (channelSnapshot) => {
-                const channelName = channelSnapshot.key;
-                
-                database.ref(`channels/${channelName}/messages`).on('child_added', (messageSnapshot) => {
-                    const message = messageSnapshot.val();
-                    if (message.author !== 'System') {
-                        displayLiveMessage(message, channelName, messageSnapshot.key);
-                    }
-                });
-            });
-        }
-
-        function displayLiveMessage(message, channel, messageId) {
-            const liveContainer = document.getElementById('liveMessages');
-            const messageDiv = document.createElement('div');
-            messageDiv.className = 'live-message';
-            messageDiv.innerHTML = `
-                <div class="message-header">
-                    <div class="message-info">
-                        <span class="message-author">${message.nickname}</span>
-                        <span class="message-channel">#${channel}</span>
-                        <span class="message-time">${new Date(message.timestamp).toLocaleTimeString()}</span>
-                    </div>
-                </div>
-                <div class="message-text">${message.text}</div>
-                <div class="message-actions">
-                    <button class="action-btn warn-btn" onclick="warnUser({nickname: '${message.nickname}', email: '${message.author}'})">Warn</button>
-                    <button class="action-btn mute-btn" onclick="muteUser({nickname: '${message.nickname}', email: '${message.author}'})">Mute</button>
-                    <button class="action-btn ban-btn" onclick="quickBanUser('${message.nickname}', '${message.author}')">Ban</button>
-                    <button class="action-btn profile-btn" onclick="viewProfile('${message.nickname}', '${message.author}')">Profile</button>
-                </div>
-            `;
-            
-            liveContainer.insertBefore(messageDiv, liveContainer.firstChild);
-            
-            // Keep only last 50 messages
-            while (liveContainer.children.length > 50) {
-                liveContainer.removeChild(liveContainer.lastChild);
-            }
-        }
-
-        // Enhanced User Actions
-        function warnUser(user) {
-            const reason = prompt(`Enter warning reason for ${user.nickname}:`);
-            if (reason) {
-                const warning = {
-                    type: 'warning',
-                    user: user.nickname,
-                    reason: reason,
-                    timestamp: Date.now(),
-                    issuedBy: currentModeratorId
-                };
-                
-                database.ref('userViolations').push(warning);
-                sendDirectMessageToUser(user.nickname, `⚠️ Moderator Warning: ${reason}`, 'urgent');
-                alert(`Warning sent to ${user.nickname}`);
-                incrementDailyActions();
-            }
-        }
-
-        function muteUser(user) {
-            const duration = prompt('Mute duration in minutes:', '60');
-            if (duration) {
-                const muteData = {
-                    user: user.nickname,
-                    mutedUntil: Date.now() + (parseInt(duration) * 60000),
-                    reason: 'Muted by moderator',
-                    timestamp: Date.now(),
-                    issuedBy: currentModeratorId
-                };
-                
-                database.ref('mutedUsers').push(muteData);
-                sendDirectMessageToUser(user.nickname, `🔇 You have been muted for ${duration} minutes by a moderator.`, 'urgent');
-                alert(`${user.nickname} muted for ${duration} minutes`);
-                incrementDailyActions();
-            }
-        }
-
-        function quickBanUser(nickname, email) {
-            if (confirm(`Ban ${nickname}?`)) {
-                const reason = prompt('Ban reason (optional):') || 'Banned by moderator';
-                
-                database.ref('bannedUsers').push({
-                    nickname: nickname,
-                    email: email,
-                    bannedBy: currentModeratorId,
-                    bannedAt: Date.now(),
-                    reason: reason,
-                    bannedByType: 'Moderator'
-                });
-                
-                alert(`${nickname} has been banned`);
-                incrementDailyActions();
-            }
-        }
-
-        // Enhanced User Profile System
-        function viewProfile(nickname, email) {
-            currentProfileUser = { nickname, email };
-            document.getElementById('profileUsername').textContent = `${nickname} Profile`;
-            
-            // Load user info
-            document.getElementById('profileInfo').innerHTML = `
-                <div style="background: #f5f5f5; padding: 15px; border-radius: 8px;">
-                    <p><strong>Nickname:</strong> ${nickname}</p>
-                    <p><strong>Email:</strong> ${email || 'Not available'}</p>
-                    <p><strong>First Seen:</strong> ${new Date().toLocaleDateString()}</p>
-                    <p><strong>Status:</strong> <span style="color: green;">Active</span></p>
-                </div>
-            `;
-            
-            // Load recent messages
-            loadUserMessages(nickname);
-            
-            // Load violations
-            loadUserViolations(nickname);
-            
-            document.getElementById('userProfileModal').style.display = 'block';
-        }
-
-        function loadUserMessages(nickname) {
-            const container = document.getElementById('profileMessages');
-            container.innerHTML = '<div style="color: #666;">Loading recent messages...</div>';
-            
-            // Get messages from all channels
-            database.ref('channels').once('value', (snapshot) => {
-                const messages = [];
-                snapshot.forEach((channelSnapshot) => {
-                    const channelName = channelSnapshot.key;
-                    channelSnapshot.child('messages').forEach((messageSnapshot) => {
-                        const message = messageSnapshot.val();
-                        if (message.nickname === nickname) {
-                            message.channel = channelName;
-                            message.id = messageSnapshot.key;
-                            messages.push(message);
-                        }
-                    });
-                });
-                
-                messages.sort((a, b) => b.timestamp - a.timestamp);
-                const recent = messages.slice(0, 10);
-                
-                if (recent.length > 0) {
-                    container.innerHTML = recent.map(msg => `
-                        <div style="background: #f9f9f9; padding: 10px; margin-bottom: 8px; border-radius: 6px;">
-                            <div style="font-size: 12px; color: #666; margin-bottom: 4px;">
-                                #${msg.channel} - ${new Date(msg.timestamp).toLocaleString()}
-                            </div>
-                            <div>${msg.text}</div>
-                        </div>
-                    `).join('');
-                } else {
-                    container.innerHTML = '<div style="color: #666;">No recent messages found.</div>';
-                }
-            });
-        }
-
-        function loadUserViolations(nickname) {
-            const container = document.getElementById('profileViolations');
-            
-            database.ref('userViolations').orderByChild('user').equalTo(nickname).once('value', (snapshot) => {
-                if (snapshot.exists()) {
-                    const violations = [];
-                    snapshot.forEach((violationSnapshot) => {
-                        violations.push(violationSnapshot.val());
-                    });
-                    
-                    violations.sort((a, b) => b.timestamp - a.timestamp);
-                    
-                    container.innerHTML = violations.map(violation => `
-                        <div class="violation-item">
-                            <div class="violation-date">${new Date(violation.timestamp).toLocaleString()}</div>
-                            <div class="violation-reason"><strong>${violation.type}:</strong> ${violation.reason}</div>
-                        </div>
-                    `).join('');
-                } else {
-                    container.innerHTML = '<div style="color: #666;">No violations on record.</div>';
-                }
-            });
-        }
-
-        function closeProfile() {
-            document.getElementById('userProfileModal').style.display = 'none';
-            currentProfileUser = null;
-        }
-
-        // Direct Messaging System
-        function sendDirectMessage() {
-            const recipient = document.getElementById('dmRecipient').value.trim();
-            const priority = document.getElementById('dmPriority').value;
-            const message = document.getElementById('dmMessage').value.trim();
-            
-            if (!recipient || !message) {
-                alert('Please enter recipient and message');
-                return;
-            }
-            
-            sendDirectMessageToUser(recipient, message, priority);
-            
-            // Clear form
-            document.getElementById('dmRecipient').value = '';
-            document.getElementById('dmMessage').value = '';
-            
-            alert(`Direct message sent to ${recipient}`);
-            incrementDailyActions();
-        }
-
-        function sendDirectMessageToUser(recipient, message, priority = 'normal') {
-            const dmData = {
-                from: 'Moderator',
-                fromId: currentModeratorId,
-                to: recipient,
-                message: message,
-                priority: priority,
-                timestamp: Date.now(),
-                read: false,
-                type: 'direct_message'
-            };
-            
-            database.ref('directMessages').push(dmData);
-            
-            // Also send as system notification
-            const notification = {
-                type: 'mod_message',
-                recipient: recipient,
-                message: message,
-                priority: priority,
-                timestamp: Date.now(),
-                read: false
-            };
-            
-            database.ref('userNotifications').push(notification);
-        }
-
-        function openDMToUser(user) {
-            document.getElementById('dmRecipient').value = user.nickname;
-            closeProfile();
-            document.getElementById('dmMessage').focus();
-        }
-
-        // Enhanced Ban System
+        // Ban user function for moderators
         function banUser() {
             const nickname = document.getElementById('banNickname').value.trim();
-            const duration = document.getElementById('banDuration').value;
             const reason = document.getElementById('banReason').value.trim();
             
             if (!nickname) {
@@ -1042,43 +599,63 @@
             }
             
             if (confirm(`Are you sure you want to ban ${nickname}?${reason ? '\n\nReason: ' + reason : ''}`)) {
+                console.log('Banning user:', nickname);
+                
                 const banData = {
                     nickname: nickname,
                     bannedBy: currentModeratorId,
                     bannedAt: Date.now(),
                     reason: reason || 'No reason provided',
-                    bannedByType: 'Moderator',
-                    duration: duration
+                    bannedByType: 'Moderator'
                 };
-                
-                // If temporary ban, set expiration
-                if (duration !== 'permanent') {
-                    banData.expiresAt = Date.now() + (parseInt(duration) * 60 * 60 * 1000);
-                }
                 
                 database.ref('bannedUsers').push(banData)
                     .then(() => {
-                        alert(`${nickname} has been banned ${duration === 'permanent' ? 'permanently' : 'for ' + duration + ' hours'}`);
+                        console.log('✅ User banned successfully');
+                        alert(`${nickname} has been banned successfully`);
                         document.getElementById('banNickname').value = '';
                         document.getElementById('banReason').value = '';
-                        incrementDailyActions();
+                        
+                        // Also send notification to admin
+                        const notification = {
+                            type: 'user_banned',
+                            moderatorId: currentModeratorId,
+                            bannedUser: nickname,
+                            reason: reason || 'No reason provided',
+                            timestamp: Date.now(),
+                            read: false
+                        };
+                        database.ref('adminNotifications').push(notification);
                     })
                     .catch((error) => {
+                        console.error('❌ Error banning user:', error);
                         alert('Error banning user: ' + error.message);
                     });
             }
         }
 
-        // Report to Admin
+        // Report user to admin
         function reportToAdmin() {
             const reportedUser = document.getElementById('reportUser').value.trim();
             const reportType = document.getElementById('reportType').value;
             const description = document.getElementById('reportDescription').value.trim();
             
-            if (!reportedUser || !reportType || !description) {
-                alert('Please fill in all fields');
+            if (!reportedUser) {
+                alert('Please enter a username to report');
                 return;
             }
+            
+            if (!reportType) {
+                alert('Please select a report type');
+                return;
+            }
+            
+            if (!description) {
+                alert('Please provide a description of the issue');
+                return;
+            }
+            
+            console.log('Reporting user to admin:', reportedUser);
             
             const reportData = {
                 reportedUser: reportedUser,
@@ -1090,8 +667,12 @@
                 adminResponse: null
             };
             
+            // Save to mod reports
             database.ref('modReports').push(reportData)
                 .then(() => {
+                    console.log('✅ Report sent successfully');
+                    
+                    // Also create admin notification
                     const notification = {
                         type: 'mod_report',
                         moderatorId: currentModeratorId,
@@ -1109,11 +690,55 @@
                     document.getElementById('reportUser').value = '';
                     document.getElementById('reportType').value = '';
                     document.getElementById('reportDescription').value = '';
-                    incrementDailyActions();
+                    loadMyReports(); // Refresh the reports list
+                })
+                .catch((error) => {
+                    console.error('❌ Error sending report:', error);
+                    alert('Error sending report: ' + error.message);
                 });
         }
 
-        // Load banned users
+        // Load moderator's reports
+        function loadMyReports() {
+            const reportsList = document.getElementById('myReportsList');
+            
+            database.ref('modReports').orderByChild('reportedBy').equalTo(currentModeratorId).on('value', (snapshot) => {
+                reportsList.innerHTML = '';
+                const reports = [];
+                
+                snapshot.forEach((reportSnapshot) => {
+                    const report = reportSnapshot.val();
+                    report.key = reportSnapshot.key;
+                    reports.unshift(report); // Show newest first
+                });
+                
+                if (reports.length > 0) {
+                    reports.slice(0, 5).forEach(report => { // Show only last 5 reports
+                        const reportItem = document.createElement('div');
+                        reportItem.className = 'user-item';
+                        
+                        const statusColor = report.status === 'pending' ? '#ff9800' : 
+                                          report.status === 'resolved' ? '#4CAF50' : '#f44336';
+                        
+                        reportItem.innerHTML = `
+                            <div class="user-info">
+                                <div class="user-nickname">${report.reportedUser} - ${report.reportType}</div>
+                                <div class="user-email" style="font-size: 12px;">
+                                    ${new Date(report.timestamp).toLocaleString()} | 
+                                    <span style="color: ${statusColor}; font-weight: bold;">${report.status.toUpperCase()}</span>
+                                    ${report.adminResponse ? ' | Response: ' + report.adminResponse : ''}
+                                </div>
+                            </div>
+                        `;
+                        reportsList.appendChild(reportItem);
+                    });
+                } else {
+                    reportsList.innerHTML = '<div class="empty-state">No reports sent yet</div>';
+                }
+            });
+        }
+
+        // Load banned users (mods can now ban and unban)
         function loadBannedUsers() {
             const bannedList = document.getElementById('bannedUsersList');
             
@@ -1125,30 +750,15 @@
                     snapshot.forEach((bannedSnapshot) => {
                         const banned = bannedSnapshot.val();
                         const key = bannedSnapshot.key;
-                        
-                        // Check if temporary ban has expired
-                        if (banned.expiresAt && banned.expiresAt < Date.now()) {
-                            // Auto-unban expired bans
-                            database.ref('bannedUsers/' + key).remove();
-                            return;
-                        }
-                        
                         count++;
                         
                         const userItem = document.createElement('div');
                         userItem.className = 'user-item';
-                        
-                        let durationText = banned.duration === 'permanent' ? 'Permanent' : `${banned.duration}h`;
-                        if (banned.expiresAt) {
-                            const remaining = Math.ceil((banned.expiresAt - Date.now()) / (60 * 60 * 1000));
-                            durationText += ` (${remaining}h left)`;
-                        }
-                        
                         userItem.innerHTML = `
                             <div class="user-info">
                                 <div class="user-nickname">${banned.nickname}</div>
                                 <div class="user-email">
-                                    ${banned.email || 'No email'} | ${durationText} | 
+                                    ${banned.email || 'No email recorded'} | 
                                     Banned by: ${banned.bannedByType || 'Admin'} | 
                                     ${banned.reason ? 'Reason: ' + banned.reason : 'No reason provided'}
                                 </div>
@@ -1171,7 +781,9 @@
                 database.ref('bannedUsers/' + key).remove()
                     .then(() => {
                         alert('User unbanned successfully');
-                        incrementDailyActions();
+                    })
+                    .catch((error) => {
+                        alert('Error unbanning user: ' + error.message);
                     });
             }
         }
@@ -1232,27 +844,34 @@
             });
         }
 
-        // Track daily actions
-        function trackDailyActions() {
-            const today = new Date().toDateString();
-            const savedDate = localStorage.getItem('modActionDate');
-            const savedCount = localStorage.getItem('modActionCount');
+        // Load recent failed logins
+        function loadFailedLogins() {
+            const failedList = document.getElementById('failedLoginsList');
             
-            if (savedDate === today) {
-                dailyActions = parseInt(savedCount) || 0;
-            } else {
-                dailyActions = 0;
-                localStorage.setItem('modActionDate', today);
-                localStorage.setItem('modActionCount', '0');
-            }
-            
-            document.getElementById('modActions').textContent = dailyActions;
-        }
-
-        function incrementDailyActions() {
-            dailyActions++;
-            document.getElementById('modActions').textContent = dailyActions;
-            localStorage.setItem('modActionCount', dailyActions.toString());
+            database.ref('failedAttempts').orderByChild('timestamp').limitToLast(5).on('value', (snapshot) => {
+                failedList.innerHTML = '';
+                const attempts = [];
+                
+                snapshot.forEach((attemptSnapshot) => {
+                    attempts.unshift(attemptSnapshot.val());
+                });
+                
+                if (attempts.length > 0) {
+                    attempts.forEach(attempt => {
+                        const attemptItem = document.createElement('div');
+                        attemptItem.className = 'user-item';
+                        attemptItem.innerHTML = `
+                            <div class="user-info">
+                                <div class="user-nickname">${attempt.email}</div>
+                                <div class="user-email">${new Date(attempt.timestamp).toLocaleString()}</div>
+                            </div>
+                        `;
+                        failedList.appendChild(attemptItem);
+                    });
+                } else {
+                    failedList.innerHTML = '<div class="empty-state">No recent failed logins</div>';
+                }
+            });
         }
 
         // Logout
@@ -1262,14 +881,6 @@
                 document.getElementById('dashboardScreen').style.display = 'none';
                 document.getElementById('modPassword').value = '';
                 document.getElementById('errorMessage').style.display = 'none';
-            }
-        }
-
-        // Close modal when clicking outside
-        window.onclick = function(event) {
-            const modal = document.getElementById('userProfileModal');
-            if (event.target === modal) {
-                closeProfile();
             }
         }
     </script>
