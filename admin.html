@@ -127,7 +127,7 @@
         /* Dashboard Container */
         .dashboard-container {
             display: none;
-            max-width: 1400px;
+            max-width: 1200px;
             margin: 0 auto;
             padding: 30px;
         }
@@ -160,320 +160,7 @@
             font-size: 24px;
         }
 
-        /* Live Messages Monitor */
-        .live-messages {
-            height: 400px;
-            overflow-y: auto;
-            border: 1px solid #eee;
-            border-radius: 8px;
-            padding: 15px;
-            background: #fafafa;
-        }
-
-        .live-message {
-            background: white;
-            border-radius: 8px;
-            padding: 12px;
-            margin-bottom: 10px;
-            border-left: 4px solid #ff69b4;
-            position: relative;
-        }
-
-        .message-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 8px;
-        }
-
-        .message-info {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .message-author {
-            font-weight: bold;
-            color: #333;
-        }
-
-        .message-channel {
-            background: #e3f2fd;
-            color: #1976d2;
-            padding: 2px 8px;
-            border-radius: 12px;
-            font-size: 12px;
-        }
-
-        .message-time {
-            font-size: 12px;
-            color: #666;
-        }
-
-        .message-text {
-            color: #555;
-            margin-bottom: 8px;
-        }
-
-        .message-actions {
-            display: flex;
-            gap: 5px;
-        }
-
-        .action-btn {
-            padding: 4px 8px;
-            border: none;
-            border-radius: 4px;
-            font-size: 11px;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .warn-btn {
-            background: #ff9800;
-            color: white;
-        }
-
-        .mute-btn {
-            background: #9c27b0;
-            color: white;
-        }
-
-        .ban-btn {
-            background: #f44336;
-            color: white;
-        }
-
-        .profile-btn {
-            background: #2196f3;
-            color: white;
-        }
-
-        .action-btn:hover {
-            transform: scale(1.05);
-        }
-
-        /* User Profile Modal */
-        .modal {
-            display: none;
-            position: fixed;
-            z-index: 1000;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.5);
-        }
-
-        .modal-content {
-            background-color: white;
-            margin: 5% auto;
-            padding: 30px;
-            border-radius: 15px;
-            width: 90%;
-            max-width: 800px;
-            max-height: 80vh;
-            overflow-y: auto;
-        }
-
-        .modal-header {
-            display: flex;
-            justify-content: between;
-            align-items: center;
-            margin-bottom: 20px;
-            border-bottom: 1px solid #eee;
-            padding-bottom: 15px;
-        }
-
-        .close {
-            color: #aaa;
-            float: right;
-            font-size: 28px;
-            font-weight: bold;
-            cursor: pointer;
-            margin-left: auto;
-        }
-
-        .close:hover {
-            color: #000;
-        }
-
-        .profile-section {
-            margin-bottom: 25px;
-        }
-
-        .profile-section h3 {
-            color: #333;
-            margin-bottom: 15px;
-            font-size: 18px;
-        }
-
-        .violation-item {
-            background: #ffebee;
-            border-left: 4px solid #f44336;
-            padding: 12px;
-            margin-bottom: 10px;
-            border-radius: 4px;
-        }
-
-        .violation-date {
-            font-size: 12px;
-            color: #666;
-            font-weight: bold;
-        }
-
-        .violation-reason {
-            margin-top: 5px;
-            color: #333;
-        }
-
-        /* Direct Message System */
-        .dm-form {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-
-        .dm-input, .dm-textarea {
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            font-size: 14px;
-        }
-
-        .dm-textarea {
-            resize: vertical;
-            min-height: 80px;
-        }
-
-        .dm-btn {
-            padding: 12px 20px;
-            background: #4caf50;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 600;
-        }
-
-        .dm-btn:hover {
-            background: #45a049;
-        }
-
-        /* Broadcast System */
-        .broadcast-form {
-            background: #fff3cd;
-            border: 1px solid #ffeaa7;
-            border-radius: 8px;
-            padding: 20px;
-            margin-bottom: 20px;
-        }
-
-        .broadcast-form h3 {
-            color: #856404;
-            margin-bottom: 15px;
-        }
-
-        .priority-select {
-            padding: 8px 12px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            margin-bottom: 10px;
-        }
-
-        .priority-high {
-            background: #ffebee !important;
-            border-color: #f44336 !important;
-        }
-
-        .priority-emergency {
-            background: #ff5722 !important;
-            color: white !important;
-            animation: pulse 1s infinite;
-        }
-
-        @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.02); }
-            100% { transform: scale(1); }
-        }
-
-        /* Emergency Alert */
-        .emergency-section {
-            background: #ffebee;
-            border: 2px solid #f44336;
-            border-radius: 8px;
-            padding: 20px;
-            margin-bottom: 20px;
-        }
-
-        .emergency-btn {
-            width: 100%;
-            padding: 15px;
-            background: #f44336;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 18px;
-            font-weight: bold;
-            cursor: pointer;
-            margin-bottom: 10px;
-        }
-
-        .emergency-btn:hover {
-            background: #d32f2f;
-        }
-
-        /* Scheduled Messages */
-        .scheduled-message {
-            background: #e3f2fd;
-            border-left: 4px solid #2196f3;
-            padding: 12px;
-            margin-bottom: 10px;
-            border-radius: 4px;
-        }
-
-        .schedule-date {
-            font-size: 12px;
-            color: #1976d2;
-            font-weight: bold;
-        }
-
-        /* Quick Actions */
-        .quick-actions {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
-            flex-wrap: wrap;
-        }
-
-        .quick-btn {
-            padding: 8px 16px;
-            border: none;
-            border-radius: 20px;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: 600;
-            transition: all 0.2s;
-        }
-
-        .quick-lockdown {
-            background: #f44336;
-            color: white;
-        }
-
-        .quick-announcement {
-            background: #ff9800;
-            color: white;
-        }
-
-        .quick-clear {
-            background: #9c27b0;
-            color: white;
-        }
-
-        /* Existing styles from your original file... */
+        /* Channel Management */
         .channel-list {
             margin-bottom: 20px;
         }
@@ -526,6 +213,279 @@
             background: #e64a19;
         }
 
+        /* Banned Users */
+        .banned-list {
+            max-height: 300px;
+            overflow-y: auto;
+            margin-bottom: 20px;
+        }
+
+        .banned-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px;
+            background: #ffebee;
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+
+        .banned-info {
+            flex: 1;
+        }
+
+        .banned-nickname {
+            font-weight: 600;
+            color: #c62828;
+        }
+
+        .banned-email {
+            font-size: 14px;
+            color: #666;
+        }
+
+        .unban-btn {
+            padding: 6px 16px;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 20px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .unban-btn:hover {
+            background: #45a049;
+            transform: scale(1.05);
+        }
+
+        /* Ban User Form */
+        .ban-form {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .ban-input {
+            flex: 1;
+            padding: 10px 14px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        .ban-btn {
+            padding: 10px 20px;
+            background: #f44336;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .ban-btn:hover {
+            background: #da190b;
+        }
+
+        /* Banned Words */
+        .word-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 20px;
+            max-height: 200px;
+            overflow-y: auto;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        .word-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 12px;
+            background: #ff69b4;
+            color: white;
+            border-radius: 20px;
+            font-size: 14px;
+        }
+
+        .remove-word {
+            cursor: pointer;
+            font-weight: bold;
+            opacity: 0.8;
+            transition: opacity 0.2s;
+        }
+
+        .remove-word:hover {
+            opacity: 1;
+        }
+
+        .word-form {
+            display: flex;
+            gap: 10px;
+        }
+
+        .word-input {
+            flex: 1;
+            padding: 10px 14px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        .add-word-btn {
+            padding: 10px 20px;
+            background: #ff69b4;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .add-word-btn:hover {
+            background: #ff1493;
+        }
+
+        /* Stats */
+        .stat-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 15px;
+            background: #f0f7ff;
+            border-radius: 8px;
+            margin-bottom: 12px;
+        }
+
+        .stat-label {
+            font-weight: 500;
+            color: #555;
+        }
+
+        .stat-value {
+            font-weight: 700;
+            color: #1976d2;
+            font-size: 18px;
+        }
+
+        /* Loading */
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #999;
+        }
+
+        /* Empty state */
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+        }
+
+        /* Status indicator */
+        .status-indicator {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 500;
+            margin-left: 10px;
+        }
+
+        .status-active {
+            background: #e8f5e9;
+            color: #4CAF50;
+        }
+
+        .status-used {
+            background: #f5f5f5;
+            color: #999;
+        }
+
+        /* Toggle switch styles */
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 24px;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: 0.3s;
+            border-radius: 24px;
+        }
+
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: 0.3s;
+            border-radius: 50%;
+        }
+
+        input:checked + .toggle-slider {
+            background-color: #4CAF50;
+        }
+
+        input:checked + .toggle-slider:before {
+            transform: translateX(26px);
+        }
+
+        /* Auto-approve section */
+        .auto-approve-section {
+            background: #f0f7ff;
+            border: 1px solid #b3d9ff;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+
+        .auto-approve-enabled {
+            background: #e8f5e9 !important;
+            border-color: #c8e6c9 !important;
+        }
+
+        .auto-approve-enabled .auto-approve-status {
+            color: #4CAF50 !important;
+            font-weight: 600;
+        }
+
+        /* Debug info */
+        .debug-info {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            color: #856404;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+
         /* Responsive */
         @media (max-width: 768px) {
             .dashboard-grid {
@@ -535,15 +495,6 @@
             .header {
                 flex-direction: column;
                 gap: 15px;
-            }
-
-            .message-actions {
-                flex-wrap: wrap;
-            }
-
-            .action-btn {
-                flex: 1;
-                min-width: 60px;
             }
         }
     </style>
@@ -580,134 +531,147 @@
             <button class="logout-btn" onclick="logout()">Logout</button>
         </header>
 
-        <!-- Quick Actions -->
-        <div class="quick-actions">
-            <button class="quick-btn quick-lockdown" onclick="toggleLockdown()">🚨 Emergency Lockdown</button>
-            <button class="quick-btn quick-announcement" onclick="quickAnnouncement()">📢 Quick Announcement</button>
-            <button class="quick-btn quick-clear" onclick="clearAllChannels()">🗑️ Clear All Channels</button>
-        </div>
-
         <div class="dashboard-grid">
-            <!-- Live Messages Monitor -->
-            <div class="dashboard-card" style="grid-column: span 2;">
-                <h2 class="card-title">
-                    <span class="card-icon">👁️</span>
-                    Live Messages Monitor
-                </h2>
-                <div class="live-messages" id="liveMessages">
-                    <div style="text-align: center; color: #666; padding: 20px;">
-                        Monitoring all channels for new messages...
-                    </div>
-                </div>
-            </div>
-
-            <!-- Direct Messaging -->
+            <!-- Channel Management -->
             <div class="dashboard-card">
                 <h2 class="card-title">
                     <span class="card-icon">💬</span>
-                    Direct Message User
+                    Channel Management
                 </h2>
-                <div class="dm-form">
-                    <input type="text" id="dmRecipient" class="dm-input" placeholder="Enter username">
-                    <select id="dmPriority" class="priority-select">
-                        <option value="normal">Normal Message</option>
-                        <option value="important">Important</option>
-                        <option value="urgent">Urgent</option>
-                    </select>
-                    <textarea id="dmMessage" class="dm-textarea" placeholder="Type your message..."></textarea>
-                    <button class="dm-btn" onclick="sendDirectMessage()">Send Message</button>
+                <div class="channel-list" id="channelList">
+                    <div class="loading">Loading channels...</div>
+                </div>
+                <button class="clear-all-btn" onclick="clearAllChannels()">Clear All Channels</button>
+            </div>
+
+            <!-- Banned Users -->
+            <div class="dashboard-card">
+                <h2 class="card-title">
+                    <span class="card-icon">🚫</span>
+                    Banned Users
+                </h2>
+                <div class="ban-form">
+                    <input type="text" id="banNickname" class="ban-input" placeholder="Nickname to ban">
+                    <button class="ban-btn" onclick="banUser()">Ban User</button>
+                </div>
+                <div class="banned-list" id="bannedList">
+                    <div class="loading">Loading banned users...</div>
                 </div>
             </div>
 
-            <!-- Broadcast System -->
+            <!-- Banned Words -->
+            <div class="dashboard-card">
+                <h2 class="card-title">
+                    <span class="card-icon">🔤</span>
+                    Banned Words
+                </h2>
+                <div class="word-form">
+                    <input type="text" id="bannedWord" class="word-input" placeholder="Add banned word">
+                    <button class="add-word-btn" onclick="addBannedWord()">Add Word</button>
+                </div>
+                <div class="word-list" id="wordList">
+                    <div class="loading">Loading banned words...</div>
+                </div>
+            </div>
+
+            <!-- Moderator Passwords -->
+            <div class="dashboard-card">
+                <h2 class="card-title">
+                    <span class="card-icon">🔑</span>
+                    Moderator Passwords
+                </h2>
+                <div class="debug-info" id="debugInfo" style="display: none;">
+                    Debug: Waiting for Firebase connection...
+                </div>
+                <button class="clear-all-btn" style="background: #2196F3; margin-bottom: 15px;" onclick="generateModPassword()">Generate New Password</button>
+                <div class="banned-list" id="modPasswordsList" style="max-height: 400px;">
+                    <div class="loading">Loading moderator passwords...</div>
+                </div>
+            </div>
+
+            <!-- Failed Login Attempts -->
+            <div class="dashboard-card">
+                <h2 class="card-title">
+                    <span class="card-icon">⚠️</span>
+                    Failed Login Attempts
+                    <span id="unreadBadge" style="background: #f44336; color: white; padding: 2px 8px; border-radius: 12px; font-size: 14px; margin-left: 10px; display: none;">0</span>
+                </h2>
+                <button class="clear-all-btn" style="background: #2196F3; margin-bottom: 15px;" onclick="markAllAsRead()">Mark All as Read</button>
+                <button class="clear-all-btn" onclick="clearFailedAttempts()">Clear All Attempts</button>
+                <div class="banned-list" id="failedAttemptsList" style="max-height: 400px;">
+                    <div class="loading">Loading failed attempts...</div>
+                </div>
+            </div>
+
+            <!-- Approved Emails -->
+            <div class="dashboard-card">
+                <h2 class="card-title">
+                    <span class="card-icon">✉️</span>
+                    Approved Emails
+                </h2>
+                
+                <!-- Auto-Approve Toggle -->
+                <div style="background: #f0f7ff; border: 1px solid #b3d9ff; border-radius: 8px; padding: 15px; margin-bottom: 20px;">
+                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;">
+                        <span style="font-weight: 600; color: #1976d2;">Auto-Approve @usd232.org Emails</span>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="autoApproveToggle" onchange="toggleAutoApprove()">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    <p style="font-size: 14px; color: #666; margin: 0;">
+                        <span id="autoApproveStatus">When enabled, all @usd232.org emails will be automatically approved for access.</span>
+                    </p>
+                </div>
+                
+                <div class="ban-form">
+                    <input type="email" id="approveEmail" class="ban-input" placeholder="email@usd232.org">
+                    <button class="ban-btn" style="background: #4CAF50;" onclick="approveEmail()">Add Email</button>
+                </div>
+                <div class="banned-list" id="approvedEmailsList">
+                    <div class="loading">Loading approved emails...</div>
+                </div>
+            </div>
+
+            <!-- Moderator Reports -->
             <div class="dashboard-card">
                 <h2 class="card-title">
                     <span class="card-icon">📢</span>
-                    Broadcast Announcements
+                    Moderator Reports
+                    <span id="unreadReportsBadge" style="background: #ff9800; color: white; padding: 2px 8px; border-radius: 12px; font-size: 14px; margin-left: 10px; display: none;">0</span>
                 </h2>
-                <div class="broadcast-form">
-                    <h3>Send Announcement</h3>
-                    <select id="broadcastPriority" class="priority-select">
-                        <option value="info">📝 Information</option>
-                        <option value="important">⚠️ Important</option>
-                        <option value="urgent">🚨 Urgent</option>
-                        <option value="emergency">🆘 Emergency</option>
-                    </select>
-                    <input type="text" id="broadcastTitle" class="dm-input" placeholder="Announcement title">
-                    <textarea id="broadcastMessage" class="dm-textarea" placeholder="Announcement message..."></textarea>
-                    <button class="dm-btn" onclick="sendBroadcast()">Send Broadcast</button>
+                <div class="banned-list" id="modReportsList" style="max-height: 400px;">
+                    <div class="loading">Loading moderator reports...</div>
                 </div>
-            </div>
-
-            <!-- Emergency Alerts -->
+            <!-- Statistics -->
             <div class="dashboard-card">
                 <h2 class="card-title">
-                    <span class="card-icon">🆘</span>
-                    Emergency System
+                    <span class="card-icon">📊</span>
+                    Statistics
                 </h2>
-                <div class="emergency-section">
-                    <button class="emergency-btn" onclick="sendEmergencyAlert()">🚨 SEND EMERGENCY ALERT</button>
-                    <p style="color: #666; font-size: 14px; text-align: center;">
-                        This will immediately notify all users and staff
-                    </p>
+                <div class="stat-item">
+                    <span class="stat-label">Total Messages</span>
+                    <span class="stat-value" id="totalMessages">0</span>
                 </div>
-            </div>
-
-            <!-- Scheduled Messages -->
-            <div class="dashboard-card">
-                <h2 class="card-title">
-                    <span class="card-icon">⏰</span>
-                    Schedule Messages
-                </h2>
-                <div class="dm-form">
-                    <input type="datetime-local" id="scheduleTime" class="dm-input">
-                    <input type="text" id="scheduleTitle" class="dm-input" placeholder="Message title">
-                    <textarea id="scheduleMessage" class="dm-textarea" placeholder="Scheduled message..."></textarea>
-                    <button class="dm-btn" onclick="scheduleMessage()">Schedule Message</button>
+                <div class="stat-item">
+                    <span class="stat-label">Active Channels</span>
+                    <span class="stat-value" id="activeChannels">0</span>
                 </div>
-                <div id="scheduledList">
-                    <!-- Scheduled messages will appear here -->
+                <div class="stat-item">
+                    <span class="stat-label">Banned Users</span>
+                    <span class="stat-value" id="bannedCount">0</span>
                 </div>
-            </div>
-
-            <!-- User Profile Modal -->
-            <div id="userProfileModal" class="modal">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h2 id="profileUsername">User Profile</h2>
-                        <span class="close" onclick="closeProfile()">&times;</span>
-                    </div>
-                    
-                    <div class="profile-section">
-                        <h3>User Information</h3>
-                        <div id="profileInfo">
-                            <!-- User info will be loaded here -->
-                        </div>
-                    </div>
-                    
-                    <div class="profile-section">
-                        <h3>Recent Messages</h3>
-                        <div id="profileMessages">
-                            <!-- Recent messages will be loaded here -->
-                        </div>
-                    </div>
-                    
-                    <div class="profile-section">
-                        <h3>Violations & Warnings</h3>
-                        <div id="profileViolations">
-                            <!-- Violations will be loaded here -->
-                        </div>
-                    </div>
-                    
-                    <div class="profile-section">
-                        <h3>Quick Actions</h3>
-                        <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-                            <button class="action-btn warn-btn" onclick="warnUser(currentProfileUser)">Warn</button>
-                            <button class="action-btn mute-btn" onclick="muteUser(currentProfileUser)">Mute 1H</button>
-                            <button class="action-btn ban-btn" onclick="banUser(currentProfileUser)">Ban</button>
-                            <button class="dm-btn" onclick="openDMToUser(currentProfileUser)">Send DM</button>
-                        </div>
-                    </div>
+                <div class="stat-item">
+                    <span class="stat-label">Banned Words</span>
+                    <span class="stat-value" id="wordCount">0</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Approved Emails</span>
+                    <span class="stat-value" id="approvedCount">0</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Pending Reports</span>
+                    <span class="stat-value" id="pendingReports">0</span>
                 </div>
             </div>
         </div>
@@ -734,8 +698,28 @@
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
 
-        let currentProfileUser = null;
-        let lockdownMode = false;
+        // Test Firebase connection
+        function testFirebaseConnection() {
+            const debugInfo = document.getElementById('debugInfo');
+            debugInfo.style.display = 'block';
+            
+            database.ref('.info/connected').on('value', (snapshot) => {
+                if (snapshot.val() === true) {
+                    debugInfo.innerHTML = '✅ Firebase connected successfully';
+                    debugInfo.style.background = '#e8f5e9';
+                    debugInfo.style.color = '#4CAF50';
+                    debugInfo.style.borderColor = '#c8e6c9';
+                    setTimeout(() => {
+                        debugInfo.style.display = 'none';
+                    }, 3000);
+                } else {
+                    debugInfo.innerHTML = '❌ Firebase connection lost';
+                    debugInfo.style.background = '#ffebee';
+                    debugInfo.style.color = '#f44336';
+                    debugInfo.style.borderColor = '#ffcdd2';
+                }
+            });
+        }
 
         // Admin login
         document.getElementById('adminLoginForm').addEventListener('submit', function(e) {
@@ -746,6 +730,7 @@
             if (password === 'skid') {
                 document.getElementById('loginScreen').style.display = 'none';
                 document.getElementById('dashboardScreen').style.display = 'block';
+                testFirebaseConnection();
                 loadDashboard();
             } else {
                 errorMsg.textContent = 'Invalid password';
@@ -753,490 +738,355 @@
             }
         });
 
-        // Load dashboard
+        // Load dashboard data
         function loadDashboard() {
-            startLiveMessageMonitoring();
-            loadScheduledMessages();
-            checkScheduledMessages();
+            loadChannels();
+            loadBannedUsers();
+            loadBannedWords();
+            loadApprovedEmails();
+            loadFailedAttempts();
+            loadModPasswords();
+            loadModReports();
+            loadAutoApproveSettings();
+            loadStats();
         }
 
-        // Live Message Monitoring
-        function startLiveMessageMonitoring() {
-            const liveContainer = document.getElementById('liveMessages');
+        // Generate random mod password - REUSABLE VERSION
+        function generateModPassword() {
+            console.log('Generating mod password...');
             
-            database.ref('channels').on('child_added', (channelSnapshot) => {
-                const channelName = channelSnapshot.key;
-                
-                database.ref(`channels/${channelName}/messages`).on('child_added', (messageSnapshot) => {
-                    const message = messageSnapshot.val();
-                    if (message.author !== 'System') {
-                        displayLiveMessage(message, channelName, messageSnapshot.key);
-                    }
-                });
-            });
-        }
-
-        function displayLiveMessage(message, channel, messageId) {
-            const liveContainer = document.getElementById('liveMessages');
-            const messageDiv = document.createElement('div');
-            messageDiv.className = 'live-message';
-            messageDiv.innerHTML = `
-                <div class="message-header">
-                    <div class="message-info">
-                        <span class="message-author">${message.nickname}</span>
-                        <span class="message-channel">#${channel}</span>
-                        <span class="message-time">${new Date(message.timestamp).toLocaleTimeString()}</span>
-                    </div>
-                </div>
-                <div class="message-text">${message.text}</div>
-                <div class="message-actions">
-                    <button class="action-btn warn-btn" onclick="warnUser('${message.nickname}')">Warn</button>
-                    <button class="action-btn mute-btn" onclick="muteUser('${message.nickname}')">Mute</button>
-                    <button class="action-btn ban-btn" onclick="quickBanUser('${message.nickname}', '${message.author}')">Ban</button>
-                    <button class="action-btn profile-btn" onclick="viewProfile('${message.nickname}', '${message.author}')">Profile</button>
-                </div>
-            `;
-            
-            liveContainer.insertBefore(messageDiv, liveContainer.firstChild);
-            
-            // Keep only last 50 messages
-            while (liveContainer.children.length > 50) {
-                liveContainer.removeChild(liveContainer.lastChild);
-            }
-        }
-
-        // Quick Actions
-        function warnUser(nickname) {
-            const reason = prompt(`Enter warning reason for ${nickname}:`);
-            if (reason) {
-                const warning = {
-                    type: 'warning',
-                    user: nickname,
-                    reason: reason,
-                    timestamp: Date.now(),
-                    issuedBy: 'Admin'
-                };
-                
-                database.ref('userViolations').push(warning);
-                sendDirectMessageToUser(nickname, `⚠️ Warning: ${reason}`, 'urgent');
-                alert(`Warning sent to ${nickname}`);
-            }
-        }
-
-        function muteUser(nickname) {
-            const duration = prompt('Mute duration in minutes:', '60');
-            if (duration) {
-                const muteData = {
-                    user: nickname,
-                    mutedUntil: Date.now() + (parseInt(duration) * 60000),
-                    reason: 'Muted by admin',
-                    timestamp: Date.now()
-                };
-                
-                database.ref('mutedUsers').push(muteData);
-                sendDirectMessageToUser(nickname, `🔇 You have been muted for ${duration} minutes.`, 'urgent');
-                alert(`${nickname} muted for ${duration} minutes`);
-            }
-        }
-
-        function quickBanUser(nickname, email) {
-            if (confirm(`Ban ${nickname}?`)) {
-                database.ref('bannedUsers').push({
-                    nickname: nickname,
-                    email: email,
-                    bannedBy: 'Admin Dashboard',
-                    bannedAt: Date.now(),
-                    reason: 'Banned by admin via live monitor'
-                });
-                alert(`${nickname} has been banned`);
-            }
-        }
-
-        // User Profile System
-        function viewProfile(nickname, email) {
-            currentProfileUser = { nickname, email };
-            document.getElementById('profileUsername').textContent = `${nickname} Profile`;
-            
-            // Load user info
-            document.getElementById('profileInfo').innerHTML = `
-                <div style="background: #f5f5f5; padding: 15px; border-radius: 8px;">
-                    <p><strong>Nickname:</strong> ${nickname}</p>
-                    <p><strong>Email:</strong> ${email || 'Not available'}</p>
-                    <p><strong>Join Date:</strong> ${new Date().toLocaleDateString()}</p>
-                    <p><strong>Status:</strong> <span style="color: green;">Active</span></p>
-                </div>
-            `;
-            
-            // Load recent messages
-            loadUserMessages(nickname);
-            
-            // Load violations
-            loadUserViolations(nickname);
-            
-            document.getElementById('userProfileModal').style.display = 'block';
-        }
-
-        function loadUserMessages(nickname) {
-            const container = document.getElementById('profileMessages');
-            container.innerHTML = '<div style="color: #666;">Loading recent messages...</div>';
-            
-            // Get messages from all channels
-            database.ref('channels').once('value', (snapshot) => {
-                const messages = [];
-                snapshot.forEach((channelSnapshot) => {
-                    const channelName = channelSnapshot.key;
-                    channelSnapshot.child('messages').forEach((messageSnapshot) => {
-                        const message = messageSnapshot.val();
-                        if (message.nickname === nickname) {
-                            message.channel = channelName;
-                            message.id = messageSnapshot.key;
-                            messages.push(message);
-                        }
-                    });
-                });
-                
-                messages.sort((a, b) => b.timestamp - a.timestamp);
-                const recent = messages.slice(0, 10);
-                
-                if (recent.length > 0) {
-                    container.innerHTML = recent.map(msg => `
-                        <div style="background: #f9f9f9; padding: 10px; margin-bottom: 8px; border-radius: 6px;">
-                            <div style="font-size: 12px; color: #666; margin-bottom: 4px;">
-                                #${msg.channel} - ${new Date(msg.timestamp).toLocaleString()}
-                            </div>
-                            <div>${msg.text}</div>
-                        </div>
-                    `).join('');
-                } else {
-                    container.innerHTML = '<div style="color: #666;">No recent messages found.</div>';
-                }
-            });
-        }
-
-        function loadUserViolations(nickname) {
-            const container = document.getElementById('profileViolations');
-            
-            database.ref('userViolations').orderByChild('user').equalTo(nickname).once('value', (snapshot) => {
-                if (snapshot.exists()) {
-                    const violations = [];
-                    snapshot.forEach((violationSnapshot) => {
-                        violations.push(violationSnapshot.val());
-                    });
-                    
-                    violations.sort((a, b) => b.timestamp - a.timestamp);
-                    
-                    container.innerHTML = violations.map(violation => `
-                        <div class="violation-item">
-                            <div class="violation-date">${new Date(violation.timestamp).toLocaleString()}</div>
-                            <div class="violation-reason"><strong>${violation.type}:</strong> ${violation.reason}</div>
-                        </div>
-                    `).join('');
-                } else {
-                    container.innerHTML = '<div style="color: #666;">No violations on record.</div>';
-                }
-            });
-        }
-
-        function closeProfile() {
-            document.getElementById('userProfileModal').style.display = 'none';
-            currentProfileUser = null;
-        }
-
-        // Direct Messaging System
-        function sendDirectMessage() {
-            const recipient = document.getElementById('dmRecipient').value.trim();
-            const priority = document.getElementById('dmPriority').value;
-            const message = document.getElementById('dmMessage').value.trim();
-            
-            if (!recipient || !message) {
-                alert('Please enter recipient and message');
-                return;
+            const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789';
+            let password = '';
+            for (let i = 0; i < 12; i++) {
+                password += chars.charAt(Math.floor(Math.random() * chars.length));
             }
             
-            sendDirectMessageToUser(recipient, message, priority);
+            console.log('Generated password:', password);
             
-            // Clear form
-            document.getElementById('dmRecipient').value = '';
-            document.getElementById('dmMessage').value = '';
-            
-            alert(`Direct message sent to ${recipient}`);
-        }
-
-        function sendDirectMessageToUser(recipient, message, priority = 'normal') {
-            const dmData = {
-                from: 'Admin',
-                to: recipient,
-                message: message,
-                priority: priority,
-                timestamp: Date.now(),
-                read: false,
-                type: 'direct_message'
-            };
-            
-            database.ref('directMessages').push(dmData);
-            
-            // Also send as system notification
-            const notification = {
-                type: 'admin_message',
-                recipient: recipient,
-                message: message,
-                priority: priority,
-                timestamp: Date.now(),
-                read: false
-            };
-            
-            database.ref('userNotifications').push(notification);
-        }
-
-        function openDMToUser(user) {
-            document.getElementById('dmRecipient').value = user.nickname;
-            closeProfile();
-            document.getElementById('dmMessage').focus();
-        }
-
-        // Broadcast System
-        function sendBroadcast() {
-            const priority = document.getElementById('broadcastPriority').value;
-            const title = document.getElementById('broadcastTitle').value.trim();
-            const message = document.getElementById('broadcastMessage').value.trim();
-            
-            if (!title || !message) {
-                alert('Please enter title and message');
-                return;
-            }
-            
-            const broadcastData = {
-                from: 'Admin',
-                title: title,
-                message: message,
-                priority: priority,
-                timestamp: Date.now(),
-                type: 'broadcast'
-            };
-            
-            database.ref('broadcasts').push(broadcastData);
-            
-            // Send to all active channels as system message
-            database.ref('channels').once('value', (snapshot) => {
-                snapshot.forEach((channelSnapshot) => {
-                    const channelName = channelSnapshot.key;
-                    
-                    const systemMessage = {
-                        author: 'System',
-                        nickname: 'System',
-                        text: `📢 ${title}: ${message}`,
-                        timestamp: Date.now(),
-                        priority: priority,
-                        isHtml: true
-                    };
-                    
-                    database.ref(`channels/${channelName}/messages`).push(systemMessage);
-                });
-            });
-            
-            // Clear form
-            document.getElementById('broadcastTitle').value = '';
-            document.getElementById('broadcastMessage').value = '';
-            
-            alert('Broadcast sent to all channels!');
-        }
-
-        function quickAnnouncement() {
-            const message = prompt('Quick announcement message:');
-            if (message) {
-                document.getElementById('broadcastTitle').value = 'Admin Announcement';
-                document.getElementById('broadcastMessage').value = message;
-                document.getElementById('broadcastPriority').value = 'important';
-                sendBroadcast();
-            }
-        }
-
-        // Emergency Alert System
-        function sendEmergencyAlert() {
-            if (confirm('Send EMERGENCY ALERT to all users? This should only be used for real emergencies.')) {
-                const emergencyData = {
-                    from: 'Emergency System',
-                    title: '🚨 EMERGENCY ALERT',
-                    message: 'Emergency alert activated. Please follow emergency procedures and check with school administration immediately.',
-                    priority: 'emergency',
-                    timestamp: Date.now(),
-                    type: 'emergency'
-                };
-                
-                database.ref('emergencyAlerts').push(emergencyData);
-                
-                // Send to all channels
-                database.ref('channels').once('value', (snapshot) => {
-                    snapshot.forEach((channelSnapshot) => {
-                        const channelName = channelSnapshot.key;
-                        
-                        const emergencyMessage = {
-                            author: 'Emergency System',
-                            nickname: 'Emergency System',
-                            text: '🚨 EMERGENCY ALERT: Emergency procedures activated. Please check with school administration immediately.',
-                            timestamp: Date.now(),
-                            priority: 'emergency',
-                            isHtml: true
-                        };
-                        
-                        database.ref(`channels/${channelName}/messages`).push(emergencyMessage);
-                    });
-                });
-                
-                // Enable lockdown mode
-                toggleLockdown(true);
-                
-                alert('🚨 EMERGENCY ALERT SENT TO ALL USERS');
-            }
-        }
-
-        // Lockdown Mode
-        function toggleLockdown(force = null) {
-            if (force !== null) {
-                lockdownMode = force;
-            } else {
-                lockdownMode = !lockdownMode;
-            }
-            
-            database.ref('systemSettings/lockdownMode').set(lockdownMode);
-            
-            if (lockdownMode) {
-                // Send lockdown message
-                database.ref('channels').once('value', (snapshot) => {
-                    snapshot.forEach((channelSnapshot) => {
-                        const channelName = channelSnapshot.key;
-                        
-                        const lockdownMessage = {
-                            author: 'System',
-                            nickname: 'System',
-                            text: '🔒 LOCKDOWN MODE ACTIVATED - Normal chat has been temporarily suspended. Emergency information only.',
-                            timestamp: Date.now(),
-                            priority: 'emergency',
-                            isHtml: true
-                        };
-                        
-                        database.ref(`channels/${channelName}/messages`).push(lockdownMessage);
-                    });
-                });
-                
-                alert('🔒 LOCKDOWN MODE ACTIVATED');
-            } else {
-                alert('🔓 Lockdown mode deactivated');
-            }
-        }
-
-        // Scheduled Messages
-        function scheduleMessage() {
-            const time = document.getElementById('scheduleTime').value;
-            const title = document.getElementById('scheduleTitle').value.trim();
-            const message = document.getElementById('scheduleMessage').value.trim();
-            
-            if (!time || !title || !message) {
-                alert('Please fill in all fields');
-                return;
-            }
-            
-            const scheduleTime = new Date(time).getTime();
-            if (scheduleTime <= Date.now()) {
-                alert('Please select a future time');
-                return;
-            }
-            
-            const scheduledData = {
-                title: title,
-                message: message,
-                scheduledFor: scheduleTime,
+            // Create the mod password object - REUSABLE
+            const modPassword = {
+                password: password,
                 createdAt: Date.now(),
                 createdBy: 'Admin',
-                status: 'pending',
-                type: 'scheduled_message'
+                active: true,
+                reusable: true,
+                usageCount: 0,
+                lastUsedAt: null,
+                lastUsedBy: null
             };
             
-            database.ref('scheduledMessages').push(scheduledData);
+            console.log('Attempting to save to Firebase...', modPassword);
             
-            // Clear form
-            document.getElementById('scheduleTime').value = '';
-            document.getElementById('scheduleTitle').value = '';
-            document.getElementById('scheduleMessage').value = '';
-            
-            alert('Message scheduled successfully!');
-            loadScheduledMessages();
+            // Add to Firebase with better error handling
+            database.ref('modPasswords').push(modPassword)
+                .then((result) => {
+                    console.log('✅ Password saved successfully!', result.key);
+                    alert(`✅ New moderator password generated: ${password}\n\n🔄 This code can be used multiple times!\n\nShare this with your moderators.\n\nPassword saved to database with ID: ${result.key}`);
+                })
+                .catch((error) => {
+                    console.error('❌ Error saving password:', error);
+                    alert(`❌ Error saving password: ${error.message}\n\nTry again or check Firebase permissions.`);
+                });
         }
 
-        function loadScheduledMessages() {
-            const container = document.getElementById('scheduledList');
+        // Load mod passwords - CLEAN VERSION WITHOUT TIMESTAMP CLUTTER
+        function loadModPasswords() {
+            console.log('Loading mod passwords...');
+            const passwordsList = document.getElementById('modPasswordsList');
             
-            database.ref('scheduledMessages').orderByChild('status').equalTo('pending').on('value', (snapshot) => {
-                container.innerHTML = '';
+            database.ref('modPasswords').on('value', (snapshot) => {
+                console.log('Mod passwords snapshot received:', snapshot.exists());
+                passwordsList.innerHTML = '';
+                const passwords = [];
                 
                 if (snapshot.exists()) {
-                    snapshot.forEach((scheduleSnapshot) => {
-                        const scheduled = scheduleSnapshot.val();
-                        const key = scheduleSnapshot.key;
+                    snapshot.forEach((passSnapshot) => {
+                        const passData = passSnapshot.val();
+                        passData.key = passSnapshot.key;
+                        passwords.unshift(passData); // Show newest first
+                        console.log('Found password:', passData);
+                    });
+                    
+                    console.log(`Total passwords found: ${passwords.length}`);
+                    
+                    passwords.forEach(passData => {
+                        const passItem = document.createElement('div');
+                        passItem.className = 'banned-item';
+                        passItem.style.background = passData.active ? '#e8f5e9' : '#f5f5f5';
                         
-                        const messageDiv = document.createElement('div');
-                        messageDiv.className = 'scheduled-message';
-                        messageDiv.innerHTML = `
-                            <div class="schedule-date">Scheduled for: ${new Date(scheduled.scheduledFor).toLocaleString()}</div>
-                            <div style="font-weight: bold; margin: 5px 0;">${scheduled.title}</div>
-                            <div style="color: #666; font-size: 14px; margin-bottom: 8px;">${scheduled.message}</div>
-                            <button class="action-btn" style="background: #f44336; color: white;" onclick="cancelScheduled('${key}')">Cancel</button>
+                        // Clean display - just show usage count, not individual timestamps
+                        const usageCount = passData.usageCount || 0;
+                        const isReusable = passData.reusable !== false;
+                        
+                        let statusText = '';
+                        let statusClass = '';
+                        
+                        if (!passData.active) {
+                            statusText = '❌ Disabled';
+                            statusClass = 'status-used';
+                        } else if (isReusable) {
+                            statusText = `🔄 Active (${usageCount} uses)`;
+                            statusClass = 'status-active';
+                        } else {
+                            statusText = usageCount > 0 ? '✓ Used' : '✓ Active';
+                            statusClass = usageCount > 0 ? 'status-used' : 'status-active';
+                        }
+                        
+                        // Clean timestamp display - only show creation and last use (if exists)
+                        let timeInfo = `Created: ${new Date(passData.createdAt).toLocaleDateString()}`;
+                        if (passData.lastUsedAt && usageCount > 0) {
+                            timeInfo += ` | Last used: ${new Date(passData.lastUsedAt).toLocaleDateString()}`;
+                        }
+                        
+                        passItem.innerHTML = `
+                            <div class="banned-info">
+                                <div class="banned-nickname" style="font-family: monospace; font-size: 16px;">
+                                    ${passData.password}
+                                    <span class="status-indicator ${statusClass}">${statusText}</span>
+                                </div>
+                                <div class="banned-email">
+                                    ${timeInfo}
+                                </div>
+                            </div>
+                            <div style="display: flex; gap: 5px;">
+                                <button class="unban-btn" style="background: ${passData.active ? '#f44336' : '#4CAF50'};" onclick="toggleModPassword('${passData.key}', ${passData.active})">${passData.active ? 'Disable' : 'Enable'}</button>
+                                <button class="unban-btn" style="background: #ff5722;" onclick="deleteModPassword('${passData.key}')">Delete</button>
+                            </div>
                         `;
-                        container.appendChild(messageDiv);
+                        passwordsList.appendChild(passItem);
                     });
                 } else {
-                    container.innerHTML = '<div style="color: #666; text-align: center; padding: 20px;">No scheduled messages</div>';
+                    console.log('No mod passwords found in database');
+                    passwordsList.innerHTML = '<div class="empty-state">No moderator passwords generated yet<br><small>Click "Generate New Password" to create one</small></div>';
+                }
+            }, (error) => {
+                console.error('Error loading mod passwords:', error);
+                passwordsList.innerHTML = '<div class="empty-state">Error loading passwords: ' + error.message + '</div>';
+            });
+        }
+
+        // Toggle mod password (enable/disable)
+        function toggleModPassword(key, currentStatus) {
+            const newStatus = !currentStatus;
+            const action = newStatus ? 'enable' : 'disable';
+            
+            if (confirm(`Are you sure you want to ${action} this moderator password?`)) {
+                console.log(`${action === 'enable' ? 'Enabling' : 'Disabling'} password with key:`, key);
+                database.ref('modPasswords/' + key).update({ active: newStatus })
+                    .then(() => {
+                        console.log(`✅ Password ${action}d successfully`);
+                        alert(`Moderator password ${action}d successfully`);
+                    })
+                    .catch((error) => {
+                        console.error(`❌ Error ${action}ing password:`, error);
+                        alert(`Error ${action}ing password: ` + error.message);
+                    });
+            }
+        }
+
+        // Delete mod password
+        function deleteModPassword(key) {
+            if (confirm('Delete this moderator password permanently? This cannot be undone.')) {
+                console.log('Deleting password with key:', key);
+                database.ref('modPasswords/' + key).remove()
+                    .then(() => {
+                        console.log('✅ Password deleted successfully');
+                        alert('Moderator password deleted');
+                    })
+                    .catch((error) => {
+                        console.error('❌ Error deleting password:', error);
+                        alert('Error deleting password: ' + error.message);
+                    });
+            }
+        }
+
+        // Load failed login attempts
+        function loadFailedAttempts() {
+            const failedList = document.getElementById('failedAttemptsList');
+            
+            database.ref('failedAttempts').orderByChild('timestamp').limitToLast(50).on('value', (snapshot) => {
+                failedList.innerHTML = '';
+                const attempts = [];
+                
+                snapshot.forEach((attemptSnapshot) => {
+                    const attempt = attemptSnapshot.val();
+                    attempt.key = attemptSnapshot.key;
+                    attempts.unshift(attempt); // Show newest first
+                });
+                
+                if (attempts.length > 0) {
+                    attempts.forEach(attempt => {
+                        const attemptItem = document.createElement('div');
+                        attemptItem.className = 'banned-item';
+                        attemptItem.style.background = '#fff3cd';
+                        attemptItem.style.borderLeft = '4px solid #ffc107';
+                        attemptItem.innerHTML = `
+                            <div class="banned-info">
+                                <div class="banned-nickname" style="color: #856404;">
+                                    ${attempt.email}
+                                    <button class="unban-btn" style="background: #4CAF50; margin-left: 10px; font-size: 12px;" onclick="quickApprove('${attempt.email}')">Quick Approve</button>
+                                </div>
+                                <div class="banned-email">
+                                    Nickname tried: ${attempt.nickname || 'N/A'} | 
+                                    Time: ${new Date(attempt.timestamp).toLocaleString()}
+                                </div>
+                            </div>
+                            <button class="unban-btn" style="background: #ff5722;" onclick="removeFailedAttempt('${attempt.key}')">Delete</button>
+                        `;
+                        failedList.appendChild(attemptItem);
+                    });
+                } else {
+                    failedList.innerHTML = '<div class="empty-state">No failed login attempts</div>';
+                }
+            });
+            
+            // Check for unread notifications
+            database.ref('adminNotifications').orderByChild('read').equalTo(false).on('value', (snapshot) => {
+                const unreadCount = snapshot.numChildren();
+                const badge = document.getElementById('unreadBadge');
+                if (unreadCount > 0) {
+                    badge.style.display = 'inline-block';
+                    badge.textContent = unreadCount;
+                } else {
+                    badge.style.display = 'none';
                 }
             });
         }
 
-        function cancelScheduled(key) {
-            if (confirm('Cancel this scheduled message?')) {
-                database.ref(`scheduledMessages/${key}`).update({ status: 'cancelled' });
+        // Quick approve email from failed attempts
+        function quickApprove(email) {
+            if (confirm(`Add ${email} to approved list?`)) {
+                database.ref('approvedEmails').push(email.toLowerCase());
+                alert(`${email} has been approved!`);
             }
         }
 
-        function checkScheduledMessages() {
-            setInterval(() => {
-                const now = Date.now();
-                
-                database.ref('scheduledMessages').orderByChild('status').equalTo('pending').once('value', (snapshot) => {
-                    snapshot.forEach((scheduleSnapshot) => {
-                        const scheduled = scheduleSnapshot.val();
-                        const key = scheduleSnapshot.key;
-                        
-                        if (scheduled.scheduledFor <= now) {
-                            // Time to send the message
-                            sendScheduledMessage(scheduled, key);
-                        }
-                    });
-                });
-            }, 30000); // Check every 30 seconds
+        // Remove failed attempt
+        function removeFailedAttempt(key) {
+            database.ref('failedAttempts/' + key).remove();
         }
 
-        function sendScheduledMessage(scheduled, key) {
-            // Send to all channels
-            database.ref('channels').once('value', (snapshot) => {
-                snapshot.forEach((channelSnapshot) => {
-                    const channelName = channelSnapshot.key;
-                    
-                    const systemMessage = {
-                        author: 'System',
-                        nickname: 'System',
-                        text: `⏰ ${scheduled.title}: ${scheduled.message}`,
-                        timestamp: Date.now(),
-                        isHtml: true
-                    };
-                    
-                    database.ref(`channels/${channelName}/messages`).push(systemMessage);
+        // Clear all failed attempts
+        function clearFailedAttempts() {
+            if (confirm('Clear all failed login attempts?')) {
+                database.ref('failedAttempts').remove();
+                alert('All failed attempts cleared');
+            }
+        }
+
+        // Mark all notifications as read
+        function markAllAsRead() {
+            database.ref('adminNotifications').once('value', (snapshot) => {
+                snapshot.forEach((notifSnapshot) => {
+                    notifSnapshot.ref.update({ read: true });
                 });
             });
+            alert('All notifications marked as read');
+        }
+
+        // Load approved emails
+        function loadApprovedEmails() {
+            const approvedList = document.getElementById('approvedEmailsList');
             
-            // Mark as sent
-            database.ref(`scheduledMessages/${key}`).update({ 
-                status: 'sent',
-                sentAt: Date.now()
+            database.ref('approvedEmails').on('value', (snapshot) => {
+                approvedList.innerHTML = '';
+                let approvedCount = 0;
+                
+                if (snapshot.exists()) {
+                    snapshot.forEach((emailSnapshot) => {
+                        const email = emailSnapshot.val();
+                        const key = emailSnapshot.key;
+                        approvedCount++;
+                        
+                        const emailItem = document.createElement('div');
+                        emailItem.className = 'banned-item';
+                        emailItem.innerHTML = `
+                            <div class="banned-info">
+                                <div class="banned-nickname">${email}</div>
+                            </div>
+                            <button class="unban-btn" onclick="removeApprovedEmail('${key}')">Remove</button>
+                        `;
+                        approvedList.appendChild(emailItem);
+                    });
+                    
+                    document.getElementById('approvedCount').textContent = approvedCount;
+                } else {
+                    approvedList.innerHTML = '<div class="empty-state">No approved emails. Add some to allow access.</div>';
+                    document.getElementById('approvedCount').textContent = '0';
+                }
             });
+        }
+
+        // Approve email
+        function approveEmail() {
+            const email = document.getElementById('approveEmail').value.trim().toLowerCase();
+            
+            if (!email) {
+                alert('Please enter an email address');
+                return;
+            }
+            
+            if (!email.endsWith('@usd232.org')) {
+                alert('Email must be a @usd232.org address');
+                return;
+            }
+            
+            // Check if already exists
+            database.ref('approvedEmails').orderByValue().equalTo(email).once('value', (snapshot) => {
+                if (snapshot.exists()) {
+                    alert('This email is already approved');
+                } else {
+                    database.ref('approvedEmails').push(email);
+                    document.getElementById('approveEmail').value = '';
+                    alert(`${email} has been approved`);
+                }
+            });
+        }
+
+        // Remove approved email
+        function removeApprovedEmail(key) {
+            if (confirm('Remove this email from approved list?')) {
+                database.ref('approvedEmails/' + key).remove();
+                alert('Email removed from approved list');
+            }
+        }
+
+        // Load channels
+        function loadChannels() {
+            const channelList = document.getElementById('channelList');
+            
+            database.ref('channels').on('value', (snapshot) => {
+                channelList.innerHTML = '';
+                let channelCount = 0;
+                
+                if (snapshot.exists()) {
+                    snapshot.forEach((channelSnapshot) => {
+                        const channelName = '#' + channelSnapshot.key;
+                        channelCount++;
+                        
+                        const channelItem = document.createElement('div');
+                        channelItem.className = 'channel-item';
+                        channelItem.innerHTML = `
+                            <span class="channel-name">${channelName}</span>
+                            <button class="clear-btn" onclick="clearChannel('${channelSnapshot.key}')">Clear</button>
+                        `;
+                        channelList.appendChild(channelItem);
+                    });
+                    
+                    document.getElementById('activeChannels').textContent = channelCount;
+                } else {
+                    channelList.innerHTML = '<div class="empty-state">No active channels</div>';
+                    document.getElementById('activeChannels').textContent = '0';
+                }
+            });
+        }
+
+        // Clear single channel
+        function clearChannel(channel) {
+            if (confirm(`Clear all messages in #${channel}?`)) {
+                database.ref('channels/' + channel + '/messages').remove();
+                alert(`Channel #${channel} cleared`);
+            }
         }
 
         // Clear all channels
@@ -1247,6 +1097,133 @@
             }
         }
 
+        // Load banned users
+        function loadBannedUsers() {
+            const bannedList = document.getElementById('bannedList');
+            
+            database.ref('bannedUsers').on('value', (snapshot) => {
+                bannedList.innerHTML = '';
+                let bannedCount = 0;
+                
+                if (snapshot.exists()) {
+                    snapshot.forEach((bannedSnapshot) => {
+                        const banned = bannedSnapshot.val();
+                        const key = bannedSnapshot.key;
+                        bannedCount++;
+                        
+                        const bannedItem = document.createElement('div');
+                        bannedItem.className = 'banned-item';
+                        bannedItem.innerHTML = `
+                            <div class="banned-info">
+                                <div class="banned-nickname">${banned.nickname}</div>
+                                <div class="banned-email">${banned.email || 'Email not recorded'} | Banned by: ${banned.bannedBy || 'Unknown'}</div>
+                            </div>
+                            <button class="unban-btn" onclick="unbanUser('${key}')">Unban</button>
+                        `;
+                        bannedList.appendChild(bannedItem);
+                    });
+                    
+                    document.getElementById('bannedCount').textContent = bannedCount;
+                } else {
+                    bannedList.innerHTML = '<div class="empty-state">No banned users</div>';
+                    document.getElementById('bannedCount').textContent = '0';
+                }
+            });
+        }
+
+        // Ban user
+        function banUser() {
+            const nickname = document.getElementById('banNickname').value.trim();
+            
+            if (!nickname) {
+                alert('Please enter a nickname');
+                return;
+            }
+            
+            database.ref('bannedUsers').push({
+                nickname: nickname,
+                bannedBy: 'Admin Dashboard',
+                bannedAt: Date.now()
+            });
+            
+            document.getElementById('banNickname').value = '';
+            alert(`${nickname} has been banned`);
+        }
+
+        // Unban user
+        function unbanUser(key) {
+            if (confirm('Unban this user?')) {
+                database.ref('bannedUsers/' + key).remove();
+                alert('User unbanned');
+            }
+        }
+
+        // Load banned words
+        function loadBannedWords() {
+            const wordList = document.getElementById('wordList');
+            
+            database.ref('bannedWords').on('value', (snapshot) => {
+                wordList.innerHTML = '';
+                let wordCount = 0;
+                
+                if (snapshot.exists()) {
+                    snapshot.forEach((wordSnapshot) => {
+                        const word = wordSnapshot.val();
+                        const key = wordSnapshot.key;
+                        wordCount++;
+                        
+                        const wordTag = document.createElement('div');
+                        wordTag.className = 'word-tag';
+                        wordTag.innerHTML = `
+                            ${word}
+                            <span class="remove-word" onclick="removeBannedWord('${key}')">×</span>
+                        `;
+                        wordList.appendChild(wordTag);
+                    });
+                    
+                    document.getElementById('wordCount').textContent = wordCount;
+                } else {
+                    wordList.innerHTML = '<div class="empty-state">No banned words</div>';
+                    document.getElementById('wordCount').textContent = '0';
+                }
+            });
+        }
+
+        // Add banned word
+        function addBannedWord() {
+            const word = document.getElementById('bannedWord').value.trim().toLowerCase();
+            
+            if (!word) {
+                alert('Please enter a word');
+                return;
+            }
+            
+            database.ref('bannedWords').push(word);
+            document.getElementById('bannedWord').value = '';
+        }
+
+        // Remove banned word
+        function removeBannedWord(key) {
+            database.ref('bannedWords/' + key).remove();
+        }
+
+        // Load statistics
+        function loadStats() {
+            // Count total messages
+            database.ref('channels').once('value', (snapshot) => {
+                let totalMessages = 0;
+                
+                if (snapshot.exists()) {
+                    snapshot.forEach((channelSnapshot) => {
+                        const messages = channelSnapshot.child('messages').numChildren();
+                        totalMessages += messages;
+                    });
+                }
+                
+                document.getElementById('totalMessages').textContent = totalMessages;
+            });
+        }
+
         // Logout
         function logout() {
             document.getElementById('loginScreen').style.display = 'block';
@@ -1255,11 +1232,323 @@
             document.getElementById('errorMessage').style.display = 'none';
         }
 
-        // Close modal when clicking outside
-        window.onclick = function(event) {
-            const modal = document.getElementById('userProfileModal');
-            if (event.target === modal) {
-                closeProfile();
+        // Initialize banned words list (run this once)
+        function initializeBannedWords() {
+            const defaultBannedWords = [
+                "abbo", "abo", "abortion", "abuse", "addict", "addicts", "adult", "africa", "african", "alla",
+                "allah", "alligatorbait", "amateur", "american", "anal", "analannie", "analsex", "angie", "angry", "anus",
+                "arab", "arabs", "areola", "argie", "aroused", "arse", "arsehole", "asian", "ass", "assassin",
+                "assassinate", "assassination", "assault", "assbagger", "assblaster", "assclown", "asscowboy", "asses", "assfuck", "assfucker",
+                "asshat", "asshole", "assholes", "asshore", "assjockey", "asskiss", "asskisser", "assklown", "asslick", "asslicker",
+                "asslover", "assman", "assmonkey", "assmunch", "assmuncher", "asspacker", "asspirate", "asspuppies", "assranger", "asswhore",
+                "asswipe", "athletesfoot", "attack", "australian", "babe", "babies", "backdoor", "backdoorman", "backseat", "badfuck",
+                "balllicker", "balls", "ballsack", "banging", "baptist", "barelylegal", "barf", "barface", "barfface", "bast",
+                "bastard", "bazongas", "bazooms", "beaner", "beast", "beastality", "beastial", "beastiality", "beatoff", "beat-off",
+                "beatyourmeat", "beaver", "bestial", "bestiality", "bi", "biatch", "bible", "bicurious", "bigass", "bigbastard",
+                "bigbutt", "bigger", "bisexual", "bi-sexual", "bitch", "bitcher", "bitches", "bitchez", "bitchin", "bitching",
+                "bitchslap", "bitchy", "biteme", "black", "blackman", "blackout", "blacks", "blind", "blow", "blowjob",
+                "boang", "bogan", "bohunk", "bollick", "bollock", "bomb", "bombers", "bombing", "bombs", "bomd",
+                "bondage", "boner", "bong", "boob", "boobies", "boobs", "booby", "boody", "boom", "boong",
+                "boonga", "boonie", "booty", "bootycall", "bountybar", "bra", "brea5t", "breast", "breastjob", "breastlover",
+                "breastman", "brothel", "bugger", "buggered", "buggery", "bullcrap", "bulldike", "bulldyke", "bullshit", "bumblefuck",
+                "bumfuck", "bunga", "bunghole", "buried", "burn", "butchbabes", "butchdike", "butchdyke", "butt", "buttbang",
+                "butt-bang", "buttface", "buttfuck", "butt-fuck", "buttfucker", "butt-fucker", "buttfuckers", "butt-fuckers", "butthead", "buttman",
+                "buttmunch", "buttmuncher", "buttpirate", "buttplug", "buttstain", "byatch", "cacker", "cameljockey", "cameltoe", "canadian",
+                "cancer", "carpetmuncher", "carruth", "catholic", "catholics", "cemetery", "chav", "cherrypopper", "chickslick", "children's",
+                "chin", "chinaman", "chinamen", "chinese", "chink", "chinky", "choad", "chode", "christ", "christian",
+                "church", "cigarette", "cigs", "clamdigger", "clamdiver", "clit", "clitoris", "clogwog", "cocaine", "cock",
+                "cockblock", "cockblocker", "cockcowboy", "cockfight", "cockhead", "cockknob", "cocklicker", "cocklover", "cocknob", "cockqueen",
+                "cockrider", "cocksman", "cocksmith", "cocksmoker", "cocksucer", "cocksuck", "cocksucked", "cocksucker", "cocksucking", "cocktail",
+                "cocktease", "cocky", "cohee", "coitus", "color", "colored", "coloured", "commie", "communist", "condom",
+                "conservative", "conspiracy", "coolie", "cooly", "coon", "coondog", "copulate", "cornhole", "corruption", "cra5h",
+                "crabs", "crack", "crackpipe", "crackwhore", "crack-whore", "crap", "crapola", "crapper", "crappy", "crash",
+                "creamy", "crime", "crimes", "criminal", "criminals", "crotch", "crotchjockey", "crotchmonkey", "crotchrot", "cum",
+                "cumbubble", "cumfest", "cumjockey", "cumm", "cummer", "cumming", "cumquat", "cumqueen", "cumshot", "cunilingus",
+                "cunillingus", "cunn", "cunnilingus", "cunntt", "cunt", "cunteyed", "cuntfuck", "cuntfucker", "cuntlick", "cuntlicker",
+                "cuntlicking", "cuntsucker", "cybersex", "cyberslimer", "dago", "dahmer", "dammit", "damn", "damnation", "damnit",
+                "darkie", "darky", "datnigga", "dead", "deapthroat", "death", "deepthroat", "defecate", "dego", "demon",
+                "deposit", "desire", "destroy", "deth", "devil", "devilworshipper", "dick", "dickbrain", "dickforbrains", "dickhead",
+                "dickless", "dicklick", "dicklicker", "dickman", "dickwad", "dickweed", "diddle", "die", "died", "dies",
+                "dike", "dildo", "dingleberry", "dink", "dipshit", "dipstick", "dirty", "disease", "diseases", "disturbed",
+                "dive", "dix", "dixiedike", "dixiedyke", "doggiestyle", "doggystyle", "dong", "doodoo", "doo-doo", "doom",
+                "dope", "dragqueen", "dragqween", "dripdick", "drug", "drunk", "drunken", "dumb", "dumbass", "dumbbitch",
+                "dumbfuck", "dyefly", "dyke", "easyslut", "eatballs", "eatme", "eatpussy", "ecstacy", "ejaculate", "ejaculated",
+                "ejaculating", "ejaculation", "enema", "enemy", "erect", "erection", "ero", "escort", "ethiopian", "ethnic",
+                "european", "evl", "excrement", "execute", "executed", "execution", "executioner", "explosion", "facefucker", "faeces",
+                "fag", "fagging", "faggot", "fagot", "failed", "failure", "fairies", "fairy", "faith", "fannyfucker",
+                "fart", "farted", "farting", "farty", "fastfuck", "fat", "fatah", "fatass", "fatfuck", "fatfucker",
+                "fatso", "fckcum", "fear", "feces", "felatio", "felch", "felcher", "felching", "fellatio", "feltch",
+                "feltcher", "feltching", "fetish", "fight", "filipina", "filipino", "fingerfood", "fingerfuck", "fingerfucked", "fingerfucker",
+                "fingerfuckers", "fingerfucking", "fire", "firing", "fister", "fistfuck", "fistfucked", "fistfucker", "fistfucking", "fisting",
+                "flange", "flasher", "flatulence", "floo", "flydie", "flydye", "fok", "fondle", "footaction", "footfuck",
+                "footfucker", "footlicker", "footstar", "fore", "foreskin", "forni", "fornicate", "foursome", "fourtwenty", "fraud",
+                "freakfuck", "freakyfucker", "freefuck", "fu", "fubar", "fuc", "fucck", "fuck", "fucka", "fuckable",
+                "fuckbag", "fuckbuddy", "fucked", "fuckedup", "fucker", "fuckers", "fuckface", "fuckfest", "fuckfreak", "fuckfriend",
+                "fuckhead", "fuckher", "fuckin", "fuckina", "fucking", "fuckingbitch", "fuckinnuts", "fuckinright", "fuckit", "fuckknob",
+                "fuckme", "fuckmehard", "fuckmonkey", "fuckoff", "fuckpig", "fucks", "fucktard", "fuckwhore", "fuckyou", "fudgepacker",
+                "fugly", "fuk", "fuks", "funeral", "funfuck", "fungus", "fuuck", "gangbang", "gangbanged", "gangbanger",
+                "gangsta", "gatorbait", "gay", "gaymuthafuckinwhore", "gaysex", "geez", "geezer", "geni", "genital", "german",
+                "getiton", "gin", "ginzo", "gipp", "girls", "givehead", "glazeddonut", "gob", "god", "godammit",
+                "goddamit", "goddammit", "goddamn", "goddamned", "goddamnes", "goddamnit", "goddamnmuthafucker", "goldenshower", "gonorrehea",
+                "gonzagas", "gook", "gotohell", "goy", "goyim", "greaseball", "gringo", "groe", "gross", "grostulation",
+                "gubba", "gummer", "gun", "gyp", "gypo", "gypp", "gyppie", "gyppo", "gyppy", "hamas",
+                "handjob", "hapa", "harder", "hardon", "harem", "headfuck", "headlights", "hebe", "heeb", "hell",
+                "henhouse", "heroin", "herpes", "heterosexual", "hijack", "hijacker", "hijacking", "hillbillies", "hindoo", "hiscock",
+                "hitler", "hitlerism", "hitlerist", "hiv", "ho", "hobo", "hodgie", "hoes", "hole", "holestuffer",
+                "homicide", "homo", "homobangers", "homosexual", "honger", "honk", "honkers", "honkey", "honky", "hook",
+                "hooker", "hookers", "hooters", "hore", "hork", "horn", "horney", "horniest", "horny", "horseshit",
+                "hosejob", "hoser", "hostage", "hotdamn", "hotpussy", "hottotrot", "hummer", "husky", "hussy", "hustler",
+                "hymen", "hymie", "iblowu", "idiot", "ikey", "illegal", "incest", "insest", "intercourse", "interracial",
+                "intheass", "inthebuff", "israel", "israeli", "israel's", "italiano", "itch", "jackass", "jackoff", "jackshit",
+                "jacktheripper", "jade", "jap", "japanese", "japcrap", "jebus", "jeez", "jerkoff", "jesus", "jesuschrist",
+                "jew", "jewish", "jiga", "jigaboo", "jigg", "jigga", "jiggabo", "jigger", "jiggy", "jihad",
+                "jijjiboo", "jimfish", "jism", "jiz", "jizim", "jizjuice", "jizm", "jizz", "jizzim", "jizzum",
+                "joint", "juggalo", "jugs", "junglebunny", "kaffer", "kaffir", "kaffre", "kafir", "kanake", "kid",
+                "kigger", "kike", "kill", "killed", "killer", "killing", "kills", "kink", "kinky", "kissass",
+                "kkk", "knife", "knockers", "kock", "kondum", "koon", "kotex", "krap", "krappy", "kraut",
+                "kum", "kumbubble", "kumbullbe", "kummer", "kumming", "kumquat", "kums", "kunilingus", "kunnilingus", "kunt",
+                "ky", "kyke", "lactate", "laid", "lapdance", "latin", "lesbain", "lesbayn", "lesbian", "lesbin",
+                "lesbo", "lez", "lezbe", "lezbefriends", "lezbo", "lezz", "lezzo", "liberal", "libido", "licker",
+                "lickme", "lies", "limey", "limpdick", "limy", "lingerie", "liquor", "livesex", "loadedgun", "lolita",
+                "looser", "loser", "lotion", "lovebone", "lovegoo", "lovegun", "lovejuice", "lovemuscle", "lovepistol", "loverocket",
+                "lowlife", "lsd", "lubejob", "lucifer", "luckycammeltoe", "lugan", "lynch", "macaca", "mad", "mafia",
+                "magicwand", "mams", "manhater", "manpaste", "marijuana", "mastabate", "mastabater", "masterbate", "masterblaster", "mastrabator",
+                "masturbate", "masturbating", "mattressprincess", "meatbeatter", "meatrack", "meth", "mexican", "mgger", "mggor", "mickeyfinn",
+                "mideast", "milf", "minority", "mockey", "mockie", "mocky", "mofo", "moky", "moles", "molest",
+                "molestation", "molester", "molestor", "moneyshot", "mooncricket", "mormon", "moron", "moslem", "mosshead", "mothafuck",
+                "mothafucka", "mothafuckaz", "mothafucked", "mothafucker", "mothafuckin", "mothafucking", "mothafuckings", "motherfuck", "motherfucked",
+                "motherfucker", "motherfuckin", "motherfucking", "motherfuckings", "motherlovebone", "muff", "muffdive", "muffdiver", "muffindiver", "mufflikcer",
+                "mulatto", "muncher", "munt", "murder", "murderer", "muslim", "naked", "narcotic", "nasty", "nastybitch",
+                "nastyho", "nastyslut", "nastywhore", "nazi", "necro", "negro", "negroes", "negroid", "negro's", "nig",
+                "niger", "nigerian", "nigerians", "nigg", "nigga", "niggah", "niggaracci", "niggard", "niggarded", "niggarding",
+                "niggardliness", "niggardliness's", "niggardly", "niggards", "niggard's", "niggaz", "nigger", "niggerhead", "niggerhole", "niggers",
+                "nigger's", "niggle", "niggled", "niggles", "niggling", "nigglings", "niggor", "niggur", "niglet", "nignog",
+                "nigr", "nigra", "nigre", "nip", "nipple", "nipplering", "nittit", "nlgger", "nlggor", "nofuckingway",
+                "nook", "nookey", "nookie", "noonan", "nooner", "nude", "nudger", "nuke", "nutfucker", "nymph",
+                "ontherag", "oral", "orga", "orgasim", "orgasm", "orgies", "orgy", "osama", "paki", "palesimian",
+                "palestinian", "pansies", "pansy", "panti", "panties", "payo", "pearlnecklace", "peck", "pecker", "peckerwood",
+                "pee", "peehole", "pee-pee", "peepshow", "peepshpw", "pendy", "penetration", "peni5", "penile", "penis",
+                "penises", "penthouse", "period", "perv", "phonesex", "phuk", "phuked", "phuking", "phukked", "phukking",
+                "phungky", "phuq", "pi55", "picaninny", "piccaninny", "pickaninny", "piker", "pikey", "piky", "pimp",
+                "pimped", "pimper", "pimpjuic", "pimpjuice", "pimpsimp", "pindick", "piss", "pissed", "pisser", "pisses",
+                "pisshead", "pissin", "pissing", "pissoff", "pistol", "pixie", "pixy", "playboy", "playgirl", "pocha",
+                "pocho", "pocketpool", "pohm", "polack", "pom", "pommie", "pommy", "poo", "poon", "poontang",
+                "poop", "pooper", "pooperscooper", "pooping", "poorwhitetrash", "popimp", "porchmonkey", "porn", "pornflick", "pornking",
+                "porno", "pornography", "pornprincess", "pot", "poverty", "premature", "pric", "prick", "prickhead", "primetime",
+                "propaganda", "pros", "prostitute", "protestant", "pu55i", "pu55y", "pube", "pubic", "pubiclice", "pud",
+                "pudboy", "pudd", "puddboy", "puke", "puntang", "purinapricness", "puss", "pussie", "pussies", "pussy",
+                "pussycat", "pussyeater", "pussyfucker", "pussylicker", "pussylips", "pussylover", "pussypounder", "pusy", "quashie", "queef",
+                "queer", "quickie", "quim", "ra8s", "rabbi", "racial", "racist", "radical", "radicals", "raghead",
+                "randy", "rape", "raped", "raper", "rapist", "rearend", "rearentry", "rectum", "redlight", "redneck",
+                "reefer", "reestie", "refugee", "reject", "remains", "rentafuck", "republican", "rere", "retard", "retarded",
+                "ribbed", "rigger", "rimjob", "rimming", "roach", "robber", "roundeye", "rump", "russki", "russkie",
+                "sadis", "sadom", "samckdaddy", "sandm", "sandnigger", "satan", "scag", "scallywag", "scat", "schlong",
+                "screw", "screwyou", "scrotum", "scum", "semen", "seppo", "servant", "sex", "sexed", "sexfarm",
+                "sexhound", "sexhouse", "sexing", "sexkitten", "sexpot", "sexslave", "sextogo", "sextoy", "sextoys", "sexual",
+                "sexually", "sexwhore", "sexy", "sexymoma", "sexy-slim", "shag", "shaggin", "shagging", "shat", "shav",
+                "shawtypimp", "sheeney", "shhit", "shinola", "shit", "shitcan", "shitdick", "shite", "shiteater", "shited",
+                "shitface", "shitfaced", "shitfit", "shitforbrains", "shitfuck", "shitfucker", "shitfull", "shithapens", "shithappens", "shithead",
+                "shithouse", "shiting", "shitlist", "shitola", "shitoutofluck", "shits", "shitstain", "shitted", "shitter", "shitting",
+                "shitty", "shoot", "shooting", "shortfuck", "showtime", "sick", "sissy", "sixsixsix", "sixtynine", "sixtyniner",
+                "skank", "skankbitch", "skankfuck", "skankwhore", "skanky", "skankybitch", "skankywhore", "skinflute", "skum", "skumbag",
+                "slant", "slanteye", "slapper", "slaughter", "slav", "slave", "slavedriver", "sleezebag", "sleezeball", "slideitin",
+                "slime", "slimeball", "slimebucket", "slopehead", "slopey", "slopy", "slut", "sluts", "slutt", "slutting",
+                "slutty", "slutwear", "slutwhore", "smack", "smackthemonkey", "smut", "snatch", "snatchpatch", "snigger", "sniggered",
+                "sniggering", "sniggers", "snigger's", "sniper", "snot", "snowback", "snownigger", "sob", "sodom", "sodomise",
+                "sodomite", "sodomize", "sodomy", "sonofabitch", "sonofbitch", "sooty", "sos", "soviet", "spaghettibender", "spaghettinigger",
+                "spank", "spankthemonkey", "sperm", "spermacide", "spermbag", "spermhearder", "spermherder", "spic", "spick", "spig",
+                "spigotty", "spik", "spit", "spitter", "splittail", "spooge", "spreadeagle", "spunk", "spunky", "squaw",
+                "stagg", "stiffy", "strapon", "stringer", "stripclub", "stroke", "stroking", "stupid", "stupidfuck", "stupidfucker",
+                "suck", "suckdick", "sucker", "suckme", "suckmyass", "suckmydick", "suckmytit", "suckoff", "suicide", "swallow",
+                "swallower", "swalow", "swastika", "sweetness", "syphilis", "taboo", "taff", "tampon", "tang", "tantra",
+                "tarbaby", "tard", "teat", "terror", "terrorist", "teste", "testicle", "testicles", "thicklips", "thirdeye",
+                "thirdleg", "threesome", "threeway", "timbernigger", "tinkle", "tit", "titbitnipply", "titfuck", "titfucker", "titfuckin",
+                "titjob", "titlicker", "titlover", "tits", "tittie", "titties", "titty", "tnt", "toilet", "tongethruster",
+                "tongue", "tonguethrust", "tonguetramp", "tortur", "torture", "tosser", "towelhead", "trailertrash", "tramp", "trannie",
+                "tranny", "transexual", "transsexual", "transvestite", "triplex", "trisexual", "trojan", "trots", "tuckahoe", "tunneloflove",
+                "turd", "turnon", "twat", "twink", "twinkie", "twobitwhore", "uck", "uk", "unfuckable", "upskirt",
+                "uptheass", "upthebutt", "urinary", "urinate", "urine", "usama", "uterus", "vagina", "vaginal", "vatican",
+                "vibr", "vibrater", "vibrator", "vietcong", "violence", "virgin", "virginbreaker", "vomit", "vulva", "wab",
+                "wank", "wanker", "wanking", "waysted", "weapon", "weenie", "weewee", "welcher", "welfare", "wetb",
+                "wetback", "wetspot", "whacker", "whash", "whigger", "whiskey", "whiskeydick", "whiskydick", "whit", "whitenigger",
+                "whites", "whitetrash", "whitey", "whiz", "whop", "whore", "whorefucker", "whorehouse", "wigger", "willie",
+                "williewanker", "willy", "wn", "wog", "women's", "wop", "wtf", "wuss", "wuzzie", "xtc",
+                "xxx", "yankee", "yellowman", "zigabo", "zipperhead"
+            ];
+
+            // Check if words are already initialized
+            database.ref('bannedWords').once('value', (snapshot) => {
+                if (!snapshot.exists() || snapshot.numChildren() < 10) {
+                    console.log('Initializing banned words...');
+                    // Add all default banned words
+                    const promises = defaultBannedWords.map(word => {
+                        return database.ref('bannedWords').push(word.toLowerCase());
+                    });
+                    
+                    Promise.all(promises).then(() => {
+                        console.log('✅ Banned words initialized successfully');
+                        alert('Banned words list initialized with ' + defaultBannedWords.length + ' words');
+                    }).catch((error) => {
+                        console.error('❌ Error initializing banned words:', error);
+                        alert('Error initializing banned words: ' + error.message);
+                    });
+                } else {
+                    console.log('Banned words already initialized:', snapshot.numChildren(), 'words found');
+                }
+            });
+        }
+
+        // Call this when dashboard loads
+        setTimeout(initializeBannedWords, 2000);
+
+        // Load moderator reports
+        function loadModReports() {
+            const reportsList = document.getElementById('modReportsList');
+            
+            database.ref('modReports').orderByChild('timestamp').on('value', (snapshot) => {
+                reportsList.innerHTML = '';
+                const reports = [];
+                let pendingCount = 0;
+                
+                snapshot.forEach((reportSnapshot) => {
+                    const report = reportSnapshot.val();
+                    report.key = reportSnapshot.key;
+                    reports.unshift(report); // Show newest first
+                    
+                    if (report.status === 'pending') {
+                        pendingCount++;
+                    }
+                });
+                
+                // Update badge
+                const badge = document.getElementById('unreadReportsBadge');
+                if (pendingCount > 0) {
+                    badge.style.display = 'inline-block';
+                    badge.textContent = pendingCount;
+                } else {
+                    badge.style.display = 'none';
+                }
+                
+                // Update stats
+                document.getElementById('pendingReports').textContent = pendingCount;
+                
+                if (reports.length > 0) {
+                    reports.forEach(report => {
+                        const reportItem = document.createElement('div');
+                        reportItem.className = 'banned-item';
+                        
+                        const statusColor = report.status === 'pending' ? '#fff3cd' : 
+                                          report.status === 'resolved' ? '#e8f5e9' : '#ffebee';
+                        const statusTextColor = report.status === 'pending' ? '#856404' : 
+                                              report.status === 'resolved' ? '#4CAF50' : '#f44336';
+                        
+                        reportItem.style.background = statusColor;
+                        reportItem.innerHTML = `
+                            <div class="banned-info">
+                                <div class="banned-nickname" style="color: ${statusTextColor};">
+                                    <strong>${report.reportedUser}</strong> - ${report.reportType}
+                                    <span style="font-size: 12px; background: ${statusTextColor}; color: white; padding: 2px 6px; border-radius: 10px; margin-left: 10px;">
+                                        ${report.status.toUpperCase()}
+                                    </span>
+                                </div>
+                                <div class="banned-email">
+                                    <strong>Reported by:</strong> ${report.reportedBy} | 
+                                    <strong>Time:</strong> ${new Date(report.timestamp).toLocaleString()}<br>
+                                    <strong>Description:</strong> ${report.description}
+                                    ${report.adminResponse ? '<br><strong>Admin Response:</strong> ' + report.adminResponse : ''}
+                                </div>
+                            </div>
+                            <div style="display: flex; flex-direction: column; gap: 5px;">
+                                ${report.status === 'pending' ? `
+                                    <button class="unban-btn" style="background: #4CAF50;" onclick="resolveReport('${report.key}')">Mark Resolved</button>
+                                    <button class="unban-btn" style="background: #2196F3;" onclick="respondToReport('${report.key}')">Respond</button>
+                                ` : ''}
+                                <button class="unban-btn" style="background: #ff5722;" onclick="deleteReport('${report.key}')">Delete</button>
+                            </div>
+                        `;
+                        reportsList.appendChild(reportItem);
+                    });
+                } else {
+                    reportsList.innerHTML = '<div class="empty-state">No moderator reports yet</div>';
+                }
+            });
+        }
+
+        // Resolve moderator report
+        function resolveReport(reportKey) {
+            if (confirm('Mark this report as resolved?')) {
+                database.ref('modReports/' + reportKey).update({
+                    status: 'resolved',
+                    resolvedAt: Date.now(),
+                    resolvedBy: 'Admin'
+                }).then(() => {
+                    alert('Report marked as resolved');
+                }).catch((error) => {
+                    alert('Error resolving report: ' + error.message);
+                });
+            }
+        }
+
+        // Respond to moderator report
+        function respondToReport(reportKey) {
+            const response = prompt('Enter your response to the moderator:');
+            if (response && response.trim()) {
+                database.ref('modReports/' + reportKey).update({
+                    adminResponse: response.trim(),
+                    respondedAt: Date.now(),
+                    respondedBy: 'Admin'
+                }).then(() => {
+                    alert('Response sent to moderator');
+                }).catch((error) => {
+                    alert('Error sending response: ' + error.message);
+                });
+            }
+        }
+
+        // Auto-approve email functions
+        function loadAutoApproveSettings() {
+            database.ref('settings/autoApproveEmails').on('value', (snapshot) => {
+                const isEnabled = snapshot.val() || false;
+                document.getElementById('autoApproveToggle').checked = isEnabled;
+                updateAutoApproveStatus(isEnabled);
+            });
+        }
+
+        function toggleAutoApprove() {
+            const toggle = document.getElementById('autoApproveToggle');
+            const isEnabled = toggle.checked;
+            
+            database.ref('settings/autoApproveEmails').set(isEnabled)
+                .then(() => {
+                    updateAutoApproveStatus(isEnabled);
+                    alert(isEnabled ? 
+                        'Auto-approve enabled! All @usd232.org emails will now be automatically approved.' : 
+                        'Auto-approve disabled! You must manually approve emails again.');
+                })
+                .catch((error) => {
+                    console.error('Error updating auto-approve setting:', error);
+                    alert('Error updating setting: ' + error.message);
+                    // Revert toggle on error
+                    toggle.checked = !isEnabled;
+                });
+        }
+
+        function updateAutoApproveStatus(isEnabled) {
+            const statusText = document.getElementById('autoApproveStatus');
+            const section = statusText.closest('div').parentElement;
+            
+            if (isEnabled) {
+                statusText.textContent = '✅ Auto-approve is ENABLED. All @usd232.org emails are automatically approved.';
+                statusText.style.color = '#4CAF50';
+                statusText.style.fontWeight = '600';
+                section.style.background = '#e8f5e9';
+                section.style.borderColor = '#c8e6c9';
+            } else {
+                statusText.textContent = 'When enabled, all @usd232.org emails will be automatically approved for access.';
+                statusText.style.color = '#666';
+                statusText.style.fontWeight = 'normal';
+                section.style.background = '#f0f7ff';
+                section.style.borderColor = '#b3d9ff';
             }
         }
     </script>
