@@ -486,6 +486,68 @@
             font-size: 14px;
         }
 
+        /* Quick action buttons */
+        .quick-action-btn {
+            padding: 8px 12px;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            flex: 1;
+        }
+
+        .ban-action {
+            background: #f44336;
+            color: white;
+        }
+
+        .ban-action:hover {
+            background: #da190b;
+        }
+
+        .warn-action {
+            background: #ff9800;
+            color: white;
+        }
+
+        .warn-action:hover {
+            background: #f57c00;
+        }
+
+        .mute-action {
+            background: #9e9e9e;
+            color: white;
+        }
+
+        .mute-action:hover {
+            background: #757575;
+        }
+
+        .profile-action {
+            background: #2196F3;
+            color: white;
+        }
+
+        .profile-action:hover {
+            background: #1976D2;
+        }
+
+        /* Emergency alert styling */
+        .emergency-section {
+            background: #ffebee;
+            border: 2px solid #f44336;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+
+        .emergency-section h4 {
+            color: #c62828;
+            margin-bottom: 10px;
+        }
+
         /* Responsive */
         @media (max-width: 768px) {
             .dashboard-grid {
@@ -495,6 +557,11 @@
             .header {
                 flex-direction: column;
                 gap: 15px;
+            }
+            
+            .quick-action-btn {
+                font-size: 12px;
+                padding: 6px 8px;
             }
         }
     </style>
@@ -519,6 +586,55 @@
                 <button type="submit" class="login-btn">Login</button>
                 <div class="error-message" id="errorMessage"></div>
             </form>
+            <!-- Moderator Reports -->
+            <div class="dashboard-card">
+                <h2 class="card-title">
+                    <span class="card-icon">📢</span>
+                    Moderator Reports
+                    <span id="unreadReportsBadge" style="background: #ff9800; color: white; padding: 2px 8px; border-radius: 12px; font-size: 14px; margin-left: 10px; display: none;">0</span>
+                </h2>
+                <div class="banned-list" id="modReportsList" style="max-height: 400px;">
+                    <div class="loading">Loading moderator reports...</div>
+                </div>
+            </div>
+
+            <!-- User Profile Viewer -->
+            <div class="dashboard-card" id="userProfileCard" style="display: none;">
+                <h2 class="card-title">
+                    <span class="card-icon">👤</span>
+                    User Profile: <span id="profileUsername">Username</span>
+                    <button class="unban-btn" style="background: #666; margin-left: auto;" onclick="closeUserProfile()">Close</button>
+                </h2>
+                
+                <div id="userProfileContent">
+                    <div class="stat-item">
+                        <span class="stat-label">Total Messages</span>
+                        <span class="stat-value" id="profileMessageCount">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">First Seen</span>
+                        <span class="stat-value" id="profileFirstSeen">Never</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Last Active</span>
+                        <span class="stat-value" id="profileLastActive">Never</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Violations</span>
+                        <span class="stat-value" id="profileViolations">0</span>
+                    </div>
+                    
+                    <h3 style="margin-top: 20px; margin-bottom: 10px;">Recent Messages</h3>
+                    <div class="banned-list" id="profileRecentMessages" style="max-height: 200px;">
+                        <div class="loading">Loading user messages...</div>
+                    </div>
+                    
+                    <h3 style="margin-top: 20px; margin-bottom: 10px;">Violation History</h3>
+                    <div class="banned-list" id="profileViolationHistory" style="max-height: 150px;">
+                        <div class="loading">Loading violations...</div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -748,7 +864,15 @@
             loadModPasswords();
             loadModReports();
             loadAutoApproveSettings();
+            loadRecentActions();
+            loadRecentDMs();
+            loadScheduledMessages();
             loadStats();
+            
+            // Set default datetime for scheduling (1 hour from now)
+            const now = new Date();
+            now.setHours(now.getHours() + 1);
+            document.getElementById('scheduleTime').value = now.toISOString().slice(0, 16);
         }
 
         // Generate random mod password - REUSABLE VERSION
@@ -1533,7 +1657,480 @@
                 });
         }
 
-        function updateAutoApproveStatus(isEnabled) {
+        // Broadcast type change handler
+        document.getElementById('broadcastType').addEventListener('change', function() {
+            const channelInput = document.getElementById('broadcastChannel');
+            if (this.value === 'specific') {
+                channelInput.style.display = 'block';
+                channelInput.required = true;
+            } else {
+                channelInput.style.display = 'none';
+                channelInput.required = false;
+            }
+        });
+
+        // Quick user actions
+        function quickBan() {
+            const username = document.getElementById('quickActionUser').value.trim();
+            if (!username) {
+                alert('Please enter a username');
+                return;
+            }
+            
+            if (confirm(`Ban user ${username}?`)) {
+                const banData = {
+                    nickname: username,
+                    bannedBy: 'Admin (Quick Action)',
+                    bannedAt: Date.now(),
+                    reason: 'Quick ban from admin dashboard',
+                    bannedByType: 'Admin'
+                };
+                
+                database.ref('bannedUsers').push(banData);
+                logAdminAction('ban', username, 'Quick ban');
+                alert(`${username} has been banned`);
+                document.getElementById('quickActionUser').value = '';
+            }
+        }
+
+        function quickWarn() {
+            const username = document.getElementById('quickActionUser').value.trim();
+            if (!username) {
+                alert('Please enter a username');
+                return;
+            }
+            
+            const reason = prompt(`Warning reason for ${username}:`);
+            if (reason) {
+                const warningData = {
+                    username: username,
+                    reason: reason,
+                    issuedBy: 'Admin',
+                    timestamp: Date.now(),
+                    type: 'warning'
+                };
+                
+                database.ref('userViolations').push(warningData);
+                sendDirectMessageToUser(username, `⚠️ WARNING: ${reason}`);
+                logAdminAction('warn', username, reason);
+                alert(`Warning sent to ${username}`);
+                document.getElementById('quickActionUser').value = '';
+            }
+        }
+
+        function quickMute() {
+            const username = document.getElementById('quickActionUser').value.trim();
+            if (!username) {
+                alert('Please enter a username');
+                return;
+            }
+            
+            const duration = prompt('Mute duration in minutes:', '30');
+            if (duration && !isNaN(duration)) {
+                const muteData = {
+                    username: username,
+                    mutedBy: 'Admin',
+                    mutedAt: Date.now(),
+                    muteUntil: Date.now() + (parseInt(duration) * 60 * 1000),
+                    duration: duration + ' minutes'
+                };
+                
+                database.ref('mutedUsers').push(muteData);
+                sendDirectMessageToUser(username, `🔇 You have been muted for ${duration} minutes`);
+                logAdminAction('mute', username, `${duration} minutes`);
+                alert(`${username} has been muted for ${duration} minutes`);
+                document.getElementById('quickActionUser').value = '';
+            }
+        }
+
+        function viewUserProfile() {
+            const username = document.getElementById('quickActionUser').value.trim();
+            if (!username) {
+                alert('Please enter a username');
+                return;
+            }
+            
+            loadUserProfile(username);
+        }
+
+        // User profile functions
+        function loadUserProfile(username) {
+            document.getElementById('userProfileCard').style.display = 'block';
+            document.getElementById('profileUsername').textContent = username;
+            
+            // Load user stats
+            loadUserStats(username);
+            loadUserMessages(username);
+            loadUserViolations(username);
+        }
+
+        function closeUserProfile() {
+            document.getElementById('userProfileCard').style.display = 'none';
+        }
+
+        function loadUserStats(username) {
+            let messageCount = 0;
+            let firstSeen = null;
+            let lastActive = null;
+            
+            database.ref('channels').once('value', (snapshot) => {
+                snapshot.forEach((channelSnapshot) => {
+                    channelSnapshot.child('messages').forEach((messageSnapshot) => {
+                        const message = messageSnapshot.val();
+                        if (message.nickname === username || message.author?.includes(username)) {
+                            messageCount++;
+                            const messageTime = message.timestamp;
+                            
+                            if (!firstSeen || messageTime < firstSeen) {
+                                firstSeen = messageTime;
+                            }
+                            if (!lastActive || messageTime > lastActive) {
+                                lastActive = messageTime;
+                            }
+                        }
+                    });
+                });
+                
+                document.getElementById('profileMessageCount').textContent = messageCount;
+                document.getElementById('profileFirstSeen').textContent = firstSeen ? new Date(firstSeen).toLocaleDateString() : 'Never';
+                document.getElementById('profileLastActive').textContent = lastActive ? new Date(lastActive).toLocaleDateString() : 'Never';
+            });
+            
+            // Load violations count
+            database.ref('userViolations').orderByChild('username').equalTo(username).once('value', (snapshot) => {
+                document.getElementById('profileViolations').textContent = snapshot.numChildren();
+            });
+        }
+
+        function loadUserMessages(username) {
+            const messagesList = document.getElementById('profileRecentMessages');
+            messagesList.innerHTML = '';
+            
+            const recentMessages = [];
+            
+            database.ref('channels').once('value', (snapshot) => {
+                snapshot.forEach((channelSnapshot) => {
+                    const channelName = channelSnapshot.key;
+                    channelSnapshot.child('messages').forEach((messageSnapshot) => {
+                        const message = messageSnapshot.val();
+                        if (message.nickname === username || message.author?.includes(username)) {
+                            recentMessages.push({
+                                ...message,
+                                channel: channelName,
+                                id: messageSnapshot.key
+                            });
+                        }
+                    });
+                });
+                
+                // Sort by timestamp and show last 10
+                recentMessages.sort((a, b) => b.timestamp - a.timestamp);
+                recentMessages.slice(0, 10).forEach(message => {
+                    const messageItem = document.createElement('div');
+                    messageItem.className = 'user-item';
+                    messageItem.innerHTML = `
+                        <div class="user-info">
+                            <div class="user-nickname">#${message.channel}</div>
+                            <div class="user-email">${message.text} | ${new Date(message.timestamp).toLocaleString()}</div>
+                        </div>
+                    `;
+                    messagesList.appendChild(messageItem);
+                });
+                
+                if (recentMessages.length === 0) {
+                    messagesList.innerHTML = '<div class="empty-state">No messages found</div>';
+                }
+            });
+        }
+
+        function loadUserViolations(username) {
+            const violationsList = document.getElementById('profileViolationHistory');
+            
+            database.ref('userViolations').orderByChild('username').equalTo(username).on('value', (snapshot) => {
+                violationsList.innerHTML = '';
+                const violations = [];
+                
+                snapshot.forEach((violationSnapshot) => {
+                    violations.unshift(violationSnapshot.val());
+                });
+                
+                if (violations.length > 0) {
+                    violations.forEach(violation => {
+                        const violationItem = document.createElement('div');
+                        violationItem.className = 'user-item';
+                        violationItem.innerHTML = `
+                            <div class="user-info">
+                                <div class="user-nickname">${violation.type.toUpperCase()}: ${violation.reason}</div>
+                                <div class="user-email">By: ${violation.issuedBy} | ${new Date(violation.timestamp).toLocaleString()}</div>
+                            </div>
+                        `;
+                        violationsList.appendChild(violationItem);
+                    });
+                } else {
+                    violationsList.innerHTML = '<div class="empty-state">No violations</div>';
+                }
+            });
+        }
+
+        // Direct messaging functions
+        function sendDirectMessage() {
+            const recipient = document.getElementById('dmRecipient').value.trim();
+            const message = document.getElementById('dmMessage').value.trim();
+            
+            if (!recipient || !message) {
+                alert('Please enter both recipient and message');
+                return;
+            }
+            
+            sendDirectMessageToUser(recipient, message);
+            document.getElementById('dmRecipient').value = '';
+            document.getElementById('dmMessage').value = '';
+        }
+
+        function sendDirectMessageToUser(recipient, message) {
+            const dmData = {
+                recipient: recipient,
+                message: message,
+                sentBy: 'Admin',
+                timestamp: Date.now(),
+                read: false
+            };
+            
+            database.ref('directMessages').push(dmData);
+            logAdminAction('dm', recipient, message.substring(0, 50) + '...');
+            alert(`Direct message sent to ${recipient}`);
+        }
+
+        // Broadcast and announcement functions
+        function sendBroadcast() {
+            const type = document.getElementById('broadcastType').value;
+            const channel = document.getElementById('broadcastChannel').value.trim();
+            const message = document.getElementById('broadcastMessage').value.trim();
+            
+            if (!message) {
+                alert('Please enter a broadcast message');
+                return;
+            }
+            
+            if (type === 'specific' && !channel) {
+                alert('Please enter a channel name');
+                return;
+            }
+            
+            const broadcastData = {
+                message: `📢 ANNOUNCEMENT: ${message}`,
+                sentBy: 'Admin',
+                timestamp: Date.now(),
+                type: 'broadcast'
+            };
+            
+            if (type === 'all') {
+                // Send to all active channels
+                database.ref('channels').once('value', (snapshot) => {
+                    snapshot.forEach((channelSnapshot) => {
+                        database.ref('channels/' + channelSnapshot.key + '/messages').push({
+                            author: 'System',
+                            nickname: 'System',
+                            text: broadcastData.message,
+                            timestamp: Date.now()
+                        });
+                    });
+                });
+                logAdminAction('broadcast', 'all channels', message);
+            } else {
+                // Send to specific channel
+                const channelName = channel.startsWith('#') ? channel.substring(1) : channel;
+                database.ref('channels/' + channelName + '/messages').push({
+                    author: 'System',
+                    nickname: 'System',
+                    text: broadcastData.message,
+                    timestamp: Date.now()
+                });
+                logAdminAction('broadcast', channel, message);
+            }
+            
+            document.getElementById('broadcastMessage').value = '';
+            document.getElementById('broadcastChannel').value = '';
+            alert('Broadcast sent successfully');
+        }
+
+        function sendEmergencyAlert() {
+            const message = document.getElementById('emergencyMessage').value.trim();
+            
+            if (!message) {
+                alert('Please enter an emergency message');
+                return;
+            }
+            
+            if (!confirm('Send EMERGENCY ALERT to all users? This will be highly visible.')) {
+                return;
+            }
+            
+            const alertData = {
+                message: `🚨 EMERGENCY ALERT: ${message}`,
+                sentBy: 'Admin',
+                timestamp: Date.now(),
+                type: 'emergency'
+            };
+            
+            // Send to all channels and as system-wide alert
+            database.ref('channels').once('value', (snapshot) => {
+                snapshot.forEach((channelSnapshot) => {
+                    database.ref('channels/' + channelSnapshot.key + '/messages').push({
+                        author: 'System',
+                        nickname: 'System',
+                        text: alertData.message,
+                        timestamp: Date.now()
+                    });
+                });
+            });
+            
+            // Also store as global alert
+            database.ref('emergencyAlerts').push(alertData);
+            logAdminAction('emergency', 'all users', message);
+            
+            document.getElementById('emergencyMessage').value = '';
+            alert('EMERGENCY ALERT sent to all users');
+        }
+
+        function scheduleMessage() {
+            const time = document.getElementById('scheduleTime').value;
+            const channel = document.getElementById('scheduleChannel').value.trim();
+            const message = document.getElementById('scheduleMessage').value.trim();
+            
+            if (!time || !channel || !message) {
+                alert('Please fill in all fields for scheduled message');
+                return;
+            }
+            
+            const scheduleData = {
+                channel: channel,
+                message: message,
+                scheduledTime: new Date(time).getTime(),
+                createdBy: 'Admin',
+                createdAt: Date.now(),
+                status: 'pending'
+            };
+            
+            database.ref('scheduledMessages').push(scheduleData);
+            logAdminAction('schedule', channel, `Message scheduled for ${new Date(time).toLocaleString()}`);
+            
+            document.getElementById('scheduleChannel').value = '';
+            document.getElementById('scheduleMessage').value = '';
+            alert(`Message scheduled for ${new Date(time).toLocaleString()}`);
+        }
+
+        // Utility functions
+        function logAdminAction(type, target, details) {
+            const actionData = {
+                type: type,
+                target: target,
+                details: details,
+                timestamp: Date.now(),
+                admin: 'Admin Dashboard'
+            };
+            
+            database.ref('adminActions').push(actionData);
+        }
+
+        function loadRecentActions() {
+            const actionsList = document.getElementById('recentActionsList');
+            
+            database.ref('adminActions').orderByChild('timestamp').limitToLast(10).on('value', (snapshot) => {
+                actionsList.innerHTML = '';
+                const actions = [];
+                
+                snapshot.forEach((actionSnapshot) => {
+                    actions.unshift(actionSnapshot.val());
+                });
+                
+                if (actions.length > 0) {
+                    actions.forEach(action => {
+                        const actionItem = document.createElement('div');
+                        actionItem.className = 'user-item';
+                        actionItem.innerHTML = `
+                            <div class="user-info">
+                                <div class="user-nickname">${action.type.toUpperCase()}: ${action.target}</div>
+                                <div class="user-email">${action.details} | ${new Date(action.timestamp).toLocaleString()}</div>
+                            </div>
+                        `;
+                        actionsList.appendChild(actionItem);
+                    });
+                } else {
+                    actionsList.innerHTML = '<div class="empty-state">No recent actions</div>';
+                }
+            });
+        }
+
+        function loadRecentDMs() {
+            const dmsList = document.getElementById('recentDMsList');
+            
+            database.ref('directMessages').orderByChild('timestamp').limitToLast(10).on('value', (snapshot) => {
+                dmsList.innerHTML = '';
+                const dms = [];
+                
+                snapshot.forEach((dmSnapshot) => {
+                    dms.unshift(dmSnapshot.val());
+                });
+                
+                if (dms.length > 0) {
+                    dms.forEach(dm => {
+                        const dmItem = document.createElement('div');
+                        dmItem.className = 'user-item';
+                        dmItem.innerHTML = `
+                            <div class="user-info">
+                                <div class="user-nickname">To: ${dm.recipient}</div>
+                                <div class="user-email">${dm.message.substring(0, 50)}... | ${new Date(dm.timestamp).toLocaleString()}</div>
+                            </div>
+                        `;
+                        dmsList.appendChild(dmItem);
+                    });
+                } else {
+                    dmsList.innerHTML = '<div class="empty-state">No recent DMs</div>';
+                }
+            });
+        }
+
+        function loadScheduledMessages() {
+            const scheduleList = document.getElementById('scheduledMessagesList');
+            
+            database.ref('scheduledMessages').orderByChild('scheduledTime').on('value', (snapshot) => {
+                scheduleList.innerHTML = '';
+                const scheduled = [];
+                
+                snapshot.forEach((scheduleSnapshot) => {
+                    const scheduleData = scheduleSnapshot.val();
+                    scheduleData.key = scheduleSnapshot.key;
+                    if (scheduleData.status === 'pending') {
+                        scheduled.push(scheduleData);
+                    }
+                });
+                
+                if (scheduled.length > 0) {
+                    scheduled.forEach(schedule => {
+                        const scheduleItem = document.createElement('div');
+                        scheduleItem.className = 'user-item';
+                        scheduleItem.innerHTML = `
+                            <div class="user-info">
+                                <div class="user-nickname">${schedule.channel} - ${new Date(schedule.scheduledTime).toLocaleString()}</div>
+                                <div class="user-email">${schedule.message.substring(0, 50)}...</div>
+                            </div>
+                            <button class="unban-btn" style="background: #f44336;" onclick="cancelScheduledMessage('${schedule.key}')">Cancel</button>
+                        `;
+                        scheduleList.appendChild(scheduleItem);
+                    });
+                } else {
+                    scheduleList.innerHTML = '<div class="empty-state">No scheduled messages</div>';
+                }
+            });
+        }
+
+        function cancelScheduledMessage(key) {
+            if (confirm('Cancel this scheduled message?')) {
+                database.ref('scheduledMessages/' + key).update({ status: 'cancelled' });
+                alert('Scheduled message cancelled');
+            }
+        }        function updateAutoApproveStatus(isEnabled) {
             const statusText = document.getElementById('autoApproveStatus');
             const section = statusText.closest('div').parentElement;
             
@@ -1551,6 +2148,178 @@
                 section.style.borderColor = '#b3d9ff';
             }
         }
+
+        // Initialize banned words list (run this once)
+        function initializeBannedWords() {
+            const defaultBannedWords = [
+                "abbo", "abo", "abortion", "abuse", "addict", "addicts", "adult", "africa", "african", "alla",
+                "allah", "alligatorbait", "amateur", "american", "anal", "analannie", "analsex", "angie", "angry", "anus",
+                "arab", "arabs", "areola", "argie", "aroused", "arse", "arsehole", "asian", "ass", "assassin",
+                "assassinate", "assassination", "assault", "assbagger", "assblaster", "assclown", "asscowboy", "asses", "assfuck", "assfucker",
+                "asshat", "asshole", "assholes", "asshore", "assjockey", "asskiss", "asskisser", "assklown", "asslick", "asslicker",
+                "asslover", "assman", "assmonkey", "assmunch", "assmuncher", "asspacker", "asspirate", "asspuppies", "assranger", "asswhore",
+                "asswipe", "athletesfoot", "attack", "australian", "babe", "babies", "backdoor", "backdoorman", "backseat", "badfuck",
+                "balllicker", "balls", "ballsack", "banging", "baptist", "barelylegal", "barf", "barface", "barfface", "bast",
+                "bastard", "bazongas", "bazooms", "beaner", "beast", "beastality", "beastial", "beastiality", "beatoff", "beat-off",
+                "beatyourmeat", "beaver", "bestial", "bestiality", "bi", "biatch", "bible", "bicurious", "bigass", "bigbastard",
+                "bigbutt", "bigger", "bisexual", "bi-sexual", "bitch", "bitcher", "bitches", "bitchez", "bitchin", "bitching",
+                "bitchslap", "bitchy", "biteme", "black", "blackman", "blackout", "blacks", "blind", "blow", "blowjob",
+                "boang", "bogan", "bohunk", "bollick", "bollock", "bomb", "bombers", "bombing", "bombs", "bomd",
+                "bondage", "boner", "bong", "boob", "boobies", "boobs", "booby", "boody", "boom", "boong",
+                "boonga", "boonie", "booty", "bootycall", "bountybar", "bra", "brea5t", "breast", "breastjob", "breastlover",
+                "breastman", "brothel", "bugger", "buggered", "buggery", "bullcrap", "bulldike", "bulldyke", "bullshit", "bumblefuck",
+                "bumfuck", "bunga", "bunghole", "buried", "burn", "butchbabes", "butchdike", "butchdyke", "butt", "buttbang",
+                "butt-bang", "buttface", "buttfuck", "butt-fuck", "buttfucker", "butt-fucker", "buttfuckers", "butt-fuckers", "butthead", "buttman",
+                "buttmunch", "buttmuncher", "buttpirate", "buttplug", "buttstain", "byatch", "cacker", "cameljockey", "cameltoe", "canadian",
+                "cancer", "carpetmuncher", "carruth", "catholic", "catholics", "cemetery", "chav", "cherrypopper", "chickslick", "children's",
+                "chin", "chinaman", "chinamen", "chinese", "chink", "chinky", "choad", "chode", "christ", "christian",
+                "church", "cigarette", "cigs", "clamdigger", "clamdiver", "clit", "clitoris", "clogwog", "cocaine", "cock",
+                "cockblock", "cockblocker", "cockcowboy", "cockfight", "cockhead", "cockknob", "cocklicker", "cocklover", "cocknob", "cockqueen",
+                "cockrider", "cocksman", "cocksmith", "cocksmoker", "cocksucer", "cocksuck", "cocksucked", "cocksucker", "cocksucking", "cocktail",
+                "cocktease", "cocky", "cohee", "coitus", "color", "colored", "coloured", "commie", "communist", "condom",
+                "conservative", "conspiracy", "coolie", "cooly", "coon", "coondog", "copulate", "cornhole", "corruption", "cra5h",
+                "crabs", "crack", "crackpipe", "crackwhore", "crack-whore", "crap", "crapola", "crapper", "crappy", "crash",
+                "creamy", "crime", "crimes", "criminal", "criminals", "crotch", "crotchjockey", "crotchmonkey", "crotchrot", "cum",
+                "cumbubble", "cumfest", "cumjockey", "cumm", "cummer", "cumming", "cumquat", "cumqueen", "cumshot", "cunilingus",
+                "cunillingus", "cunn", "cunnilingus", "cunntt", "cunt", "cunteyed", "cuntfuck", "cuntfucker", "cuntlick", "cuntlicker",
+                "cuntlicking", "cuntsucker", "cybersex", "cyberslimer", "dago", "dahmer", "dammit", "damn", "damnation", "damnit",
+                "darkie", "darky", "datnigga", "dead", "deapthroat", "death", "deepthroat", "defecate", "dego", "demon",
+                "deposit", "desire", "destroy", "deth", "devil", "devilworshipper", "dick", "dickbrain", "dickforbrains", "dickhead",
+                "dickless", "dicklick", "dicklicker", "dickman", "dickwad", "dickweed", "diddle", "die", "died", "dies",
+                "dike", "dildo", "dingleberry", "dink", "dipshit", "dipstick", "dirty", "disease", "diseases", "disturbed",
+                "dive", "dix", "dixiedike", "dixiedyke", "doggiestyle", "doggystyle", "dong", "doodoo", "doo-doo", "doom",
+                "dope", "dragqueen", "dragqween", "dripdick", "drug", "drunk", "drunken", "dumb", "dumbass", "dumbbitch",
+                "dumbfuck", "dyefly", "dyke", "easyslut", "eatballs", "eatme", "eatpussy", "ecstacy", "ejaculate", "ejaculated",
+                "ejaculating", "ejaculation", "enema", "enemy", "erect", "erection", "ero", "escort", "ethiopian", "ethnic",
+                "european", "evl", "excrement", "execute", "executed", "execution", "executioner", "explosion", "facefucker", "faeces",
+                "fag", "fagging", "faggot", "fagot", "failed", "failure", "fairies", "fairy", "faith", "fannyfucker",
+                "fart", "farted", "farting", "farty", "fastfuck", "fat", "fatah", "fatass", "fatfuck", "fatfucker",
+                "fatso", "fckcum", "fear", "feces", "felatio", "felch", "felcher", "felching", "fellatio", "feltch",
+                "feltcher", "feltching", "fetish", "fight", "filipina", "filipino", "fingerfood", "fingerfuck", "fingerfucked", "fingerfucker",
+                "fingerfuckers", "fingerfucking", "fire", "firing", "fister", "fistfuck", "fistfucked", "fistfucker", "fistfucking", "fisting",
+                "flange", "flasher", "flatulence", "floo", "flydie", "flydye", "fok", "fondle", "footaction", "footfuck",
+                "footfucker", "footlicker", "footstar", "fore", "foreskin", "forni", "fornicate", "foursome", "fourtwenty", "fraud",
+                "freakfuck", "freakyfucker", "freefuck", "fu", "fubar", "fuc", "fucck", "fuck", "fucka", "fuckable",
+                "fuckbag", "fuckbuddy", "fucked", "fuckedup", "fucker", "fuckers", "fuckface", "fuckfest", "fuckfreak", "fuckfriend",
+                "fuckhead", "fuckher", "fuckin", "fuckina", "fucking", "fuckingbitch", "fuckinnuts", "fuckinright", "fuckit", "fuckknob",
+                "fuckme", "fuckmehard", "fuckmonkey", "fuckoff", "fuckpig", "fucks", "fucktard", "fuckwhore", "fuckyou", "fudgepacker",
+                "fugly", "fuk", "fuks", "funeral", "funfuck", "fungus", "fuuck", "gangbang", "gangbanged", "gangbanger",
+                "gangsta", "gatorbait", "gay", "gaymuthafuckinwhore", "gaysex", "geez", "geezer", "geni", "genital", "german",
+                "getiton", "gin", "ginzo", "gipp", "girls", "givehead", "glazeddonut", "gob", "god", "godammit",
+                "goddamit", "goddammit", "goddamn", "goddamned", "goddamnes", "goddamnit", "goddamnmuthafucker", "goldenshower", "gonorrehea",
+                "gonzagas", "gook", "gotohell", "goy", "goyim", "greaseball", "gringo", "groe", "gross", "grostulation",
+                "gubba", "gummer", "gun", "gyp", "gypo", "gypp", "gyppie", "gyppo", "gyppy", "hamas",
+                "handjob", "hapa", "harder", "hardon", "harem", "headfuck", "headlights", "hebe", "heeb", "hell",
+                "henhouse", "heroin", "herpes", "heterosexual", "hijack", "hijacker", "hijacking", "hillbillies", "hindoo", "hiscock",
+                "hitler", "hitlerism", "hitlerist", "hiv", "ho", "hobo", "hodgie", "hoes", "hole", "holestuffer",
+                "homicide", "homo", "homobangers", "homosexual", "honger", "honk", "honkers", "honkey", "honky", "hook",
+                "hooker", "hookers", "hooters", "hore", "hork", "horn", "horney", "horniest", "horny", "horseshit",
+                "hosejob", "hoser", "hostage", "hotdamn", "hotpussy", "hottotrot", "hummer", "husky", "hussy", "hustler",
+                "hymen", "hymie", "iblowu", "idiot", "ikey", "illegal", "incest", "insest", "intercourse", "interracial",
+                "intheass", "inthebuff", "israel", "israeli", "israel's", "italiano", "itch", "jackass", "jackoff", "jackshit",
+                "jacktheripper", "jade", "jap", "japanese", "japcrap", "jebus", "jeez", "jerkoff", "jesus", "jesuschrist",
+                "jew", "jewish", "jiga", "jigaboo", "jigg", "jigga", "jiggabo", "jigger", "jiggy", "jihad",
+                "jijjiboo", "jimfish", "jism", "jiz", "jizim", "jizjuice", "jizm", "jizz", "jizzim", "jizzum",
+                "joint", "juggalo", "jugs", "junglebunny", "kaffer", "kaffir", "kaffre", "kafir", "kanake", "kid",
+                "kigger", "kike", "kill", "killed", "killer", "killing", "kills", "kink", "kinky", "kissass",
+                "kkk", "knife", "knockers", "kock", "kondum", "koon", "kotex", "krap", "krappy", "kraut",
+                "kum", "kumbubble", "kumbullbe", "kummer", "kumming", "kumquat", "kums", "kunilingus", "kunnilingus", "kunt",
+                "ky", "kyke", "lactate", "laid", "lapdance", "latin", "lesbain", "lesbayn", "lesbian", "lesbin",
+                "lesbo", "lez", "lezbe", "lezbefriends", "lezbo", "lezz", "lezzo", "liberal", "libido", "licker",
+                "lickme", "lies", "limey", "limpdick", "limy", "lingerie", "liquor", "livesex", "loadedgun", "lolita",
+                "looser", "loser", "lotion", "lovebone", "lovegoo", "lovegun", "lovejuice", "lovemuscle", "lovepistol", "loverocket",
+                "lowlife", "lsd", "lubejob", "lucifer", "luckycammeltoe", "lugan", "lynch", "macaca", "mad", "mafia",
+                "magicwand", "mams", "manhater", "manpaste", "marijuana", "mastabate", "mastabater", "masterbate", "masterblaster", "mastrabator",
+                "masturbate", "masturbating", "mattressprincess", "meatbeatter", "meatrack", "meth", "mexican", "mgger", "mggor", "mickeyfinn",
+                "mideast", "milf", "minority", "mockey", "mockie", "mocky", "mofo", "moky", "moles", "molest",
+                "molestation", "molester", "molestor", "moneyshot", "mooncricket", "mormon", "moron", "moslem", "mosshead", "mothafuck",
+                "mothafucka", "mothafuckaz", "mothafucked", "mothafucker", "mothafuckin", "mothafucking", "mothafuckings", "motherfuck", "motherfucked",
+                "motherfucker", "motherfuckin", "motherfucking", "motherfuckings", "motherlovebone", "muff", "muffdive", "muffdiver", "muffindiver", "mufflikcer",
+                "mulatto", "muncher", "munt", "murder", "murderer", "muslim", "naked", "narcotic", "nasty", "nastybitch",
+                "nastyho", "nastyslut", "nastywhore", "nazi", "necro", "negro", "negroes", "negroid", "negro's", "nig",
+                "niger", "nigerian", "nigerians", "nigg", "nigga", "niggah", "niggaracci", "niggard", "niggarded", "niggarding",
+                "niggardliness", "niggardliness's", "niggardly", "niggards", "niggard's", "niggaz", "nigger", "niggerhead", "niggerhole", "niggers",
+                "nigger's", "niggle", "niggled", "niggles", "niggling", "nigglings", "niggor", "niggur", "niglet", "nignog",
+                "nigr", "nigra", "nigre", "nip", "nipple", "nipplering", "nittit", "nlgger", "nlggor", "nofuckingway",
+                "nook", "nookey", "nookie", "noonan", "nooner", "nude", "nudger", "nuke", "nutfucker", "nymph",
+                "ontherag", "oral", "orga", "orgasim", "orgasm", "orgies", "orgy", "osama", "paki", "palesimian",
+                "palestinian", "pansies", "pansy", "panti", "panties", "payo", "pearlnecklace", "peck", "pecker", "peckerwood",
+                "pee", "peehole", "pee-pee", "peepshow", "peepshpw", "pendy", "penetration", "peni5", "penile", "penis",
+                "penises", "penthouse", "period", "perv", "phonesex", "phuk", "phuked", "phuking", "phukked", "phukking",
+                "phungky", "phuq", "pi55", "picaninny", "piccaninny", "pickaninny", "piker", "pikey", "piky", "pimp",
+                "pimped", "pimper", "pimpjuic", "pimpjuice", "pimpsimp", "pindick", "piss", "pissed", "pisser", "pisses",
+                "pisshead", "pissin", "pissing", "pissoff", "pistol", "pixie", "pixy", "playboy", "playgirl", "pocha",
+                "pocho", "pocketpool", "pohm", "polack", "pom", "pommie", "pommy", "poo", "poon", "poontang",
+                "poop", "pooper", "pooperscooper", "pooping", "poorwhitetrash", "popimp", "porchmonkey", "porn", "pornflick", "pornking",
+                "porno", "pornography", "pornprincess", "pot", "poverty", "premature", "pric", "prick", "prickhead", "primetime",
+                "propaganda", "pros", "prostitute", "protestant", "pu55i", "pu55y", "pube", "pubic", "pubiclice", "pud",
+                "pudboy", "pudd", "puddboy", "puke", "puntang", "purinapricness", "puss", "pussie", "pussies", "pussy",
+                "pussycat", "pussyeater", "pussyfucker", "pussylicker", "pussylips", "pussylover", "pussypounder", "pusy", "quashie", "queef",
+                "queer", "quickie", "quim", "ra8s", "rabbi", "racial", "racist", "radical", "radicals", "raghead",
+                "randy", "rape", "raped", "raper", "rapist", "rearend", "rearentry", "rectum", "redlight", "redneck",
+                "reefer", "reestie", "refugee", "reject", "remains", "rentafuck", "republican", "rere", "retard", "retarded",
+                "ribbed", "rigger", "rimjob", "rimming", "roach", "robber", "roundeye", "rump", "russki", "russkie",
+                "sadis", "sadom", "samckdaddy", "sandm", "sandnigger", "satan", "scag", "scallywag", "scat", "schlong",
+                "screw", "screwyou", "scrotum", "scum", "semen", "seppo", "servant", "sex", "sexed", "sexfarm",
+                "sexhound", "sexhouse", "sexing", "sexkitten", "sexpot", "sexslave", "sextogo", "sextoy", "sextoys", "sexual",
+                "sexually", "sexwhore", "sexy", "sexymoma", "sexy-slim", "shag", "shaggin", "shagging", "shat", "shav",
+                "shawtypimp", "sheeney", "shhit", "shinola", "shit", "shitcan", "shitdick", "shite", "shiteater", "shited",
+                "shitface", "shitfaced", "shitfit", "shitforbrains", "shitfuck", "shitfucker", "shitfull", "shithapens", "shithappens", "shithead",
+                "shithouse", "shiting", "shitlist", "shitola", "shitoutofluck", "shits", "shitstain", "shitted", "shitter", "shitting",
+                "shitty", "shoot", "shooting", "shortfuck", "showtime", "sick", "sissy", "sixsixsix", "sixtynine", "sixtyniner",
+                "skank", "skankbitch", "skankfuck", "skankwhore", "skanky", "skankybitch", "skankywhore", "skinflute", "skum", "skumbag",
+                "slant", "slanteye", "slapper", "slaughter", "slav", "slave", "slavedriver", "sleezebag", "sleezeball", "slideitin",
+                "slime", "slimeball", "slimebucket", "slopehead", "slopey", "slopy", "slut", "sluts", "slutt", "slutting",
+                "slutty", "slutwear", "slutwhore", "smack", "smackthemonkey", "smut", "snatch", "snatchpatch", "snigger", "sniggered",
+                "sniggering", "sniggers", "snigger's", "sniper", "snot", "snowback", "snownigger", "sob", "sodom", "sodomise",
+                "sodomite", "sodomize", "sodomy", "sonofabitch", "sonofbitch", "sooty", "sos", "soviet", "spaghettibender", "spaghettinigger",
+                "spank", "spankthemonkey", "sperm", "spermacide", "spermbag", "spermhearder", "spermherder", "spic", "spick", "spig",
+                "spigotty", "spik", "spit", "spitter", "splittail", "spooge", "spreadeagle", "spunk", "spunky", "squaw",
+                "stagg", "stiffy", "strapon", "stringer", "stripclub", "stroke", "stroking", "stupid", "stupidfuck", "stupidfucker",
+                "suck", "suckdick", "sucker", "suckme", "suckmyass", "suckmydick", "suckmytit", "suckoff", "suicide", "swallow",
+                "swallower", "swalow", "swastika", "sweetness", "syphilis", "taboo", "taff", "tampon", "tang", "tantra",
+                "tarbaby", "tard", "teat", "terror", "terrorist", "teste", "testicle", "testicles", "thicklips", "thirdeye",
+                "thirdleg", "threesome", "threeway", "timbernigger", "tinkle", "tit", "titbitnipply", "titfuck", "titfucker", "titfuckin",
+                "titjob", "titlicker", "titlover", "tits", "tittie", "titties", "titty", "tnt", "toilet", "tongethruster",
+                "tongue", "tonguethrust", "tonguetramp", "tortur", "torture", "tosser", "towelhead", "trailertrash", "tramp", "trannie",
+                "tranny", "transexual", "transsexual", "transvestite", "triplex", "trisexual", "trojan", "trots", "tuckahoe", "tunneloflove",
+                "turd", "turnon", "twat", "twink", "twinkie", "twobitwhore", "uck", "uk", "unfuckable", "upskirt",
+                "uptheass", "upthebutt", "urinary", "urinate", "urine", "usama", "uterus", "vagina", "vaginal", "vatican",
+                "vibr", "vibrater", "vibrator", "vietcong", "violence", "virgin", "virginbreaker", "vomit", "vulva", "wab",
+                "wank", "wanker", "wanking", "waysted", "weapon", "weenie", "weewee", "welcher", "welfare", "wetb",
+                "wetback", "wetspot", "whacker", "whash", "whigger", "whiskey", "whiskeydick", "whiskydick", "whit", "whitenigger",
+                "whites", "whitetrash", "whitey", "whiz", "whop", "whore", "whorefucker", "whorehouse", "wigger", "willie",
+                "williewanker", "willy", "wn", "wog", "women's", "wop", "wtf", "wuss", "wuzzie", "xtc",
+                "xxx", "yankee", "yellowman", "zigabo", "zipperhead"
+            ];
+
+            // Check if words are already initialized
+            database.ref('bannedWords').once('value', (snapshot) => {
+                if (!snapshot.exists() || snapshot.numChildren() < 10) {
+                    console.log('Initializing banned words...');
+                    // Add all default banned words
+                    const promises = defaultBannedWords.map(word => {
+                        return database.ref('bannedWords').push(word.toLowerCase());
+                    });
+                    
+                    Promise.all(promises).then(() => {
+                        console.log('✅ Banned words initialized successfully');
+                        alert('Banned words list initialized with ' + defaultBannedWords.length + ' words');
+                    }).catch((error) => {
+                        console.error('❌ Error initializing banned words:', error);
+                        alert('Error initializing banned words: ' + error.message);
+                    });
+                } else {
+                    console.log('Banned words already initialized:', snapshot.numChildren(), 'words found');
+                }
+            });
+        }
+
+        // Call this when dashboard loads
+        setTimeout(initializeBannedWords, 2000);
     </script>
 </body>
 </html>
+    </script>
+</body>
+    </html>
