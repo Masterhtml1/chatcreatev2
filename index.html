@@ -506,6 +506,65 @@
             display: flex;
             gap: 10px;
             align-items: center;
+            position: relative;
+        }
+
+        /* Command suggestions */
+        .command-suggestions {
+            position: absolute;
+            bottom: 100%;
+            left: 15px;
+            right: 15px;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 8px 8px 0 0;
+            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+            display: none;
+            z-index: 1000;
+        }
+
+        .dark-theme .command-suggestions {
+            background: #2d2d2d;
+            border-color: #444;
+            color: #e0e0e0;
+        }
+
+        .command-item {
+            padding: 10px 15px;
+            border-bottom: 1px solid #eee;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .dark-theme .command-item {
+            border-bottom-color: #444;
+        }
+
+        .command-item:hover, .command-item.selected {
+            background: #f0f0f0;
+        }
+
+        .dark-theme .command-item:hover, .dark-theme .command-item.selected {
+            background: #3a3a3a;
+        }
+
+        .command-item:last-child {
+            border-bottom: none;
+        }
+
+        .command-name {
+            font-weight: 600;
+            color: #ff69b4;
+        }
+
+        .command-description {
+            font-size: 12px;
+            color: #666;
+            margin-top: 2px;
+        }
+
+        .dark-theme .command-description {
+            color: #aaa;
         }
 
         .message-input {
@@ -986,6 +1045,7 @@
         <div class="typing-indicator" id="typingIndicator"></div>
 
         <div class="message-input-container">
+            <div class="command-suggestions" id="commandSuggestions"></div>
             <input type="text" class="message-input" id="messageInput" placeholder="Type a message...">
             <button class="send-btn" id="sendButton" onclick="sendMessage()">Send</button>
         </div>
@@ -1537,12 +1597,293 @@ This is an automated security notification from ChatCreate.
             container.scrollTop = container.scrollHeight;
         }
 
-        // Send message to Firebase
+        // Command system for admins and mods
+        let selectedCommandIndex = -1;
+        let availableCommands = [];
+
+        // Define available commands based on role
+        function getAvailableCommands() {
+            const commands = [];
+            
+            if (isAdmin || isMod) {
+                commands.push({
+                    name: '/ban',
+                    usage: '/ban <nickname>',
+                    description: 'Ban a user from the chat',
+                    example: '/ban john_doe'
+                });
+                
+                commands.push({
+                    name: '/banemail',
+                    usage: '/banemail <email>',
+                    description: 'Ban a user by their email address',
+                    example: '/banemail student@usd232.org'
+                });
+                
+                commands.push({
+                    name: '/unban',
+                    usage: '/unban <nickname>',
+                    description: 'Unban a user from the chat',
+                    example: '/unban john_doe'
+                });
+            }
+            
+            if (isAdmin) {
+                commands.push({
+                    name: '/edit',
+                    usage: '/edit <message_id> <new_text>',
+                    description: 'Edit a message (admin only)',
+                    example: '/edit 123 This is the new message'
+                });
+                
+                commands.push({
+                    name: '/clear',
+                    usage: '/clear',
+                    description: 'Clear all messages in current channel (admin only)',
+                    example: '/clear'
+                });
+            }
+            
+            // Universal commands
+            commands.push({
+                name: '/help',
+                usage: '/help',
+                description: 'Show all available commands',
+                example: '/help'
+            });
+            
+            return commands;
+        }
+
+        // Show command suggestions
+        function showCommandSuggestions(input) {
+            if (!isAdmin && !isMod) return;
+            
+            const suggestions = document.getElementById('commandSuggestions');
+            availableCommands = getAvailableCommands();
+            
+            const query = input.toLowerCase();
+            const matchingCommands = availableCommands.filter(cmd => 
+                cmd.name.toLowerCase().includes(query) || query === '/'
+            );
+            
+            if (matchingCommands.length === 0 || !input.startsWith('/')) {
+                suggestions.style.display = 'none';
+                return;
+            }
+            
+            suggestions.innerHTML = '';
+            matchingCommands.forEach((cmd, index) => {
+                const item = document.createElement('div');
+                item.className = 'command-item';
+                item.innerHTML = `
+                    <div class="command-name">${cmd.usage}</div>
+                    <div class="command-description">${cmd.description}</div>
+                `;
+                item.onclick = () => selectCommand(cmd.usage);
+                suggestions.appendChild(item);
+            });
+            
+            suggestions.style.display = 'block';
+            selectedCommandIndex = -1;
+        }
+
+        // Hide command suggestions
+        function hideCommandSuggestions() {
+            document.getElementById('commandSuggestions').style.display = 'none';
+            selectedCommandIndex = -1;
+        }
+
+        // Select command from suggestions
+        function selectCommand(usage) {
+            document.getElementById('messageInput').value = usage + ' ';
+            hideCommandSuggestions();
+            document.getElementById('messageInput').focus();
+        }
+
+        // Process slash commands
+        function processCommand(input) {
+            const parts = input.trim().split(' ');
+            const command = parts[0].toLowerCase();
+            const args = parts.slice(1);
+            
+            switch (command) {
+                case '/ban':
+                    if (args.length === 0) {
+                        alert('Usage: /ban <nickname>');
+                        return true;
+                    }
+                    banUserByCommand(args[0]);
+                    return true;
+                    
+                case '/banemail':
+                    if (args.length === 0) {
+                        alert('Usage: /banemail <email>');
+                        return true;
+                    }
+                    banUserByEmail(args[0]);
+                    return true;
+                    
+                case '/unban':
+                    if (args.length === 0) {
+                        alert('Usage: /unban <nickname>');
+                        return true;
+                    }
+                    unbanUserByCommand(args[0]);
+                    return true;
+                    
+                case '/edit':
+                    if (!isAdmin) {
+                        alert('Only administrators can edit messages.');
+                        return true;
+                    }
+                    if (args.length < 2) {
+                        alert('Usage: /edit <message_id> <new_text>');
+                        return true;
+                    }
+                    editMessageByCommand(args[0], args.slice(1).join(' '));
+                    return true;
+                    
+                case '/clear':
+                    if (!isAdmin) {
+                        alert('Only administrators can clear channels.');
+                        return true;
+                    }
+                    clearChannelByCommand();
+                    return true;
+                    
+                case '/help':
+                    showHelpCommand();
+                    return true;
+                    
+                default:
+                    alert('Unknown command. Type /help for available commands.');
+                    return true;
+            }
+        }
+
+        // Command implementations
+        function banUserByCommand(nickname) {
+            if (confirm(`Ban user "${nickname}"?`)) {
+                database.ref('bannedUsers').push({
+                    nickname: nickname,
+                    bannedBy: currentUser.isAdmin ? 'Admin' : 'Moderator',
+                    bannedAt: Date.now(),
+                    reason: 'Banned via command'
+                });
+                
+                const banMessage = {
+                    author: 'System',
+                    nickname: 'System',
+                    text: `${nickname} has been banned by ${currentUser.isAdmin ? 'Admin' : 'Moderator'}`,
+                    timestamp: Date.now()
+                };
+                database.ref('channels/' + currentChannel.substring(1) + '/messages').push(banMessage);
+                
+                showCommandResult(`✅ User "${nickname}" has been banned.`);
+            }
+        }
+
+        function banUserByEmail(email) {
+            if (!email.includes('@')) {
+                alert('Please provide a valid email address.');
+                return;
+            }
+            
+            if (confirm(`Ban user with email "${email}"?`)) {
+                database.ref('bannedUsers').push({
+                    nickname: 'Unknown',
+                    email: email,
+                    bannedBy: currentUser.isAdmin ? 'Admin' : 'Moderator',
+                    bannedAt: Date.now(),
+                    reason: 'Banned via email command'
+                });
+                
+                showCommandResult(`✅ User with email "${email}" has been banned.`);
+            }
+        }
+
+        function unbanUserByCommand(nickname) {
+            database.ref('bannedUsers').orderByChild('nickname').equalTo(nickname).once('value', (snapshot) => {
+                if (snapshot.exists()) {
+                    snapshot.forEach((childSnapshot) => {
+                        childSnapshot.ref.remove();
+                    });
+                    showCommandResult(`✅ User "${nickname}" has been unbanned.`);
+                } else {
+                    showCommandResult(`❌ User "${nickname}" is not banned.`);
+                }
+            });
+        }
+
+        function editMessageByCommand(messageId, newText) {
+            // This is a simplified version - in practice you'd need to find the message
+            showCommandResult(`📝 Edit command received. Message ID: ${messageId}, New text: ${newText}`);
+            alert('Message editing via command is coming soon! Use the edit button on messages for now.');
+        }
+
+        function clearChannelByCommand() {
+            if (confirm('Are you sure you want to clear all messages in this channel?')) {
+                database.ref('channels/' + currentChannel.substring(1) + '/messages').remove()
+                    .then(() => {
+                        showCommandResult('✅ Channel cleared successfully.');
+                    })
+                    .catch((error) => {
+                        showCommandResult('❌ Error clearing channel: ' + error.message);
+                    });
+            }
+        }
+
+        function showHelpCommand() {
+            const commands = getAvailableCommands();
+            let helpText = '📋 Available Commands:\n\n';
+            commands.forEach(cmd => {
+                helpText += `${cmd.usage}\n${cmd.description}\n\n`;
+            });
+            alert(helpText);
+        }
+
+        function showCommandResult(message) {
+            // Show result in chat as a system message visible only to the user
+            const resultDiv = document.createElement('div');
+            resultDiv.style.cssText = `
+                background: #e3f2fd;
+                border: 1px solid #2196F3;
+                border-radius: 8px;
+                padding: 10px 15px;
+                margin: 10px 20px;
+                font-size: 14px;
+                color: #1976D2;
+            `;
+            resultDiv.textContent = message;
+            
+            const container = document.getElementById('messagesContainer');
+            container.appendChild(resultDiv);
+            container.scrollTop = container.scrollHeight;
+            
+            // Remove after 5 seconds
+            setTimeout(() => {
+                if (resultDiv.parentNode) {
+                    resultDiv.parentNode.removeChild(resultDiv);
+                }
+            }, 5000);
+        }
+
+        // Send message to Firebase (with command support)
         function sendMessage() {
             const input = document.getElementById('messageInput');
             const text = input.value.trim();
             
             if (!text) return;
+            
+            // Check if it's a command
+            if (text.startsWith('/') && (isAdmin || isMod)) {
+                hideCommandSuggestions();
+                if (processCommand(text)) {
+                    input.value = '';
+                    return;
+                }
+            }
             
             if (bannedUsers.includes(currentUser.nickname)) {
                 alert('You have been banned from sending messages.');
@@ -1578,10 +1919,90 @@ This is an automated security notification from ChatCreate.
             input.value = '';
         }
 
-        // Enter key to send
-        document.getElementById('messageInput').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
+        // Enhanced input handling for commands
+        document.getElementById('messageInput').addEventListener('input', function(e) {
+            const text = e.target.value;
+            
+            // Show command suggestions if starts with /
+            if (text.startsWith('/') && (isAdmin || isMod)) {
+                showCommandSuggestions(text);
+            } else {
+                hideCommandSuggestions();
+            }
+            
+            // Existing typing indicator code
+            if (!isTyping) {
+                isTyping = true;
+                let typingName = currentUser.nickname;
+                if (currentUser.isAdmin) {
+                    typingName = '(Admin)';
+                } else if (currentUser.isMod) {
+                    typingName = '(MOD)';
+                }
+                
+                database.ref('channels/' + currentChannel.substring(1) + '/typing/' + typingName).set({
+                    timestamp: Date.now()
+                });
+            }
+            
+            clearTimeout(typingTimer);
+            typingTimer = setTimeout(() => {
+                isTyping = false;
+                let typingName = currentUser.nickname;
+                if (currentUser.isAdmin) {
+                    typingName = '(Admin)';
+                } else if (currentUser.isMod) {
+                    typingName = '(MOD)';
+                }
+                database.ref('channels/' + currentChannel.substring(1) + '/typing/' + typingName).remove();
+            }, 1000);
+        });
+
+        // Enhanced keypress handling for commands
+        document.getElementById('messageInput').addEventListener('keydown', function(e) {
+            const suggestions = document.getElementById('commandSuggestions');
+            const isVisible = suggestions.style.display === 'block';
+            
+            if (isVisible) {
+                const items = suggestions.querySelectorAll('.command-item');
+                
+                if (e.key === 'ArrowDown') {
+                    e.preventDefault();
+                    selectedCommandIndex = Math.min(selectedCommandIndex + 1, items.length - 1);
+                    updateCommandSelection(items);
+                } else if (e.key === 'ArrowUp') {
+                    e.preventDefault();
+                    selectedCommandIndex = Math.max(selectedCommandIndex - 1, -1);
+                    updateCommandSelection(items);
+                } else if (e.key === 'Tab' || e.key === 'Enter') {
+                    if (selectedCommandIndex >= 0 && selectedCommandIndex < items.length) {
+                        e.preventDefault();
+                        const selectedCommand = availableCommands[selectedCommandIndex];
+                        selectCommand(selectedCommand.usage);
+                    } else if (e.key === 'Enter') {
+                        e.preventDefault();
+                        sendMessage();
+                    }
+                } else if (e.key === 'Escape') {
+                    hideCommandSuggestions();
+                }
+            } else if (e.key === 'Enter') {
+                e.preventDefault();
                 sendMessage();
+            }
+        });
+
+        // Update command selection highlighting
+        function updateCommandSelection(items) {
+            items.forEach((item, index) => {
+                item.classList.toggle('selected', index === selectedCommandIndex);
+            });
+        }
+
+        // Hide suggestions when clicking outside
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.message-input-container')) {
+                hideCommandSuggestions();
             }
         });
 
