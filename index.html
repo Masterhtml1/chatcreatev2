@@ -1090,6 +1090,7 @@
         let isMod = false;
         let bannedUsers = [];
         let bannedWords = [];
+        let bannedWordsFilterEnabled = true; // Default to true (filter enabled)
         let typingTimer = null;
         let isTyping = false;
         let onlineUsers = {};
@@ -1890,11 +1891,14 @@ This is an automated security notification from ChatCreate.
                 return;
             }
             
-            const textLower = text.toLowerCase();
-            for (let word of bannedWords) {
-                if (textLower.includes(word)) {
-                    alert('Your message contains a banned word and cannot be sent.');
-                    return;
+            // Only check banned words if the filter is enabled
+            if (bannedWordsFilterEnabled) {
+                const textLower = text.toLowerCase();
+                for (let word of bannedWords) {
+                    if (textLower.includes(word)) {
+                        alert('Your message contains a banned word and cannot be sent.');
+                        return;
+                    }
                 }
             }
             
@@ -2374,6 +2378,13 @@ This is an automated security notification from ChatCreate.
                 snapshot.forEach((wordSnapshot) => {
                     bannedWords.push(wordSnapshot.val());
                 });
+            });
+            
+            // Load banned words filter setting
+            database.ref('settings/bannedWordsFilterEnabled').on('value', (snapshot) => {
+                // Default to true if not set
+                bannedWordsFilterEnabled = snapshot.val() !== false;
+                console.log('Banned words filter is', bannedWordsFilterEnabled ? 'ENABLED' : 'DISABLED');
             });
         }
 
