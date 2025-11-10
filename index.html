@@ -340,12 +340,18 @@
         
         /* Channel Sidebar */
         .channel-sidebar {
-            width: 250px;
+            width: 60px;
             background: #f8f9fa;
             border-right: 1px solid #e0e0e0;
             display: flex;
             flex-direction: column;
-            transition: transform 0.3s ease;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .channel-sidebar.expanded {
+            width: 250px;
         }
         
         .dark-theme .channel-sidebar {
@@ -353,19 +359,65 @@
             border-right-color: #444;
         }
         
+        /* Sidebar Toggle Button (Arrow on right edge) */
+        .sidebar-toggle-edge {
+            position: absolute;
+            right: -10px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 30px;
+            height: 60px;
+            background: #ff69b4;
+            border: none;
+            border-radius: 0 8px 8px 0;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            z-index: 10;
+            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+        }
+        
+        .sidebar-toggle-edge:hover {
+            background: #ff1493;
+            right: -12px;
+        }
+        
         .sidebar-header {
             padding: 15px;
             background: #ff69b4;
             color: white;
             display: flex;
-            justify-content: space-between;
+            justify-content: center;
             align-items: center;
             border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            min-height: 60px;
+        }
+        
+        .channel-sidebar.expanded .sidebar-header {
+            justify-content: space-between;
         }
         
         .sidebar-header h3 {
             font-size: 18px;
             margin: 0;
+            display: none;
+        }
+        
+        .channel-sidebar.expanded .sidebar-header h3 {
+            display: block;
+        }
+        
+        .sidebar-header-icon {
+            font-size: 24px;
+            display: block;
+        }
+        
+        .channel-sidebar.expanded .sidebar-header-icon {
+            display: none;
         }
         
         .toggle-sidebar-btn {
@@ -377,7 +429,7 @@
             width: 30px;
             height: 30px;
             border-radius: 50%;
-            display: none; /* Show only on mobile */
+            display: none;
             align-items: center;
             justify-content: center;
         }
@@ -386,6 +438,13 @@
             flex: 1;
             overflow-y: auto;
             padding: 10px;
+            opacity: 0;
+            pointer-events: none;
+        }
+        
+        .channel-sidebar.expanded .channel-list-sidebar {
+            opacity: 1;
+            pointer-events: auto;
         }
         
         .channel-item-sidebar {
@@ -398,6 +457,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            white-space: nowrap;
         }
         
         .dark-theme .channel-item-sidebar {
@@ -430,10 +490,18 @@
         }
         
         .sidebar-footer {
-            padding: 15px;
+            padding: 10px;
             border-top: 1px solid #e0e0e0;
             display: flex;
-            gap: 10px;
+            flex-direction: column;
+            gap: 8px;
+            opacity: 0;
+            pointer-events: none;
+        }
+        
+        .channel-sidebar.expanded .sidebar-footer {
+            opacity: 1;
+            pointer-events: auto;
         }
         
         .dark-theme .sidebar-footer {
@@ -441,11 +509,12 @@
         }
         
         .new-channel-input {
-            flex: 1;
-            padding: 8px 12px;
+            width: 100%;
+            padding: 10px 12px;
             border: 1px solid #ddd;
             border-radius: 6px;
             font-size: 14px;
+            box-sizing: border-box;
         }
         
         .dark-theme .new-channel-input {
@@ -455,7 +524,8 @@
         }
         
         .join-channel-btn {
-            padding: 8px 15px;
+            width: 100%;
+            padding: 10px 15px;
             background: #ff69b4;
             color: white;
             border: none;
@@ -464,11 +534,13 @@
             font-size: 14px;
             font-weight: 600;
             transition: all 0.2s;
+            box-sizing: border-box;
         }
         
         .join-channel-btn:hover {
             background: #ff1493;
-            transform: scale(1.05);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(255, 105, 180, 0.3);
         }
         
         /* Main Chat Area */
@@ -1194,23 +1266,99 @@
             font-size: 12px;
         }
 
+        /* Channel Context Menu */
+        .channel-context-menu {
+            position: fixed;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            padding: 5px 0;
+            z-index: 10000;
+            display: none;
+            min-width: 150px;
+        }
+
+        .dark-theme .channel-context-menu {
+            background: #2d2d2d;
+            border-color: #444;
+        }
+
+        .context-menu-item {
+            padding: 10px 15px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 14px;
+            color: #333;
+        }
+
+        .dark-theme .context-menu-item {
+            color: #e0e0e0;
+        }
+
+        .context-menu-item:hover {
+            background: #f0f0f0;
+        }
+
+        .dark-theme .context-menu-item:hover {
+            background: #3a3a3a;
+        }
+
+        .context-menu-item.delete {
+            color: #f44336;
+        }
+
+        .context-menu-item.pin {
+            color: #ff69b4;
+        }
+
+        .pinned-indicator {
+            color: #ff69b4;
+            font-weight: bold;
+            margin-left: 5px;
+        }
+
         @media (max-width: 768px) {
             .channel-sidebar {
                 position: fixed;
                 left: 0;
                 top: 0;
                 height: 100vh;
+                width: 250px !important;
                 z-index: 1000;
                 transform: translateX(-100%);
             }
             
-            .channel-sidebar.show {
+            .channel-sidebar.expanded {
                 transform: translateX(0);
                 box-shadow: 2px 0 10px rgba(0, 0, 0, 0.2);
             }
             
+            /* Always show content on mobile when expanded */
+            .channel-sidebar .sidebar-footer,
+            .channel-sidebar .channel-list-sidebar {
+                opacity: 1;
+                pointer-events: auto;
+            }
+            
+            .channel-sidebar .sidebar-header h3 {
+                display: block;
+            }
+            
+            .channel-sidebar .sidebar-header-icon {
+                display: none;
+            }
+            
             .toggle-sidebar-btn {
                 display: flex;
+            }
+            
+            .sidebar-toggle-edge {
+                right: -45px;
+                border-radius: 0 25px 25px 0;
             }
             
             .header {
@@ -1329,6 +1477,11 @@
     <div class="chat-interface" id="chatInterface">
         <!-- Channel Sidebar -->
         <div class="channel-sidebar" id="channelSidebar">
+            <!-- Arrow Toggle Button on Edge -->
+            <button class="sidebar-toggle-edge" onclick="toggleSidebar()">
+                <span id="sidebarArrow">▶</span>
+            </button>
+            
             <div class="sidebar-header">
                 <h3>Channels</h3>
                 <button class="toggle-sidebar-btn" onclick="toggleSidebar()">×</button>
@@ -1338,20 +1491,25 @@
             </div>
             <div class="sidebar-footer">
                 <input type="text" class="new-channel-input" id="newChannelInput" placeholder="#new-channel">
-                <button class="join-channel-btn" onclick="joinNewChannel()">Join</button>
+                <button class="join-channel-btn" onclick="joinNewChannel()">Join Channel</button>
+            </div>
+        </div>
+        
+        <!-- Channel Context Menu -->
+        <div class="channel-context-menu" id="channelContextMenu">
+            <div class="context-menu-item pin" onclick="pinChannel()">
+                <span>📌</span>
+                <span>Pin to Top</span>
+            </div>
+            <div class="context-menu-item delete" onclick="deleteChannel()">
+                <span>🗑️</span>
+                <span>Delete Channel</span>
             </div>
         </div>
         
         <!-- Main Chat Area -->
         <div class="chat-main">
             <div class="chat-header">
-                <button class="sidebar-toggle-btn" onclick="toggleSidebar()" title="Toggle channels">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <line x1="3" y1="12" x2="21" y2="12"></line>
-                        <line x1="3" y1="6" x2="21" y2="6"></line>
-                        <line x1="3" y1="18" x2="21" y2="18"></line>
-                    </svg>
-                </button>
                 <h2>
                     <span class="channel-name" id="channelName">#general</span>
                 </h2>
@@ -1435,6 +1593,22 @@
         let approvedEmails = [];
         let allChannels = {}; // Track all active channels
         let unreadMessages = {}; // Track unread messages per channel
+        let pinnedChannels = []; // Track pinned channels
+        let selectedChannelForMenu = null; // Track which channel the context menu is for
+
+        // Load pinned channels from localStorage
+        function loadPinnedChannels() {
+            const saved = localStorage.getItem('pinnedChannels');
+            if (saved) {
+                pinnedChannels = JSON.parse(saved);
+            }
+        }
+
+        function savePinnedChannels() {
+            localStorage.setItem('pinnedChannels', JSON.stringify(pinnedChannels));
+        }
+
+        loadPinnedChannels();
 
         // Load approved emails from Firebase
         function loadApprovedEmails() {
@@ -2918,7 +3092,16 @@ This is an automated security notification from ChatCreate.
         // Toggle sidebar function
         function toggleSidebar() {
             const sidebar = document.getElementById('channelSidebar');
-            sidebar.classList.toggle('show');
+            const arrow = document.getElementById('sidebarArrow');
+            
+            sidebar.classList.toggle('expanded');
+            
+            // Rotate arrow
+            if (sidebar.classList.contains('expanded')) {
+                arrow.textContent = '◀';
+            } else {
+                arrow.textContent = '▶';
+            }
         }
         
         // Load all channels for sidebar
@@ -2928,13 +3111,37 @@ This is an automated security notification from ChatCreate.
                 sidebarList.innerHTML = '';
                 allChannels = {};
                 
+                // Load hidden channels
+                const hiddenChannels = JSON.parse(localStorage.getItem('hiddenChannels') || '[]');
+                
                 if (snapshot.exists()) {
+                    const channelsArray = [];
                     snapshot.forEach((channelSnapshot) => {
                         const channelName = '#' + channelSnapshot.key;
+                        
+                        // Skip hidden channels
+                        if (hiddenChannels.includes(channelName)) {
+                            return;
+                        }
+                        
                         allChannels[channelName] = {
                             messageCount: channelSnapshot.child('messages').numChildren()
                         };
+                        channelsArray.push(channelName);
+                    });
+                    
+                    // Sort channels: pinned first, then alphabetically
+                    channelsArray.sort((a, b) => {
+                        const aIsPinned = pinnedChannels.includes(a);
+                        const bIsPinned = pinnedChannels.includes(b);
                         
+                        if (aIsPinned && !bIsPinned) return -1;
+                        if (!aIsPinned && bIsPinned) return 1;
+                        return a.localeCompare(b);
+                    });
+                    
+                    // Render channels
+                    channelsArray.forEach(channelName => {
                         const channelItem = document.createElement('div');
                         channelItem.className = 'channel-item-sidebar';
                         if (channelName === currentChannel) {
@@ -2947,18 +3154,86 @@ This is an automated security notification from ChatCreate.
                             unreadBadge = `<span class="unread-badge">${unreadCount}</span>`;
                         }
                         
+                        const pinnedIndicator = pinnedChannels.includes(channelName) ? '<span class="pinned-indicator">📌</span>' : '';
+                        
                         channelItem.innerHTML = `
-                            <span class="channel-item-name">${channelName}</span>
+                            <span class="channel-item-name">${channelName}${pinnedIndicator}</span>
                             ${unreadBadge}
                         `;
                         
                         channelItem.onclick = () => switchChannel(channelName);
+                        
+                        // Add right-click context menu
+                        channelItem.oncontextmenu = (e) => {
+                            e.preventDefault();
+                            selectedChannelForMenu = channelName;
+                            showContextMenu(e.clientX, e.clientY);
+                        };
+                        
                         sidebarList.appendChild(channelItem);
                     });
                 } else {
                     sidebarList.innerHTML = '<div class="empty-state">No channels yet</div>';
                 }
             });
+        }
+        
+        // Show context menu
+        function showContextMenu(x, y) {
+            const menu = document.getElementById('channelContextMenu');
+            menu.style.display = 'block';
+            menu.style.left = x + 'px';
+            menu.style.top = y + 'px';
+        }
+        
+        // Hide context menu when clicking elsewhere
+        document.addEventListener('click', () => {
+            const menu = document.getElementById('channelContextMenu');
+            menu.style.display = 'none';
+        });
+        
+        // Pin channel to top
+        function pinChannel() {
+            if (!selectedChannelForMenu) return;
+            
+            const index = pinnedChannels.indexOf(selectedChannelForMenu);
+            if (index > -1) {
+                // Unpin
+                pinnedChannels.splice(index, 1);
+            } else {
+                // Pin
+                pinnedChannels.push(selectedChannelForMenu);
+            }
+            
+            savePinnedChannels();
+            loadChannelsSidebar();
+        }
+        
+        // Delete channel
+        function deleteChannel() {
+            if (!selectedChannelForMenu) return;
+            
+            // Just hide the channel from this user's sidebar
+            let hiddenChannels = JSON.parse(localStorage.getItem('hiddenChannels') || '[]');
+            if (!hiddenChannels.includes(selectedChannelForMenu)) {
+                hiddenChannels.push(selectedChannelForMenu);
+                localStorage.setItem('hiddenChannels', JSON.stringify(hiddenChannels));
+            }
+            
+            // Remove from pinned if it was pinned
+            const index = pinnedChannels.indexOf(selectedChannelForMenu);
+            if (index > -1) {
+                pinnedChannels.splice(index, 1);
+                savePinnedChannels();
+            }
+            
+            // If we're in the deleted channel, switch to #general
+            if (currentChannel === selectedChannelForMenu) {
+                switchChannel('#general');
+            }
+            
+            // Reload sidebar to hide the channel
+            loadChannelsSidebar();
         }
         
         // Switch to a different channel
