@@ -335,7 +335,164 @@
         .chat-interface {
             display: none;
             height: 100vh;
+            flex-direction: row;
+        }
+        
+        /* Channel Sidebar */
+        .channel-sidebar {
+            width: 250px;
+            background: #f8f9fa;
+            border-right: 1px solid #e0e0e0;
+            display: flex;
             flex-direction: column;
+            transition: transform 0.3s ease;
+        }
+        
+        .dark-theme .channel-sidebar {
+            background: #1a1a1a;
+            border-right-color: #444;
+        }
+        
+        .sidebar-header {
+            padding: 15px;
+            background: #ff69b4;
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .sidebar-header h3 {
+            font-size: 18px;
+            margin: 0;
+        }
+        
+        .toggle-sidebar-btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: none; /* Show only on mobile */
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .channel-list-sidebar {
+            flex: 1;
+            overflow-y: auto;
+            padding: 10px;
+        }
+        
+        .channel-item-sidebar {
+            padding: 12px 15px;
+            margin-bottom: 5px;
+            background: white;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .dark-theme .channel-item-sidebar {
+            background: #2d2d2d;
+        }
+        
+        .channel-item-sidebar:hover {
+            background: #ff69b4;
+            color: white;
+            transform: translateX(5px);
+        }
+        
+        .channel-item-sidebar.active {
+            background: #ff69b4;
+            color: white;
+            font-weight: 600;
+        }
+        
+        .channel-item-name {
+            flex: 1;
+        }
+        
+        .unread-badge {
+            background: #f44336;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+        
+        .sidebar-footer {
+            padding: 15px;
+            border-top: 1px solid #e0e0e0;
+            display: flex;
+            gap: 10px;
+        }
+        
+        .dark-theme .sidebar-footer {
+            border-top-color: #444;
+        }
+        
+        .new-channel-input {
+            flex: 1;
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+        
+        .dark-theme .new-channel-input {
+            background: #2d2d2d;
+            border-color: #444;
+            color: #e0e0e0;
+        }
+        
+        .join-channel-btn {
+            padding: 8px 15px;
+            background: #ff69b4;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+        
+        .join-channel-btn:hover {
+            background: #ff1493;
+            transform: scale(1.05);
+        }
+        
+        /* Main Chat Area */
+        .chat-main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .sidebar-toggle-btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 8px;
+            border-radius: 6px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+        
+        .sidebar-toggle-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
         }
 
         .chat-header {
@@ -345,6 +502,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            gap: 15px;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
         }
 
@@ -637,9 +795,59 @@
         .ban-btn:hover {
             background: #da190b;
         }
+        
+        .delete-btn {
+            background: #ff5722;
+            color: white;
+        }
+        
+        .delete-btn:hover {
+            background: #e64a19;
+        }
 
         .message:hover .admin-controls {
             display: flex;
+        }
+        
+        /* Mention Styles */
+        .mention {
+            background: rgba(255, 105, 180, 0.15);
+            color: #ff69b4;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .mention:hover {
+            background: rgba(255, 105, 180, 0.25);
+        }
+        
+        .dark-theme .mention {
+            background: rgba(255, 105, 180, 0.2);
+            color: #ff8fc7;
+        }
+        
+        .message.mentioned {
+            background: rgba(255, 105, 180, 0.1);
+            border-left: 3px solid #ff69b4;
+            padding-left: 10px;
+            margin-left: -10px;
+        }
+        
+        .dark-theme .message.mentioned {
+            background: rgba(255, 105, 180, 0.15);
+        }
+        
+        /* Deleted Message Styles */
+        .message.deleted .message-text {
+            color: #999;
+            font-style: italic;
+        }
+        
+        .message.deleted .message-content {
+            opacity: 0.6;
         }
 
         .banned-notice {
@@ -987,6 +1195,24 @@
         }
 
         @media (max-width: 768px) {
+            .channel-sidebar {
+                position: fixed;
+                left: 0;
+                top: 0;
+                height: 100vh;
+                z-index: 1000;
+                transform: translateX(-100%);
+            }
+            
+            .channel-sidebar.show {
+                transform: translateX(0);
+                box-shadow: 2px 0 10px rgba(0, 0, 0, 0.2);
+            }
+            
+            .toggle-sidebar-btn {
+                display: flex;
+            }
+            
             .header {
                 padding: 15px;
             }
@@ -1101,39 +1327,64 @@
 
     <!-- Chat Interface -->
     <div class="chat-interface" id="chatInterface">
-        <div class="chat-header">
-            <h2>
-                <span class="channel-name" id="channelName">#general</span>
-            </h2>
-            <div class="user-info">
-                <a href="https://masterhtml1.github.io/ChatCreate-Services/" target="_blank" class="services-btn">Services</a>
-                <button class="theme-toggle-header" onclick="toggleTheme()" title="Toggle theme">
-                    <svg id="themeIconHeader" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
-                    </svg>
-                </button>
-                <span id="userNickname"></span>
-                <button class="logout-btn" onclick="logout()">Leave</button>
+        <!-- Channel Sidebar -->
+        <div class="channel-sidebar" id="channelSidebar">
+            <div class="sidebar-header">
+                <h3>Channels</h3>
+                <button class="toggle-sidebar-btn" onclick="toggleSidebar()">×</button>
+            </div>
+            <div class="channel-list-sidebar" id="channelListSidebar">
+                <div class="loading">Loading channels...</div>
+            </div>
+            <div class="sidebar-footer">
+                <input type="text" class="new-channel-input" id="newChannelInput" placeholder="#new-channel">
+                <button class="join-channel-btn" onclick="joinNewChannel()">Join</button>
             </div>
         </div>
+        
+        <!-- Main Chat Area -->
+        <div class="chat-main">
+            <div class="chat-header">
+                <button class="sidebar-toggle-btn" onclick="toggleSidebar()" title="Toggle channels">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="3" y1="12" x2="21" y2="12"></line>
+                        <line x1="3" y1="6" x2="21" y2="6"></line>
+                        <line x1="3" y1="18" x2="21" y2="18"></line>
+                    </svg>
+                </button>
+                <h2>
+                    <span class="channel-name" id="channelName">#general</span>
+                </h2>
+                <div class="user-info">
+                    <a href="https://masterhtml1.github.io/ChatCreate-Services/" target="_blank" class="services-btn">Services</a>
+                    <button class="theme-toggle-header" onclick="toggleTheme()" title="Toggle theme">
+                        <svg id="themeIconHeader" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                        </svg>
+                    </button>
+                    <span id="userNickname"></span>
+                    <button class="logout-btn" onclick="logout()">Leave</button>
+                </div>
+            </div>
 
-        <div class="search-container">
-            <input type="text" class="search-input" id="searchInput" placeholder="Search messages...">
-            <div class="search-results" id="searchResults" style="display: none;"></div>
-        </div>
+            <div class="search-container">
+                <input type="text" class="search-input" id="searchInput" placeholder="Search messages...">
+                <div class="search-results" id="searchResults" style="display: none;"></div>
+            </div>
 
-        <div class="online-users" id="onlineUsers">
-            <strong>Online:</strong>
-        </div>
+            <div class="online-users" id="onlineUsers">
+                <strong>Online:</strong>
+            </div>
 
-        <div class="messages-container" id="messagesContainer"></div>
+            <div class="messages-container" id="messagesContainer"></div>
 
-        <div class="typing-indicator" id="typingIndicator"></div>
+            <div class="typing-indicator" id="typingIndicator"></div>
 
-        <div class="message-input-container">
-            <div class="command-suggestions" id="commandSuggestions"></div>
-            <input type="text" class="message-input" id="messageInput" placeholder="Type a message...">
-            <button class="send-btn" id="sendButton" onclick="sendMessage()">Send</button>
+            <div class="message-input-container">
+                <div class="command-suggestions" id="commandSuggestions"></div>
+                <input type="text" class="message-input" id="messageInput" placeholder="Type a message...">
+                <button class="send-btn" id="sendButton" onclick="sendMessage()">Send</button>
+            </div>
         </div>
     </div>
 
@@ -1182,6 +1433,8 @@
         let onlineUsers = {};
         let messageReactions = {};
         let approvedEmails = [];
+        let allChannels = {}; // Track all active channels
+        let unreadMessages = {}; // Track unread messages per channel
 
         // Load approved emails from Firebase
         function loadApprovedEmails() {
@@ -1466,6 +1719,8 @@
             listenForOnlineUsers();
             listenForReactions();
             setupSearch();
+            loadChannelsSidebar();
+            trackUnreadMessages();
             
             if (isAdmin) {
                 checkAdminNotifications();
@@ -1578,6 +1833,10 @@ This is an automated security notification from ChatCreate.
         window.addReaction = addReaction;
         window.toggleReaction = toggleReaction;
         window.clearSavedData = clearSavedData;
+        window.deleteMessage = deleteMessage;
+        window.toggleSidebar = toggleSidebar;
+        window.switchChannel = switchChannel;
+        window.joinNewChannel = joinNewChannel;
 
         // Clear saved user data
         function clearSavedData() {
@@ -1628,22 +1887,44 @@ This is an automated security notification from ChatCreate.
                 let adminControls = '';
                 let reactButton = '';
                 
+                // Check if user can delete this message (own message within 5 mins or admin/mod)
+                const messageAge = Date.now() - message.timestamp;
+                const canDelete = (message.senderId === currentUser.uid && messageAge < 300000) || isAdmin || isMod;
+                
                 if ((isAdmin || isMod) && message.author !== 'System') {
                     adminControls = `
                         <div class="admin-controls">
                             ${isAdmin ? `<button class="admin-btn edit-btn" onclick="editMessage('${message.id}')">Edit</button>` : ''}
                             <button class="admin-btn ban-btn" onclick="banUser('${message.nickname}', '${message.author}')">Ban</button>
+                            ${canDelete && !message.deleted ? `<button class="admin-btn delete-btn" onclick="deleteMessage('${message.id}')">Delete</button>` : ''}
+                        </div>
+                    `;
+                } else if (canDelete && message.author !== 'System' && !message.deleted) {
+                    adminControls = `
+                        <div class="admin-controls">
+                            <button class="admin-btn delete-btn" onclick="deleteMessage('${message.id}')">Delete</button>
                         </div>
                     `;
                 }
                 
-                if (message.author !== 'System') {
+                if (message.author !== 'System' && !message.deleted) {
                     reactButton = `<button class="react-btn" onclick="showReactionPicker('${message.id}')">😊</button>`;
+                }
+                
+                // Check if current user is mentioned
+                const isMentioned = message.mentions && message.mentions.includes(currentUser.nickname);
+                if (isMentioned) {
+                    messageDiv.classList.add('mentioned');
+                }
+                
+                // Check if message is deleted
+                if (message.deleted) {
+                    messageDiv.classList.add('deleted');
                 }
                 
                 const reactions = messageReactions[message.id] || {};
                 let reactionsHtml = '';
-                if (Object.keys(reactions).length > 0) {
+                if (Object.keys(reactions).length > 0 && !message.deleted) {
                     reactionsHtml = '<div class="message-reactions">';
                     for (const [emoji, users] of Object.entries(reactions)) {
                         reactionsHtml += `
@@ -1656,14 +1937,22 @@ This is an automated security notification from ChatCreate.
                     reactionsHtml += '</div>';
                 }
                 
-                // Add link preview if URL exists
+                // Add link preview if URL exists and message not deleted
                 let linkPreviewHtml = '';
-                if (message.url) {
+                if (message.url && !message.deleted) {
                     linkPreviewHtml = `
                         <div class="link-preview" id="preview-${message.id}">
                             <div class="link-preview-loading">Loading preview...</div>
                         </div>
                     `;
+                }
+                
+                // Process message text for mentions
+                let messageText = message.text;
+                if (!message.deleted) {
+                    messageText = messageText.replace(/@(\w+)/g, '<span class="mention">@$1</span>');
+                } else {
+                    messageText = '[Message Deleted]';
                 }
                 
                 messageDiv.innerHTML = `
@@ -1675,7 +1964,7 @@ This is an automated security notification from ChatCreate.
                             ${reactButton}
                             ${adminControls}
                         </div>
-                        <div class="message-text" id="text-${message.id}">${message.isHtml && message.author === 'System' ? message.text : message.text}</div>
+                        <div class="message-text" id="text-${message.id}">${message.isHtml && message.author === 'System' ? message.text : messageText}</div>
                         ${linkPreviewHtml}
                         ${reactionsHtml}
                         <div class="reaction-picker" id="picker-${message.id}">
@@ -1691,8 +1980,8 @@ This is an automated security notification from ChatCreate.
                 
                 container.appendChild(messageDiv);
                 
-                // Fetch link preview if URL exists
-                if (message.url) {
+                // Fetch link preview if URL exists and message not deleted
+                if (message.url && !message.deleted) {
                     fetchLinkPreview(message.url, message.id);
                 }
             });
@@ -2063,18 +2352,32 @@ This is an automated security notification from ChatCreate.
             const urlRegex = /(https?:\/\/[^\s]+)/gi;
             const urls = text.match(urlRegex);
             
+            // Detect @mentions in the message
+            const mentionRegex = /@(\w+)/g;
+            const mentions = [];
+            let match;
+            while ((match = mentionRegex.exec(text)) !== null) {
+                mentions.push(match[1]);
+            }
+            
             const message = {
                 author: currentUser.email,
                 nickname: displayNickname,
                 text: text,
                 timestamp: Date.now(),
                 isAdmin: currentUser.isAdmin,
-                isMod: currentUser.isMod
+                isMod: currentUser.isMod,
+                senderId: currentUser.uid
             };
             
             // Add URL preview data if URLs are detected
             if (urls && urls.length > 0) {
                 message.url = urls[0]; // Store the first URL for preview
+            }
+            
+            // Add mentions if detected
+            if (mentions.length > 0) {
+                message.mentions = mentions;
             }
             
             const channelRef = database.ref('channels/' + currentChannel.substring(1) + '/messages');
@@ -2593,6 +2896,177 @@ This is an automated security notification from ChatCreate.
                     }
                     messages[currentChannel][messageIndex] = updatedMessage;
                     renderMessages();
+                }
+            });
+        }
+        
+        // Delete message function
+        function deleteMessage(messageId) {
+            if (confirm('Delete this message?')) {
+                database.ref('channels/' + currentChannel.substring(1) + '/messages/' + messageId).update({
+                    deleted: true,
+                    deletedBy: currentUser.nickname,
+                    deletedAt: Date.now()
+                }).then(() => {
+                    console.log('Message deleted');
+                }).catch((error) => {
+                    alert('Error deleting message: ' + error.message);
+                });
+            }
+        }
+        
+        // Toggle sidebar function
+        function toggleSidebar() {
+            const sidebar = document.getElementById('channelSidebar');
+            sidebar.classList.toggle('show');
+        }
+        
+        // Load all channels for sidebar
+        function loadChannelsSidebar() {
+            database.ref('channels').on('value', (snapshot) => {
+                const sidebarList = document.getElementById('channelListSidebar');
+                sidebarList.innerHTML = '';
+                allChannels = {};
+                
+                if (snapshot.exists()) {
+                    snapshot.forEach((channelSnapshot) => {
+                        const channelName = '#' + channelSnapshot.key;
+                        allChannels[channelName] = {
+                            messageCount: channelSnapshot.child('messages').numChildren()
+                        };
+                        
+                        const channelItem = document.createElement('div');
+                        channelItem.className = 'channel-item-sidebar';
+                        if (channelName === currentChannel) {
+                            channelItem.classList.add('active');
+                        }
+                        
+                        const unreadCount = unreadMessages[channelName] || 0;
+                        let unreadBadge = '';
+                        if (unreadCount > 0 && channelName !== currentChannel) {
+                            unreadBadge = `<span class="unread-badge">${unreadCount}</span>`;
+                        }
+                        
+                        channelItem.innerHTML = `
+                            <span class="channel-item-name">${channelName}</span>
+                            ${unreadBadge}
+                        `;
+                        
+                        channelItem.onclick = () => switchChannel(channelName);
+                        sidebarList.appendChild(channelItem);
+                    });
+                } else {
+                    sidebarList.innerHTML = '<div class="empty-state">No channels yet</div>';
+                }
+            });
+        }
+        
+        // Switch to a different channel
+        function switchChannel(channelName) {
+            if (channelName === currentChannel) return;
+            
+            // Leave current channel
+            let leaveText = '';
+            if (currentUser.isAdmin) {
+                leaveText = '<span style="color: #f44336; font-weight: bold;">(Admin)</span> left the channel';
+            } else if (currentUser.isMod) {
+                leaveText = '<span style="color: #2196F3; font-weight: bold;">(MOD)</span> left the channel';
+            } else {
+                leaveText = `${currentUser.nickname} left the channel`;
+            }
+            
+            const leaveMessage = {
+                author: 'System',
+                nickname: 'System',
+                text: leaveText,
+                timestamp: Date.now(),
+                isHtml: currentUser.isAdmin || currentUser.isMod
+            };
+            database.ref('channels/' + currentChannel.substring(1) + '/messages').push(leaveMessage);
+            
+            // Clean up presence and typing
+            let displayName = currentUser.nickname;
+            if (currentUser.isAdmin) {
+                displayName = '(Admin)';
+            } else if (currentUser.isMod) {
+                displayName = '(MOD)';
+            }
+            
+            database.ref('presence/' + displayName).remove();
+            database.ref('channels/' + currentChannel.substring(1) + '/typing/' + displayName).remove();
+            
+            // Remove listeners from current channel
+            const oldChannelRef = database.ref('channels/' + currentChannel.substring(1) + '/messages');
+            oldChannelRef.off();
+            
+            // Switch to new channel
+            currentChannel = channelName;
+            document.getElementById('channelName').textContent = channelName;
+            messages[currentChannel] = [];
+            
+            // Clear unread count
+            unreadMessages[channelName] = 0;
+            
+            // Join new channel
+            let joinText = '';
+            if (currentUser.isAdmin) {
+                joinText = '<span style="color: #f44336; font-weight: bold;">(Admin)</span> joined the channel';
+            } else if (currentUser.isMod) {
+                joinText = '<span style="color: #2196F3; font-weight: bold;">(MOD)</span> joined the channel';
+            } else {
+                joinText = `${currentUser.nickname} joined the channel`;
+            }
+            
+            const joinMessage = {
+                author: 'System',
+                nickname: 'System',
+                text: joinText,
+                timestamp: Date.now(),
+                isHtml: currentUser.isAdmin || currentUser.isMod
+            };
+            database.ref('channels/' + currentChannel.substring(1) + '/messages').push(joinMessage);
+            
+            // Set up new channel
+            listenForMessages();
+            listenForMessageUpdates();
+            setupPresence();
+            listenForTyping();
+            listenForOnlineUsers();
+            listenForReactions();
+            
+            // Update sidebar
+            loadChannelsSidebar();
+            
+            // Close sidebar on mobile
+            if (window.innerWidth <= 768) {
+                toggleSidebar();
+            }
+        }
+        
+        // Join a new channel from input
+        function joinNewChannel() {
+            let channelInput = document.getElementById('newChannelInput').value.trim();
+            if (!channelInput) {
+                alert('Please enter a channel name');
+                return;
+            }
+            
+            // Add # if not present
+            if (!channelInput.startsWith('#')) {
+                channelInput = '#' + channelInput;
+            }
+            
+            switchChannel(channelInput);
+            document.getElementById('newChannelInput').value = '';
+        }
+        
+        // Track unread messages when not in channel
+        function trackUnreadMessages() {
+            database.ref('channels').on('child_changed', (snapshot) => {
+                const channelName = '#' + snapshot.key;
+                if (channelName !== currentChannel) {
+                    unreadMessages[channelName] = (unreadMessages[channelName] || 0) + 1;
+                    loadChannelsSidebar();
                 }
             });
         }
