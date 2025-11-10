@@ -900,6 +900,92 @@
         .dark-theme .online-user {
             background: #2d2d2d;
         }
+
+        /* Link Preview Styles */
+        .link-preview {
+            margin-top: 10px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            overflow: hidden;
+            background: #f8f9fa;
+            transition: all 0.2s;
+        }
+
+        .dark-theme .link-preview {
+            background: #1a1a1a;
+            border-color: #444;
+        }
+
+        .link-preview:hover {
+            border-color: #ff69b4;
+            box-shadow: 0 2px 8px rgba(255, 105, 180, 0.2);
+        }
+
+        .link-preview-image {
+            width: 100%;
+            height: 150px;
+            object-fit: cover;
+            background: #e0e0e0;
+        }
+
+        .dark-theme .link-preview-image {
+            background: #2d2d2d;
+        }
+
+        .link-preview-content {
+            padding: 12px;
+        }
+
+        .link-preview-title {
+            font-weight: 600;
+            font-size: 14px;
+            color: #333;
+            margin-bottom: 5px;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .dark-theme .link-preview-title {
+            color: #e0e0e0;
+        }
+
+        .link-preview-description {
+            font-size: 12px;
+            color: #666;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            margin-bottom: 5px;
+        }
+
+        .dark-theme .link-preview-description {
+            color: #999;
+        }
+
+        .link-preview-url {
+            font-size: 11px;
+            color: #ff69b4;
+            text-decoration: none;
+            display: block;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .link-preview-url:hover {
+            text-decoration: underline;
+        }
+
+        .link-preview-loading {
+            padding: 15px;
+            text-align: center;
+            color: #999;
+            font-size: 12px;
+        }
+
         @media (max-width: 768px) {
             .header {
                 padding: 15px;
@@ -1570,6 +1656,16 @@ This is an automated security notification from ChatCreate.
                     reactionsHtml += '</div>';
                 }
                 
+                // Add link preview if URL exists
+                let linkPreviewHtml = '';
+                if (message.url) {
+                    linkPreviewHtml = `
+                        <div class="link-preview" id="preview-${message.id}">
+                            <div class="link-preview-loading">Loading preview...</div>
+                        </div>
+                    `;
+                }
+                
                 messageDiv.innerHTML = `
                     <div class="message-avatar">${initial}</div>
                     <div class="message-content">
@@ -1580,6 +1676,7 @@ This is an automated security notification from ChatCreate.
                             ${adminControls}
                         </div>
                         <div class="message-text" id="text-${message.id}">${message.isHtml && message.author === 'System' ? message.text : message.text}</div>
+                        ${linkPreviewHtml}
                         ${reactionsHtml}
                         <div class="reaction-picker" id="picker-${message.id}">
                             <span class="reaction-emoji" onclick="addReaction('${message.id}', '👍')">👍</span>
@@ -1593,9 +1690,62 @@ This is an automated security notification from ChatCreate.
                 `;
                 
                 container.appendChild(messageDiv);
+                
+                // Fetch link preview if URL exists
+                if (message.url) {
+                    fetchLinkPreview(message.url, message.id);
+                }
             });
             
             container.scrollTop = container.scrollHeight;
+        }
+        
+        // Fetch link preview using web_fetch-like approach
+        async function fetchLinkPreview(url, messageId) {
+            const previewDiv = document.getElementById(`preview-${messageId}`);
+            if (!previewDiv) return;
+            
+            try {
+                // Use a simple fetch to get basic metadata
+                // Note: This won't work for all sites due to CORS, but will work for many
+                const response = await fetch(`https://api.microlink.io/?url=${encodeURIComponent(url)}`);
+                const data = await response.json();
+                
+                if (data.status === 'success') {
+                    const { title, description, image, url: fetchedUrl } = data.data;
+                    
+                    let imageHtml = '';
+                    if (image && image.url) {
+                        imageHtml = `<img src="${image.url}" alt="${title || 'Preview'}" class="link-preview-image" onerror="this.style.display='none'">`;
+                    }
+                    
+                    previewDiv.innerHTML = `
+                        ${imageHtml}
+                        <div class="link-preview-content">
+                            <div class="link-preview-title">${title || 'Link'}</div>
+                            ${description ? `<div class="link-preview-description">${description}</div>` : ''}
+                            <a href="${fetchedUrl || url}" target="_blank" class="link-preview-url">${new URL(url).hostname}</a>
+                        </div>
+                    `;
+                } else {
+                    // Fallback to simple link display
+                    previewDiv.innerHTML = `
+                        <div class="link-preview-content">
+                            <div class="link-preview-title">🔗 Link</div>
+                            <a href="${url}" target="_blank" class="link-preview-url">${new URL(url).hostname}</a>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                console.error('Error fetching link preview:', error);
+                // Fallback display
+                previewDiv.innerHTML = `
+                    <div class="link-preview-content">
+                        <div class="link-preview-title">🔗 Link</div>
+                        <a href="${url}" target="_blank" class="link-preview-url">${url}</a>
+                    </div>
+                `;
+            }
         }
 
         // Command system for admins and mods
@@ -1909,6 +2059,10 @@ This is an automated security notification from ChatCreate.
                 displayNickname = 'MOD';
             }
             
+            // Detect URLs in the message
+            const urlRegex = /(https?:\/\/[^\s]+)/gi;
+            const urls = text.match(urlRegex);
+            
             const message = {
                 author: currentUser.email,
                 nickname: displayNickname,
@@ -1918,9 +2072,44 @@ This is an automated security notification from ChatCreate.
                 isMod: currentUser.isMod
             };
             
-            database.ref('channels/' + currentChannel.substring(1) + '/messages').push(message);
+            // Add URL preview data if URLs are detected
+            if (urls && urls.length > 0) {
+                message.url = urls[0]; // Store the first URL for preview
+            }
+            
+            const channelRef = database.ref('channels/' + currentChannel.substring(1) + '/messages');
+            
+            // Push the new message
+            channelRef.push(message).then(() => {
+                // Enforce 50 message limit
+                enforceMessageLimit(currentChannel.substring(1));
+            });
             
             input.value = '';
+        }
+        
+        // Enforce 50 message limit per channel
+        function enforceMessageLimit(channelName) {
+            const messagesRef = database.ref('channels/' + channelName + '/messages');
+            
+            messagesRef.once('value', (snapshot) => {
+                const messageCount = snapshot.numChildren();
+                
+                if (messageCount > 50) {
+                    const messagesToDelete = messageCount - 50;
+                    let deletedCount = 0;
+                    
+                    // Delete oldest messages
+                    snapshot.forEach((messageSnapshot) => {
+                        if (deletedCount < messagesToDelete) {
+                            messageSnapshot.ref.remove();
+                            deletedCount++;
+                        }
+                    });
+                    
+                    console.log(`Deleted ${deletedCount} old messages from #${channelName}`);
+                }
+            });
         }
 
         // Enhanced input handling for commands
