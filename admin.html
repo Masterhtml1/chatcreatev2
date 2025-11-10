@@ -390,6 +390,52 @@
             color: #999;
         }
 
+        /* Toggle Switch */
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 30px;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: 0.4s;
+            border-radius: 30px;
+        }
+
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 22px;
+            width: 22px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: 0.4s;
+            border-radius: 50%;
+        }
+
+        .toggle-switch input:checked + .toggle-slider {
+            background-color: #4CAF50;
+        }
+
+        .toggle-switch input:checked + .toggle-slider:before {
+            transform: translateX(30px);
+        }
+
         /* Status indicator */
         .status-indicator {
             display: inline-block;
@@ -565,6 +611,21 @@
                     <span class="card-icon">🔤</span>
                     Banned Words
                 </h2>
+                
+                <!-- Banned Words Filter Toggle -->
+                <div style="background: #fff3e0; border: 1px solid #ffcc80; border-radius: 8px; padding: 15px; margin-bottom: 20px;">
+                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;">
+                        <span style="font-weight: 600; color: #f57c00;">Enable Banned Words Filter</span>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="bannedWordsToggle" onchange="toggleBannedWordsFilter()">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    <p style="font-size: 14px; color: #666; margin: 0;">
+                        <span id="bannedWordsStatus">When enabled, messages containing banned words will be blocked across all channels.</span>
+                    </p>
+                </div>
+                
                 <div class="word-form">
                     <input type="text" id="bannedWord" class="word-input" placeholder="Add banned word">
                     <button class="add-word-btn" onclick="addBannedWord()">Add Word</button>
@@ -748,6 +809,7 @@
             loadModPasswords();
             loadModReports();
             loadAutoApproveSettings();
+            loadBannedWordsFilterSettings();
             loadStats();
         }
 
@@ -1549,6 +1611,53 @@
                 statusText.style.fontWeight = 'normal';
                 section.style.background = '#f0f7ff';
                 section.style.borderColor = '#b3d9ff';
+            }
+        }
+
+        // Banned Words Filter Toggle Functions
+        function loadBannedWordsFilterSettings() {
+            database.ref('settings/bannedWordsFilterEnabled').on('value', (snapshot) => {
+                const isEnabled = snapshot.val() !== false; // Default to true if not set
+                document.getElementById('bannedWordsToggle').checked = isEnabled;
+                updateBannedWordsStatus(isEnabled);
+            });
+        }
+
+        function toggleBannedWordsFilter() {
+            const toggle = document.getElementById('bannedWordsToggle');
+            const isEnabled = toggle.checked;
+            
+            database.ref('settings/bannedWordsFilterEnabled').set(isEnabled)
+                .then(() => {
+                    updateBannedWordsStatus(isEnabled);
+                    alert(isEnabled ? 
+                        'Banned words filter enabled! Messages with banned words will be blocked across all channels.' : 
+                        'Banned words filter disabled! All messages will be allowed through.');
+                })
+                .catch((error) => {
+                    console.error('Error updating banned words filter setting:', error);
+                    alert('Error updating setting: ' + error.message);
+                    // Revert toggle on error
+                    toggle.checked = !isEnabled;
+                });
+        }
+
+        function updateBannedWordsStatus(isEnabled) {
+            const statusText = document.getElementById('bannedWordsStatus');
+            const section = statusText.closest('div').parentElement;
+            
+            if (isEnabled) {
+                statusText.textContent = '✅ Banned words filter is ENABLED. Messages containing banned words are blocked.';
+                statusText.style.color = '#4CAF50';
+                statusText.style.fontWeight = '600';
+                section.style.background = '#e8f5e9';
+                section.style.borderColor = '#81c784';
+            } else {
+                statusText.textContent = '⚠️ Banned words filter is DISABLED. All messages will be allowed through.';
+                statusText.style.color = '#f57c00';
+                statusText.style.fontWeight = '600';
+                section.style.background = '#fff3e0';
+                section.style.borderColor = '#ffcc80';
             }
         }
     </script>
