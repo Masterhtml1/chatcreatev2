@@ -1321,6 +1321,111 @@
             margin-left: 5px;
         }
 
+        /* Reply Feature */
+        .reply-preview {
+            background: rgba(255, 105, 180, 0.1);
+            border-left: 3px solid #ff69b4;
+            padding: 8px 12px;
+            margin: 5px 0 8px 0;
+            border-radius: 4px;
+            font-size: 12px;
+            cursor: pointer;
+        }
+
+        .reply-preview:hover {
+            background: rgba(255, 105, 180, 0.15);
+        }
+
+        .reply-preview-author {
+            font-weight: bold;
+            color: #ff69b4;
+            margin-bottom: 3px;
+        }
+
+        .reply-preview-text {
+            color: #666;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .dark-theme .reply-preview-text {
+            color: #aaa;
+        }
+
+        .reply-input-bar {
+            background: rgba(255, 105, 180, 0.1);
+            padding: 8px 15px;
+            border-top: 1px solid rgba(255, 105, 180, 0.3);
+            display: none;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .reply-input-bar.show {
+            display: flex;
+        }
+
+        .reply-input-info {
+            flex: 1;
+            font-size: 13px;
+        }
+
+        .reply-input-author {
+            font-weight: bold;
+            color: #ff69b4;
+        }
+
+        .reply-input-text {
+            color: #666;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .dark-theme .reply-input-text {
+            color: #aaa;
+        }
+
+        .reply-cancel-btn {
+            background: none;
+            border: none;
+            color: #999;
+            font-size: 18px;
+            cursor: pointer;
+            padding: 0;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .reply-cancel-btn:hover {
+            color: #f44336;
+        }
+
+        .reply-btn {
+            opacity: 0;
+            padding: 4px 8px;
+            background: #f0f0f0;
+            border: none;
+            border-radius: 4px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-left: 5px;
+        }
+
+        .dark-theme .reply-btn {
+            background: #444;
+            color: #e0e0e0;
+        }
+
+        .message:hover .reply-btn {
+            opacity: 1;
+        }
+
         @media (max-width: 768px) {
             .channel-sidebar {
                 position: fixed;
@@ -1538,6 +1643,14 @@
 
             <div class="typing-indicator" id="typingIndicator"></div>
 
+            <div class="reply-input-bar" id="replyBar">
+                <div class="reply-input-info">
+                    <div class="reply-input-author" id="replyAuthor"></div>
+                    <div class="reply-input-text" id="replyText"></div>
+                </div>
+                <button class="reply-cancel-btn" onclick="cancelReply()">✕</button>
+            </div>
+
             <div class="message-input-container">
                 <div class="command-suggestions" id="commandSuggestions"></div>
                 <input type="text" class="message-input" id="messageInput" placeholder="Type a message...">
@@ -1595,6 +1708,7 @@
         let unreadMessages = {}; // Track unread messages per channel
         let pinnedChannels = []; // Track pinned channels
         let selectedChannelForMenu = null; // Track which channel the context menu is for
+        let replyingTo = null; // Track which message we're replying to
 
         // Load pinned channels from localStorage
         function loadPinnedChannels() {
@@ -2060,6 +2174,7 @@ This is an automated security notification from ChatCreate.
                 
                 let adminControls = '';
                 let reactButton = '';
+                let replyButton = '';
                 
                 // Check if user can delete this message (own message within 5 mins or admin/mod)
                 const messageAge = Date.now() - message.timestamp;
@@ -2083,6 +2198,7 @@ This is an automated security notification from ChatCreate.
                 
                 if (message.author !== 'System' && !message.deleted) {
                     reactButton = `<button class="react-btn" onclick="showReactionPicker('${message.id}')">😊</button>`;
+                    replyButton = `<button class="reply-btn" onclick="replyToMessage('${message.id}', '${message.nickname.replace(/'/g, "\\'")}', '${message.text.replace(/'/g, "\\'").substring(0, 50)}')">↩️ Reply</button>`;
                 }
                 
                 // Check if current user is mentioned
@@ -2129,15 +2245,32 @@ This is an automated security notification from ChatCreate.
                     messageText = '[Message Deleted]';
                 }
                 
+                // Add reply preview if this message is a reply
+                let replyPreviewHtml = '';
+                if (message.replyTo && !message.deleted) {
+                    const repliedMsg = messages[currentChannel].find(m => m.id === message.replyTo);
+                    if (repliedMsg) {
+                        const replyText = repliedMsg.text.substring(0, 50) + (repliedMsg.text.length > 50 ? '...' : '');
+                        replyPreviewHtml = `
+                            <div class="reply-preview" onclick="scrollToMessage('${message.replyTo}')">
+                                <div class="reply-preview-author">↩️ ${repliedMsg.nickname}</div>
+                                <div class="reply-preview-text">${replyText}</div>
+                            </div>
+                        `;
+                    }
+                }
+                
                 messageDiv.innerHTML = `
                     <div class="message-avatar">${initial}</div>
                     <div class="message-content">
                         <div class="message-header">
                             <span class="message-author">${displayName}</span>
                             <span class="message-time">${time}</span>
+                            ${replyButton}
                             ${reactButton}
                             ${adminControls}
                         </div>
+                        ${replyPreviewHtml}
                         <div class="message-text" id="text-${message.id}">${message.isHtml && message.author === 'System' ? message.text : messageText}</div>
                         ${linkPreviewHtml}
                         ${reactionsHtml}
@@ -2544,6 +2677,11 @@ This is an automated security notification from ChatCreate.
                 senderId: currentUser.uid
             };
             
+            // Add reply data if replying to a message
+            if (replyingTo) {
+                message.replyTo = replyingTo.id;
+            }
+            
             // Add URL preview data if URLs are detected
             if (urls && urls.length > 0) {
                 message.url = urls[0]; // Store the first URL for preview
@@ -2560,6 +2698,8 @@ This is an automated security notification from ChatCreate.
             channelRef.push(message).then(() => {
                 // Enforce 50 message limit
                 enforceMessageLimit(currentChannel.substring(1));
+                // Clear reply state
+                cancelReply();
             });
             
             input.value = '';
@@ -3344,6 +3484,43 @@ This is an automated security notification from ChatCreate.
                     loadChannelsSidebar();
                 }
             });
+        }
+        
+        // Reply functions
+        function replyToMessage(messageId, nickname, text) {
+            replyingTo = {
+                id: messageId,
+                nickname: nickname,
+                text: text
+            };
+            
+            // Show reply bar
+            const replyBar = document.getElementById('replyBar');
+            replyBar.classList.add('show');
+            
+            // Update reply bar content
+            document.getElementById('replyAuthor').textContent = 'Replying to ' + nickname;
+            document.getElementById('replyText').textContent = text;
+            
+            // Focus input
+            document.getElementById('messageInput').focus();
+        }
+        
+        function cancelReply() {
+            replyingTo = null;
+            const replyBar = document.getElementById('replyBar');
+            replyBar.classList.remove('show');
+        }
+        
+        function scrollToMessage(messageId) {
+            const messageElement = document.querySelector(`[data-message-id="${messageId}"]`);
+            if (messageElement) {
+                messageElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                messageElement.style.backgroundColor = 'rgba(255, 105, 180, 0.2)';
+                setTimeout(() => {
+                    messageElement.style.backgroundColor = '';
+                }, 2000);
+            }
         }
     </script>
 </body>
