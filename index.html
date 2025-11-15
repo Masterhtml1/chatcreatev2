@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ChatCreate - Chat with Friends, Family and Students</title>
+    <title>ChatCreate - Chat with Friends, Family and students of MT</title>
     <link rel="icon" type="image/png" href="https://yourimageshare.com/ib/53MgLPleiK.png">
     <style>
         * {
@@ -20,7 +20,7 @@
             transition: background-color 0.3s, color 0.3s;
         }
 
-        /* Dark theme 1 */
+        /* Dark theme */
         body.dark-theme {
             background-color: #1a1a1a;
             color: #e0e0e0;
@@ -1522,7 +1522,7 @@
 
         <div class="container">
             <div class="hero">
-                <h1>Chat with Friends, Family and Students</h1>
+                <h1>Chat with Friends, Family and students of MT</h1>
                 <p>Connect to channels and start chatting with the community at chatcreate.vercel.app</p>
             </div>
 
@@ -1709,6 +1709,24 @@
         let pinnedChannels = []; // Track pinned channels
         let selectedChannelForMenu = null; // Track which channel the context menu is for
         let replyingTo = null; // Track which message we're replying to
+        let joinedChannels = []; // Track channels the user has joined
+
+        // Load joined channels from localStorage
+        function loadJoinedChannels() {
+            const saved = localStorage.getItem('joinedChannels');
+            if (saved) {
+                joinedChannels = JSON.parse(saved);
+            } else {
+                // Default to #general if no channels joined yet
+                joinedChannels = ['#general'];
+            }
+        }
+
+        function saveJoinedChannels() {
+            localStorage.setItem('joinedChannels', JSON.stringify(joinedChannels));
+        }
+
+        loadJoinedChannels();
 
         // Load pinned channels from localStorage
         function loadPinnedChannels() {
@@ -1958,6 +1976,12 @@
                 isMod: isMod
             };
             currentChannel = channel;
+            
+            // Add initial channel to joined channels
+            if (!joinedChannels.includes(channel)) {
+                joinedChannels.push(channel);
+                saveJoinedChannels();
+            }
             
             localStorage.setItem('chatCreateEmail', email);
             localStorage.setItem('chatCreateNickname', nickname);
@@ -3259,6 +3283,11 @@ This is an automated security notification from ChatCreate.
                     snapshot.forEach((channelSnapshot) => {
                         const channelName = '#' + channelSnapshot.key;
                         
+                        // Only show channels that user has joined and not hidden
+                        if (!joinedChannels.includes(channelName)) {
+                            return;
+                        }
+                        
                         // Skip hidden channels
                         if (hiddenChannels.includes(channelName)) {
                             return;
@@ -3418,6 +3447,12 @@ This is an automated security notification from ChatCreate.
             currentChannel = channelName;
             document.getElementById('channelName').textContent = channelName;
             messages[currentChannel] = [];
+            
+            // Add to joined channels if not already there
+            if (!joinedChannels.includes(channelName)) {
+                joinedChannels.push(channelName);
+                saveJoinedChannels();
+            }
             
             // Clear unread count
             unreadMessages[channelName] = 0;
