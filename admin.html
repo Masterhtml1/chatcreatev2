@@ -4,548 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard - ChatCreate</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
-            background-color: #f5f5f5;
-            min-height: 100vh;
-            color: #333;
-        }
-
-        /* Header */
-        .header {
-            padding: 20px;
-            background: #ff69b4;
-            color: white;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-        }
-
-        .logo {
-            font-size: 28px;
-            font-weight: bold;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .logout-btn {
-            padding: 10px 20px;
-            background: rgba(255, 255, 255, 0.2);
-            color: white;
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            border-radius: 25px;
-            cursor: pointer;
-            font-size: 16px;
-            transition: all 0.2s;
-            text-decoration: none;
-        }
-
-        .logout-btn:hover {
-            background: rgba(255, 255, 255, 0.3);
-        }
-
-        /* Login Container */
-        .login-container {
-            max-width: 400px;
-            margin: 100px auto;
-            background: white;
-            padding: 40px;
-            border-radius: 20px;
-            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
-        }
-
-        .login-title {
-            font-size: 28px;
-            color: #333;
-            text-align: center;
-            margin-bottom: 30px;
-        }
-
-        .form-group {
-            margin-bottom: 20px;
-        }
-
-        .form-label {
-            display: block;
-            font-size: 16px;
-            font-weight: 500;
-            color: #555;
-            margin-bottom: 8px;
-        }
-
-        .form-input {
-            width: 100%;
-            padding: 12px 16px;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            font-size: 16px;
-            transition: all 0.3s ease;
-        }
-
-        .form-input:focus {
-            outline: none;
-            border-color: #ff69b4;
-            box-shadow: 0 0 0 3px rgba(255, 105, 180, 0.1);
-        }
-
-        .login-btn {
-            width: 100%;
-            padding: 14px;
-            background: #ff69b4;
-            color: white;
-            border: none;
-            border-radius: 25px;
-            font-size: 18px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .login-btn:hover {
-            background: #ff1493;
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(255, 105, 180, 0.3);
-        }
-
-        .error-message {
-            color: #dc3545;
-            font-size: 14px;
-            text-align: center;
-            margin-top: 15px;
-            display: none;
-        }
-
-        /* Dashboard Container */
-        .dashboard-container {
-            display: none;
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 30px;
-        }
-
-        .dashboard-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-            gap: 30px;
-            margin-top: 30px;
-        }
-
-        .dashboard-card {
-            background: white;
-            border-radius: 15px;
-            padding: 25px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
-        }
-
-        .card-title {
-            font-size: 22px;
-            font-weight: 600;
-            color: #333;
-            margin-bottom: 20px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .card-icon {
-            font-size: 24px;
-        }
-
-        /* Channel Management */
-        .channel-list {
-            margin-bottom: 20px;
-        }
-
-        .channel-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 12px;
-            background: #f8f9fa;
-            border-radius: 8px;
-            margin-bottom: 10px;
-        }
-
-        .channel-name {
-            font-weight: 500;
-            color: #555;
-        }
-
-        .clear-btn {
-            padding: 6px 16px;
-            background: #f44336;
-            color: white;
-            border: none;
-            border-radius: 20px;
-            font-size: 14px;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .clear-btn:hover {
-            background: #da190b;
-            transform: scale(1.05);
-        }
-
-        .clear-all-btn {
-            width: 100%;
-            padding: 12px;
-            background: #ff5722;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .clear-all-btn:hover {
-            background: #e64a19;
-        }
-
-        /* Banned Users */
-        .banned-list {
-            max-height: 300px;
-            overflow-y: auto;
-            margin-bottom: 20px;
-        }
-
-        .banned-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 12px;
-            background: #ffebee;
-            border-radius: 8px;
-            margin-bottom: 10px;
-        }
-
-        .banned-info {
-            flex: 1;
-        }
-
-        .banned-nickname {
-            font-weight: 600;
-            color: #c62828;
-        }
-
-        .banned-email {
-            font-size: 14px;
-            color: #666;
-        }
-
-        .unban-btn {
-            padding: 6px 16px;
-            background: #4CAF50;
-            color: white;
-            border: none;
-            border-radius: 20px;
-            font-size: 14px;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .unban-btn:hover {
-            background: #45a049;
-            transform: scale(1.05);
-        }
-
-        /* Ban User Form */
-        .ban-form {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-
-        .ban-input {
-            flex: 1;
-            padding: 10px 14px;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            font-size: 14px;
-        }
-
-        .ban-btn {
-            padding: 10px 20px;
-            background: #f44336;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .ban-btn:hover {
-            background: #da190b;
-        }
-
-        /* Banned Words */
-        .word-list {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            margin-bottom: 20px;
-            max-height: 200px;
-            overflow-y: auto;
-            padding: 10px;
-            background: #f8f9fa;
-            border-radius: 8px;
-        }
-
-        .word-tag {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            padding: 6px 12px;
-            background: #ff69b4;
-            color: white;
-            border-radius: 20px;
-            font-size: 14px;
-        }
-
-        .remove-word {
-            cursor: pointer;
-            font-weight: bold;
-            opacity: 0.8;
-            transition: opacity 0.2s;
-        }
-
-        .remove-word:hover {
-            opacity: 1;
-        }
-
-        .word-form {
-            display: flex;
-            gap: 10px;
-        }
-
-        .word-input {
-            flex: 1;
-            padding: 10px 14px;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            font-size: 14px;
-        }
-
-        .add-word-btn {
-            padding: 10px 20px;
-            background: #ff69b4;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .add-word-btn:hover {
-            background: #ff1493;
-        }
-
-        /* Stats */
-        .stat-item {
-            display: flex;
-            justify-content: space-between;
-            padding: 15px;
-            background: #f0f7ff;
-            border-radius: 8px;
-            margin-bottom: 12px;
-        }
-
-        .stat-label {
-            font-weight: 500;
-            color: #555;
-        }
-
-        .stat-value {
-            font-weight: 700;
-            color: #1976d2;
-            font-size: 18px;
-        }
-
-        /* Loading */
-        .loading {
-            text-align: center;
-            padding: 20px;
-            color: #999;
-        }
-
-        /* Empty state */
-        .empty-state {
-            text-align: center;
-            padding: 40px;
-            color: #999;
-        }
-
-        /* Toggle Switch */
-        .toggle-switch {
-            position: relative;
-            display: inline-block;
-            width: 60px;
-            height: 30px;
-        }
-
-        .toggle-switch input {
-            opacity: 0;
-            width: 0;
-            height: 0;
-        }
-
-        .toggle-slider {
-            position: absolute;
-            cursor: pointer;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: #ccc;
-            transition: 0.4s;
-            border-radius: 30px;
-        }
-
-        .toggle-slider:before {
-            position: absolute;
-            content: "";
-            height: 22px;
-            width: 22px;
-            left: 4px;
-            bottom: 4px;
-            background-color: white;
-            transition: 0.4s;
-            border-radius: 50%;
-        }
-
-        .toggle-switch input:checked + .toggle-slider {
-            background-color: #4CAF50;
-        }
-
-        .toggle-switch input:checked + .toggle-slider:before {
-            transform: translateX(30px);
-        }
-
-        /* Status indicator */
-        .status-indicator {
-            display: inline-block;
-            padding: 2px 8px;
-            border-radius: 12px;
-            font-size: 12px;
-            font-weight: 500;
-            margin-left: 10px;
-        }
-
-        .status-active {
-            background: #e8f5e9;
-            color: #4CAF50;
-        }
-
-        .status-used {
-            background: #f5f5f5;
-            color: #999;
-        }
-
-        /* Toggle switch styles */
-        .toggle-switch {
-            position: relative;
-            display: inline-block;
-            width: 50px;
-            height: 24px;
-        }
-
-        .toggle-switch input {
-            opacity: 0;
-            width: 0;
-            height: 0;
-        }
-
-        .toggle-slider {
-            position: absolute;
-            cursor: pointer;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: #ccc;
-            transition: 0.3s;
-            border-radius: 24px;
-        }
-
-        .toggle-slider:before {
-            position: absolute;
-            content: "";
-            height: 18px;
-            width: 18px;
-            left: 3px;
-            bottom: 3px;
-            background-color: white;
-            transition: 0.3s;
-            border-radius: 50%;
-        }
-
-        input:checked + .toggle-slider {
-            background-color: #4CAF50;
-        }
-
-        input:checked + .toggle-slider:before {
-            transform: translateX(26px);
-        }
-
-        /* Auto-approve section */
-        .auto-approve-section {
-            background: #f0f7ff;
-            border: 1px solid #b3d9ff;
-            border-radius: 8px;
-            padding: 15px;
-            margin-bottom: 20px;
-        }
-
-        .auto-approve-enabled {
-            background: #e8f5e9 !important;
-            border-color: #c8e6c9 !important;
-        }
-
-        .auto-approve-enabled .auto-approve-status {
-            color: #4CAF50 !important;
-            font-weight: 600;
-        }
-
-        /* Debug info */
-        .debug-info {
-            background: #fff3cd;
-            border: 1px solid #ffeaa7;
-            color: #856404;
-            padding: 12px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            font-size: 14px;
-        }
-
-        /* Responsive */
-        @media (max-width: 768px) {
-            .dashboard-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            .header {
-                flex-direction: column;
-                gap: 15px;
-            }
-        }
-    </style>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
 </head>
-<body>
+<body class="page-admin theme-auto">
     <!-- Login Screen -->
     <div id="loginScreen">
         <header class="header">
@@ -577,19 +41,23 @@
             <button class="logout-btn" onclick="logout()">Logout</button>
         </header>
 
-        <div class="dashboard-grid">
-            <!-- Channel Management -->
-            <div class="dashboard-card">
-                <h2 class="card-title">
-                    <span class="card-icon">💬</span>
-                    Channel Management
-                </h2>
-                <div class="channel-list" id="channelList">
-                    <div class="loading">Loading channels...</div>
+        <div class="dashboard-layout">
+            <!-- Left rail: channels -->
+            <div class="dashboard-side">
+                <div class="dashboard-card">
+                    <h2 class="card-title">
+                        <span class="card-icon">💬</span>
+                        Channel Management
+                    </h2>
+                    <div class="channel-list" id="channelList">
+                        <div class="loading">Loading channels...</div>
+                    </div>
+                    <button class="clear-all-btn danger" onclick="clearAllChannels()">Clear All Channels</button>
                 </div>
-                <button class="clear-all-btn" onclick="clearAllChannels()">Clear All Channels</button>
             </div>
 
+            <!-- Right: everything else -->
+            <div class="dashboard-grid">
             <!-- Banned Users -->
             <div class="dashboard-card">
                 <h2 class="card-title">
@@ -613,16 +81,16 @@
                 </h2>
                 
                 <!-- Banned Words Filter Toggle -->
-                <div style="background: #fff3e0; border: 1px solid #ffcc80; border-radius: 8px; padding: 15px; margin-bottom: 20px;">
-                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;">
-                        <span style="font-weight: 600; color: #f57c00;">Enable Banned Words Filter</span>
+                <div class="panel-note tint-orange" id="bannedWordsPanel">
+                    <div class="panel-note-head">
+                        <span class="panel-note-title">Enable Banned Words Filter</span>
                         <label class="toggle-switch">
                             <input type="checkbox" id="bannedWordsToggle" onchange="toggleBannedWordsFilter()">
                             <span class="toggle-slider"></span>
                         </label>
                     </div>
-                    <p style="font-size: 14px; color: #666; margin: 0;">
-                        <span id="bannedWordsStatus">When enabled, messages containing banned words will be blocked across all channels.</span>
+                    <p>
+                        <span id="bannedWordsStatus" class="panel-status">When enabled, messages containing banned words will be blocked across all channels.</span>
                     </p>
                 </div>
                 
@@ -644,8 +112,8 @@
                 <div class="debug-info" id="debugInfo" style="display: none;">
                     Debug: Waiting for Firebase connection...
                 </div>
-                <button class="clear-all-btn" style="background: #2196F3; margin-bottom: 15px;" onclick="generateModPassword()">Generate New Password</button>
-                <div class="banned-list" id="modPasswordsList" style="max-height: 400px;">
+                <button class="clear-all-btn tinted" onclick="generateModPassword()">Generate New Password</button>
+                <div class="banned-list list-tall" id="modPasswordsList">
                     <div class="loading">Loading moderator passwords...</div>
                 </div>
             </div>
@@ -655,11 +123,11 @@
                 <h2 class="card-title">
                     <span class="card-icon">⚠️</span>
                     Failed Login Attempts
-                    <span id="unreadBadge" style="background: #f44336; color: white; padding: 2px 8px; border-radius: 12px; font-size: 14px; margin-left: 10px; display: none;">0</span>
+                    <span id="unreadBadge" class="count-badge">0</span>
                 </h2>
-                <button class="clear-all-btn" style="background: #2196F3; margin-bottom: 15px;" onclick="markAllAsRead()">Mark All as Read</button>
-                <button class="clear-all-btn" onclick="clearFailedAttempts()">Clear All Attempts</button>
-                <div class="banned-list" id="failedAttemptsList" style="max-height: 400px;">
+                <button class="clear-all-btn tinted" onclick="markAllAsRead()">Mark All as Read</button>
+                <button class="clear-all-btn danger" onclick="clearFailedAttempts()">Clear All Attempts</button>
+                <div class="banned-list list-tall" id="failedAttemptsList">
                     <div class="loading">Loading failed attempts...</div>
                 </div>
             </div>
@@ -672,22 +140,22 @@
                 </h2>
                 
                 <!-- Auto-Approve Toggle -->
-                <div style="background: #f0f7ff; border: 1px solid #b3d9ff; border-radius: 8px; padding: 15px; margin-bottom: 20px;">
-                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;">
-                        <span style="font-weight: 600; color: #1976d2;">Auto-Approve @usd232.org Emails</span>
+                <div class="panel-note tint-blue" id="autoApprovePanel">
+                    <div class="panel-note-head">
+                        <span class="panel-note-title">Auto-Approve @usd232.org Emails</span>
                         <label class="toggle-switch">
                             <input type="checkbox" id="autoApproveToggle" onchange="toggleAutoApprove()">
                             <span class="toggle-slider"></span>
                         </label>
                     </div>
-                    <p style="font-size: 14px; color: #666; margin: 0;">
-                        <span id="autoApproveStatus">When enabled, all @usd232.org emails will be automatically approved for access.</span>
+                    <p>
+                        <span id="autoApproveStatus" class="panel-status">When enabled, all @usd232.org emails will be automatically approved for access.</span>
                     </p>
                 </div>
                 
                 <div class="ban-form">
                     <input type="email" id="approveEmail" class="ban-input" placeholder="email@usd232.org">
-                    <button class="ban-btn" style="background: #4CAF50;" onclick="approveEmail()">Add Email</button>
+                    <button class="ban-btn positive" onclick="approveEmail()">Add Email</button>
                 </div>
                 <div class="banned-list" id="approvedEmailsList">
                     <div class="loading">Loading approved emails...</div>
@@ -699,11 +167,14 @@
                 <h2 class="card-title">
                     <span class="card-icon">📢</span>
                     Moderator Reports
-                    <span id="unreadReportsBadge" style="background: #ff9800; color: white; padding: 2px 8px; border-radius: 12px; font-size: 14px; margin-left: 10px; display: none;">0</span>
+                    <span id="unreadReportsBadge" class="count-badge warn">0</span>
                 </h2>
-                <div class="banned-list" id="modReportsList" style="max-height: 400px;">
+                <button class="clear-all-btn danger" onclick="clearAllModReports()">Clear All Reports</button>
+                <div class="banned-list list-tall" id="modReportsList">
                     <div class="loading">Loading moderator reports...</div>
                 </div>
+            </div>
+
             <!-- Statistics -->
             <div class="dashboard-card">
                 <h2 class="card-title">
@@ -734,6 +205,7 @@
                     <span class="stat-label">Pending Reports</span>
                     <span class="stat-value" id="pendingReports">0</span>
                 </div>
+            </div>
             </div>
         </div>
     </div>
@@ -767,17 +239,17 @@
             database.ref('.info/connected').on('value', (snapshot) => {
                 if (snapshot.val() === true) {
                     debugInfo.innerHTML = '✅ Firebase connected successfully';
-                    debugInfo.style.background = '#e8f5e9';
-                    debugInfo.style.color = '#4CAF50';
-                    debugInfo.style.borderColor = '#c8e6c9';
+                    debugInfo.style.background = 'var(--green-soft)';
+                    debugInfo.style.color = 'var(--green)';
+                    debugInfo.style.borderColor = 'transparent';
                     setTimeout(() => {
                         debugInfo.style.display = 'none';
                     }, 3000);
                 } else {
                     debugInfo.innerHTML = '❌ Firebase connection lost';
-                    debugInfo.style.background = '#ffebee';
-                    debugInfo.style.color = '#f44336';
-                    debugInfo.style.borderColor = '#ffcdd2';
+                    debugInfo.style.background = 'var(--red-soft)';
+                    debugInfo.style.color = 'var(--red)';
+                    debugInfo.style.borderColor = 'transparent';
                 }
             });
         }
@@ -874,7 +346,7 @@
                     passwords.forEach(passData => {
                         const passItem = document.createElement('div');
                         passItem.className = 'banned-item';
-                        passItem.style.background = passData.active ? '#e8f5e9' : '#f5f5f5';
+                        passItem.style.background = passData.active ? 'var(--green-soft)' : 'var(--surface-2)';
                         
                         // Clean display - just show usage count, not individual timestamps
                         const usageCount = passData.usageCount || 0;
@@ -902,7 +374,7 @@
                         
                         passItem.innerHTML = `
                             <div class="banned-info">
-                                <div class="banned-nickname" style="font-family: monospace; font-size: 16px;">
+                                <div class="banned-nickname mono">
                                     ${passData.password}
                                     <span class="status-indicator ${statusClass}">${statusText}</span>
                                 </div>
@@ -910,9 +382,9 @@
                                     ${timeInfo}
                                 </div>
                             </div>
-                            <div style="display: flex; gap: 5px;">
-                                <button class="unban-btn" style="background: ${passData.active ? '#f44336' : '#4CAF50'};" onclick="toggleModPassword('${passData.key}', ${passData.active})">${passData.active ? 'Disable' : 'Enable'}</button>
-                                <button class="unban-btn" style="background: #ff5722;" onclick="deleteModPassword('${passData.key}')">Delete</button>
+                            <div class="row-actions">
+                                <button class="unban-btn" style="background: ${passData.active ? 'var(--red)' : 'var(--green)'};" onclick="toggleModPassword('${passData.key}', ${passData.active})">${passData.active ? 'Disable' : 'Enable'}</button>
+                                <button class="unban-btn" style="background: var(--orange);" onclick="deleteModPassword('${passData.key}')">Delete</button>
                             </div>
                         `;
                         passwordsList.appendChild(passItem);
@@ -980,20 +452,20 @@
                     attempts.forEach(attempt => {
                         const attemptItem = document.createElement('div');
                         attemptItem.className = 'banned-item';
-                        attemptItem.style.background = '#fff3cd';
-                        attemptItem.style.borderLeft = '4px solid #ffc107';
+                        attemptItem.style.background = 'var(--yellow-soft)';
+                        attemptItem.style.borderLeft = '4px solid var(--orange)';
                         attemptItem.innerHTML = `
                             <div class="banned-info">
-                                <div class="banned-nickname" style="color: #856404;">
+                                <div class="banned-nickname text-warn">
                                     ${attempt.email}
-                                    <button class="unban-btn" style="background: #4CAF50; margin-left: 10px; font-size: 12px;" onclick="quickApprove('${attempt.email}')">Quick Approve</button>
+                                    <button class="unban-btn stacked-input" style="background: var(--green);" onclick="quickApprove('${attempt.email}')">Quick Approve</button>
                                 </div>
                                 <div class="banned-email">
                                     Nickname tried: ${attempt.nickname || 'N/A'} | 
                                     Time: ${new Date(attempt.timestamp).toLocaleString()}
                                 </div>
                             </div>
-                            <button class="unban-btn" style="background: #ff5722;" onclick="removeFailedAttempt('${attempt.key}')">Delete</button>
+                            <button class="unban-btn" style="background: var(--orange);" onclick="removeFailedAttempt('${attempt.key}')">Delete</button>
                         `;
                         failedList.appendChild(attemptItem);
                     });
@@ -1499,17 +971,17 @@
                         const reportItem = document.createElement('div');
                         reportItem.className = 'banned-item';
                         
-                        const statusColor = report.status === 'pending' ? '#fff3cd' : 
-                                          report.status === 'resolved' ? '#e8f5e9' : '#ffebee';
-                        const statusTextColor = report.status === 'pending' ? '#856404' : 
-                                              report.status === 'resolved' ? '#4CAF50' : '#f44336';
-                        
+                        const statusColor = report.status === 'pending' ? 'var(--yellow-soft)' :
+                                          report.status === 'resolved' ? 'var(--green-soft)' : 'var(--red-soft)';
+                        const statusTextColor = report.status === 'pending' ? 'var(--orange)' :
+                                              report.status === 'resolved' ? 'var(--green)' : 'var(--red)';
+
                         reportItem.style.background = statusColor;
                         reportItem.innerHTML = `
                             <div class="banned-info">
                                 <div class="banned-nickname" style="color: ${statusTextColor};">
                                     <strong>${report.reportedUser}</strong> - ${report.reportType}
-                                    <span style="font-size: 12px; background: ${statusTextColor}; color: white; padding: 2px 6px; border-radius: 10px; margin-left: 10px;">
+                                    <span class="status-indicator" style="background: ${statusTextColor}; color: #fff;">
                                         ${report.status.toUpperCase()}
                                     </span>
                                 </div>
@@ -1520,12 +992,12 @@
                                     ${report.adminResponse ? '<br><strong>Admin Response:</strong> ' + report.adminResponse : ''}
                                 </div>
                             </div>
-                            <div style="display: flex; flex-direction: column; gap: 5px;">
+                            <div class="row-actions-stacked">
                                 ${report.status === 'pending' ? `
-                                    <button class="unban-btn" style="background: #4CAF50;" onclick="resolveReport('${report.key}')">Mark Resolved</button>
-                                    <button class="unban-btn" style="background: #2196F3;" onclick="respondToReport('${report.key}')">Respond</button>
+                                    <button class="unban-btn" style="background: var(--green);" onclick="resolveReport('${report.key}')">Mark Resolved</button>
+                                    <button class="unban-btn" style="background: var(--blue);" onclick="respondToReport('${report.key}')">Respond</button>
                                 ` : ''}
-                                <button class="unban-btn" style="background: #ff5722;" onclick="deleteReport('${report.key}')">Delete</button>
+                                <button class="unban-btn" style="background: var(--orange);" onclick="deleteReport('${report.key}')">Delete</button>
                             </div>
                         `;
                         reportsList.appendChild(reportItem);
@@ -1548,6 +1020,37 @@
                 }).catch((error) => {
                     alert('Error resolving report: ' + error.message);
                 });
+            }
+        }
+
+        // Delete a single moderator report
+        function deleteReport(reportKey) {
+            if (confirm('Delete this report permanently? This cannot be undone.')) {
+                console.log('Deleting report:', reportKey);
+                database.ref('modReports/' + reportKey).remove()
+                    .then(() => {
+                        console.log('✅ Report deleted');
+                    })
+                    .catch((error) => {
+                        console.error('❌ Error deleting report:', error);
+                        alert('Error deleting report: ' + error.message);
+                    });
+            }
+        }
+
+        // Delete every moderator report at once
+        function clearAllModReports() {
+            if (confirm('Delete ALL moderator reports permanently? This cannot be undone.')) {
+                console.log('Deleting all mod reports...');
+                database.ref('modReports').remove()
+                    .then(() => {
+                        console.log('✅ All mod reports deleted');
+                        alert('All moderator reports deleted');
+                    })
+                    .catch((error) => {
+                        console.error('❌ Error deleting all reports:', error);
+                        alert('Error deleting reports: ' + error.message);
+                    });
             }
         }
 
@@ -1597,20 +1100,14 @@
 
         function updateAutoApproveStatus(isEnabled) {
             const statusText = document.getElementById('autoApproveStatus');
-            const section = statusText.closest('div').parentElement;
-            
+            const section = document.getElementById('autoApprovePanel');
+
             if (isEnabled) {
                 statusText.textContent = '✅ Auto-approve is ENABLED. All @usd232.org emails are automatically approved.';
-                statusText.style.color = '#4CAF50';
-                statusText.style.fontWeight = '600';
-                section.style.background = '#e8f5e9';
-                section.style.borderColor = '#c8e6c9';
+                section.className = 'panel-note tint-green is-on';
             } else {
                 statusText.textContent = 'When enabled, all @usd232.org emails will be automatically approved for access.';
-                statusText.style.color = '#666';
-                statusText.style.fontWeight = 'normal';
-                section.style.background = '#f0f7ff';
-                section.style.borderColor = '#b3d9ff';
+                section.className = 'panel-note tint-blue';
             }
         }
 
@@ -1644,20 +1141,14 @@
 
         function updateBannedWordsStatus(isEnabled) {
             const statusText = document.getElementById('bannedWordsStatus');
-            const section = statusText.closest('div').parentElement;
-            
+            const section = document.getElementById('bannedWordsPanel');
+
             if (isEnabled) {
                 statusText.textContent = '✅ Banned words filter is ENABLED. Messages containing banned words are blocked.';
-                statusText.style.color = '#4CAF50';
-                statusText.style.fontWeight = '600';
-                section.style.background = '#e8f5e9';
-                section.style.borderColor = '#81c784';
+                section.className = 'panel-note tint-green is-on';
             } else {
                 statusText.textContent = '⚠️ Banned words filter is DISABLED. All messages will be allowed through.';
-                statusText.style.color = '#f57c00';
-                statusText.style.fontWeight = '600';
-                section.style.background = '#fff3e0';
-                section.style.borderColor = '#ffcc80';
+                section.className = 'panel-note tint-orange is-warn';
             }
         }
     </script>
