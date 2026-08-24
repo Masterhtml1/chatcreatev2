@@ -1,11 +1,11 @@
-# ChatCreate 🎓💬
+# ChatCreate 
 
 A secure, real-time chat application designed specifically for school district students. Built with modern web technologies and focused on creating a safe educational environment.
 
 
-## 🌟 Features
+##  Features
 
-### 💬 Core Chat Features
+###  Core Chat Features
 - **Real-time Messaging** - Instant message delivery using Firebase
 - **Multiple Channels** - Create and join different topic-based channels
 - **Message Reactions** - React with emojis (👍❤️😂😮😢🔥)
@@ -14,7 +14,7 @@ A secure, real-time chat application designed specifically for school district s
 - **Search Functionality** - Find messages quickly
 - **Dark/Light Theme** - Easy on the eyes with theme toggle
 
-### 🛡️ Security & Moderation
+###  Security & Moderation
 - **Email Verification** - Restricted to school emails only
 - **Admin Dashboard** - Comprehensive moderation tools
 - **Banned Words Filter** - Automatic content filtering
@@ -22,14 +22,14 @@ A secure, real-time chat application designed specifically for school district s
 - **Failed Login Notifications** - Email alerts for unauthorized access attempts
 - **Message Editing** - Admins can edit inappropriate content
 
-### 🎨 User Experience
+###  User Experience
 - **Auto-fill Login** - Remembers your credentials
 - **Mobile Responsive** - Works on all devices
 - **Custom Rainbow Services Button** - Quick access to additional services
 - **File Sharing Support** - Share documents and images
 - **Rich Message Formatting** - Bold, italic, and more
 
-## 🚀 Quick Start
+##  Quick Start
 
 ### Prerequisites
 - A valid school email address
@@ -42,7 +42,7 @@ A secure, real-time chat application designed specifically for school district s
 4. Accept terms of service
 5. Start chatting!
 
-## 🛠️ Technology Stack
+##  Technology Stack
 
 - **Frontend**: HTML5, CSS3, JavaScript (Vanilla)
 - **Backend**: Firebase Realtime Database
@@ -51,7 +51,7 @@ A secure, real-time chat application designed specifically for school district s
 - **Email Notifications**: Web3Forms API
 - **Real-time**: Firebase WebSockets
 
-## 📱 Screenshots
+##  Screenshots
 
 ### Login Screen
 - Clean, modern interface
@@ -64,7 +64,7 @@ A secure, real-time chat application designed specifically for school district s
 - Message reactions
 - Search functionality
 
-## 🔒 Security Features
+##  Security Features
 
 1. **Email Whitelist** - Only approved shcool emails
 2. **Real-time Moderation** - Instant ban capabilities
@@ -72,7 +72,7 @@ A secure, real-time chat application designed specifically for school district s
 4. **Failed Login Tracking** - Email notifications for attempts
 5. **Message History** - Full audit trail
 
-## 📝 Terms of Service
+##  Terms of Service
 
 By using ChatCreate, you agree to:
 - Respect all users
@@ -81,17 +81,17 @@ By using ChatCreate, you agree to:
 - Follow school guidelines
 - Report violations to admins
 
-## 🎯 Roadmap
+##  Roadmap
 
-## 🏆 Credits
+##  Credits
 
 **Created by**: [Masterhtml1](https://github.com/Masterhtml1)
 
-## 📄 License
+##  License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## ⚡ Quick Links
+##  Quick Links
 
 - **Main App**: [chatcreate.vercel.app](https://chatcreate.vercel.app)
 - **Services**: [ChatCreate Services](https://masterhtml1.github.io/ChatCreate-Services/)
