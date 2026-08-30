@@ -1143,12 +1143,13 @@ body.dark-theme .online-user {
 /* ==========================================================================
    11. Chat: messages
    ========================================================================== */
+/* No scroll-behavior: smooth here — following new messages must land
+   instantly. Jumping to a search hit or a reply passes `smooth` itself. */
 .messages-container {
     flex: 1;
     overflow-y: auto;
     padding: var(--s-6) var(--s-5);
     background: var(--bg-page);
-    scroll-behavior: smooth;
 }
 
 .message {

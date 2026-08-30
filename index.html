@@ -653,11 +653,31 @@ This is an automated security notification from ChatCreate.
             }
         }
 
+        // Rendered link previews, kept by message id. renderMessages() rebuilds
+        // the whole list on every new message, so without this each preview
+        // would reset to its small "loading" box and be fetched again — which
+        // is what used to leave the view stranded above the newest message.
+        const linkPreviewCache = {};
+
+        // Within this many pixels of the bottom counts as "following the chat"
+        const SCROLL_STICK_THRESHOLD = 80;
+
+        function isNearBottom(container) {
+            return container.scrollHeight - container.scrollTop - container.clientHeight <= SCROLL_STICK_THRESHOLD;
+        }
+
+        function scrollToBottom(container) {
+            container.scrollTop = container.scrollHeight;
+        }
+
         // Render messages
         function renderMessages() {
             const container = document.getElementById('messagesContainer');
+            // Only follow the newest message if the reader was already at the
+            // bottom — otherwise someone scrolled up reading history gets yanked
+            const stickToBottom = isNearBottom(container);
             container.innerHTML = '';
-            
+
             if (!messages[currentChannel]) return;
             
             messages[currentChannel].forEach(message => {
@@ -744,9 +764,12 @@ This is an automated security notification from ChatCreate.
                 // Add link preview if URL exists and message not deleted
                 let linkPreviewHtml = '';
                 if (message.url && !message.deleted) {
+                    // Re-use an already fetched preview so the message keeps its
+                    // full height from the first paint and nothing shifts later
+                    const cached = linkPreviewCache[message.id];
                     linkPreviewHtml = `
                         <div class="link-preview" id="preview-${message.id}">
-                            <div class="link-preview-loading">Loading preview...</div>
+                            ${cached || '<div class="link-preview-loading">Loading preview...</div>'}
                         </div>
                     `;
                 }
@@ -802,19 +825,41 @@ This is an automated security notification from ChatCreate.
                 container.appendChild(messageDiv);
                 
                 // Fetch link preview if URL exists and message not deleted
-                if (message.url && !message.deleted) {
+                if (message.url && !message.deleted && !linkPreviewCache[message.id]) {
                     fetchLinkPreview(message.url, message.id);
                 }
             });
-            
-            container.scrollTop = container.scrollHeight;
+
+            if (stickToBottom) {
+                scrollToBottom(container);
+            }
         }
         
         // Fetch link preview using web_fetch-like approach
+        // Swaps a preview's contents in, keeping the reader pinned to the bottom
+        // if that is where they already were — a preview growing from one line
+        // to a full card is exactly what used to push the newest message away.
+        function applyLinkPreview(previewDiv, messageId, html) {
+            const container = document.getElementById('messagesContainer');
+            const stickToBottom = isNearBottom(container);
+
+            linkPreviewCache[messageId] = html;
+            previewDiv.innerHTML = html;
+
+            if (stickToBottom) {
+                scrollToBottom(container);
+            }
+        }
+
         async function fetchLinkPreview(url, messageId) {
             const previewDiv = document.getElementById(`preview-${messageId}`);
             if (!previewDiv) return;
-            
+
+            if (linkPreviewCache[messageId]) {
+                previewDiv.innerHTML = linkPreviewCache[messageId];
+                return;
+            }
+
             try {
                 // Use a simple fetch to get basic metadata
                 // Note: This won't work for all sites due to CORS, but will work for many
@@ -829,32 +874,32 @@ This is an automated security notification from ChatCreate.
                         imageHtml = `<img src="${image.url}" alt="${title || 'Preview'}" class="link-preview-image" onerror="this.style.display='none'">`;
                     }
                     
-                    previewDiv.innerHTML = `
+                    applyLinkPreview(previewDiv, messageId, `
                         ${imageHtml}
                         <div class="link-preview-content">
                             <div class="link-preview-title">${title || 'Link'}</div>
                             ${description ? `<div class="link-preview-description">${description}</div>` : ''}
                             <a href="${fetchedUrl || url}" target="_blank" class="link-preview-url">${new URL(url).hostname}</a>
                         </div>
-                    `;
+                    `);
                 } else {
                     // Fallback to simple link display
-                    previewDiv.innerHTML = `
+                    applyLinkPreview(previewDiv, messageId, `
                         <div class="link-preview-content">
                             <div class="link-preview-title">🔗 Link</div>
                             <a href="${url}" target="_blank" class="link-preview-url">${new URL(url).hostname}</a>
                         </div>
-                    `;
+                    `);
                 }
             } catch (error) {
                 console.error('Error fetching link preview:', error);
                 // Fallback display
-                previewDiv.innerHTML = `
+                applyLinkPreview(previewDiv, messageId, `
                     <div class="link-preview-content">
                         <div class="link-preview-title">🔗 Link</div>
                         <a href="${url}" target="_blank" class="link-preview-url">${url}</a>
                     </div>
-                `;
+                `);
             }
         }
 
