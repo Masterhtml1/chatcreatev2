@@ -11,7 +11,7 @@
    dashboard if that happens.
    ========================================================================== */
 
-const GIPHY_API_KEY = '';
+const GIPHY_API_KEY = 'In7lzKyMiZuN6CFrZfXDU94JQqsYaBGX';
 
 /* 'g' = G only, 'pg' = G and PG, 'pg-13', 'r'. Set to G and PG. */
 const GIPHY_RATING = 'pg';
