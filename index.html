@@ -167,6 +167,18 @@
 
             <div class="message-input-container">
                 <div class="command-suggestions" id="commandSuggestions"></div>
+
+                <div class="gif-picker" id="gifPicker">
+                    <div class="gif-picker-head">
+                        <input type="text" class="gif-search" id="gifSearch" placeholder="Search GIFs"
+                               oninput="onGifSearchInput(this.value)" autocomplete="off">
+                        <button type="button" class="gif-close" onclick="closeGifPicker()" title="Close">✕</button>
+                    </div>
+                    <div class="gif-grid" id="gifGrid"></div>
+                    <div class="gif-attribution">Powered by GIPHY</div>
+                </div>
+
+                <button class="gif-btn" id="gifButton" onclick="toggleGifPicker()" title="Send a GIF">GIF</button>
                 <input type="text" class="message-input" id="messageInput" placeholder="Type a message...">
                 <button class="send-btn" id="sendButton" onclick="sendMessage()">Send</button>
             </div>
@@ -185,6 +197,7 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
     <script src="auth.js"></script>
+    <script src="gifs.js"></script>
 
     <script>
         // Your Firebase configuration
@@ -782,12 +795,30 @@ This is an automated security notification from ChatCreate.
                     messageText = '[Message Deleted]';
                 }
                 
+                // A GIF message carries no text, so skip the empty text line
+                let gifHtml = '';
+                if (message.gifUrl && !message.deleted) {
+                    const gifAlt = (message.gifTitle || 'GIF').replace(/"/g, '&quot;');
+                    // Reserving the aspect ratio keeps the list from growing when
+                    // the GIF decodes, which is what pushes the newest message away
+                    const ratio = (message.gifWidth && message.gifHeight)
+                        ? ` style="aspect-ratio: ${message.gifWidth} / ${message.gifHeight}"`
+                        : '';
+                    gifHtml = `<img class="message-gif" src="${message.gifUrl}" alt="${gifAlt}" loading="lazy" onload="onGifLoaded(this)"${ratio}>`;
+                }
+
+                const hasText = message.deleted || (message.text && message.text.length);
+                const textHtml = hasText
+                    ? `<div class="message-text" id="text-${message.id}">${message.isHtml && message.author === 'System' ? message.text : messageText}</div>`
+                    : '';
+
                 // Add reply preview if this message is a reply
                 let replyPreviewHtml = '';
                 if (message.replyTo && !message.deleted) {
                     const repliedMsg = messages[currentChannel].find(m => m.id === message.replyTo);
                     if (repliedMsg) {
-                        const replyText = repliedMsg.text.substring(0, 50) + (repliedMsg.text.length > 50 ? '...' : '');
+                        const repliedText = repliedMsg.text || (repliedMsg.gifUrl ? 'GIF' : '');
+                        const replyText = repliedText.substring(0, 50) + (repliedText.length > 50 ? '...' : '');
                         replyPreviewHtml = `
                             <div class="reply-preview" onclick="scrollToMessage('${message.replyTo}')">
                                 <div class="reply-preview-author">↩️ ${repliedMsg.nickname}</div>
@@ -808,7 +839,8 @@ This is an automated security notification from ChatCreate.
                             ${adminControls}
                         </div>
                         ${replyPreviewHtml}
-                        <div class="message-text" id="text-${message.id}">${message.isHtml && message.author === 'System' ? message.text : messageText}</div>
+                        ${textHtml}
+                        ${gifHtml}
                         ${linkPreviewHtml}
                         ${reactionsHtml}
                         <div class="reaction-picker" id="picker-${message.id}">
