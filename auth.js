@@ -30,10 +30,19 @@ async function signInAsAdmin(password) {
         throw new Error(describeAuthError(error));
     }
 
-    const snapshot = await firebase.database().ref('admins/' + credential.user.uid).once('value');
+    const uid = credential.user.uid;
+    let snapshot;
+    try {
+        snapshot = await firebase.database().ref('admins/' + uid).once('value');
+    } catch (error) {
+        await signOutAdmin();
+        console.error('Could not read /admins/' + uid, error);
+        throw new Error('Signed in, but the admin check was blocked by the database rules. UID: ' + uid);
+    }
+
     if (!snapshot.exists()) {
         await signOutAdmin();
-        throw new Error('That account is not registered as an administrator.');
+        throw new Error('Password accepted, but this account is not listed under /admins. Add this UID there: ' + uid);
     }
 
     return credential.user;
