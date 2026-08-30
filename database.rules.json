@@ -32,6 +32,26 @@
       ".write": true
     },
 
+    "calls": {
+      ".read": true,
+      ".write": "auth != null && root.child('admins').child(auth.uid).exists()",
+      "$channel": {
+        "active": { ".write": true },
+        "type": { ".write": true },
+        "startedBy": { ".write": true },
+        "startedAt": { ".write": true },
+        "participants": {
+          "$peer": { ".write": true }
+        },
+        "signals": {
+          "$peer": {
+            "$signal": { ".write": true }
+          }
+        },
+        ".write": true
+      }
+    },
+
     "bannedUsers": {
       ".read": true,
       ".write": true

@@ -133,6 +133,16 @@
                     <span class="channel-name" id="channelName">#general</span>
                 </h2>
                 <div class="user-info">
+                    <button class="call-start-btn" onclick="startCall('voice')" title="Start a voice call">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/>
+                        </svg>
+                    </button>
+                    <button class="call-start-btn" onclick="startCall('video')" title="Start a video call">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4z"/>
+                        </svg>
+                    </button>
                     <a href="https://masterhtml1.github.io/ChatCreate-Services/" target="_blank" class="services-btn">Services</a>
                     <button class="theme-toggle-header" onclick="toggleTheme()" title="Toggle theme">
                         <svg id="themeIconHeader" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -185,6 +195,22 @@
         </div>
     </div>
 
+    <!-- Call panel -->
+    <div class="call-panel" id="callPanel">
+        <div class="call-panel-head">
+            <div>
+                <div class="call-panel-title" id="callPanelTitle">Call</div>
+                <div class="call-panel-count" id="callCount">1 person</div>
+            </div>
+            <div class="call-controls">
+                <button class="call-ctrl" id="callMicBtn" onclick="toggleMic()" title="Mute microphone">🎤</button>
+                <button class="call-ctrl" id="callCamBtn" onclick="toggleCamera()" title="Turn camera off">📹</button>
+                <button class="call-ctrl leave" onclick="leaveCall()" title="Leave the call">Leave</button>
+            </div>
+        </div>
+        <div class="call-tiles" id="callTiles"></div>
+    </div>
+
     <!-- Theme Toggle Button -->
     <button class="theme-toggle" onclick="toggleTheme()" title="Toggle theme">
         <svg id="themeIcon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -198,6 +224,7 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
     <script src="auth.js"></script>
     <script src="gifs.js"></script>
+    <script src="calls.js"></script>
 
     <script>
         // Your Firebase configuration
@@ -537,6 +564,7 @@
             // Joins are not announced in the channel — the online list already shows who is here
 
             listenForMessages();
+            watchChannelCall(currentChannel);
             listenForMessageUpdates();
             loadBannedWords();
             loadBannedUsers();
@@ -796,6 +824,21 @@ This is an automated security notification from ChatCreate.
                 }
                 
                 // A GIF message carries no text, so skip the empty text line
+                // A call announcement renders as a joinable card, Discord style
+                let callCardHtml = '';
+                if (message.callType && !message.deleted) {
+                    const isVideo = message.callType === 'video';
+                    callCardHtml = `
+                        <div class="call-card" data-call-type="${message.callType}">
+                            <div class="call-card-icon">${isVideo ? '📹' : '📞'}</div>
+                            <div class="call-card-body">
+                                <div class="call-card-title">${isVideo ? 'Video' : 'Voice'} call started by ${message.nickname}</div>
+                                <div class="call-card-status">Checking…</div>
+                            </div>
+                            <button class="call-join-btn" onclick="joinCall('${message.callType}')">Join</button>
+                        </div>`;
+                }
+
                 let gifHtml = '';
                 if (message.gifUrl && !message.deleted) {
                     const gifAlt = (message.gifTitle || 'GIF').replace(/"/g, '&quot;');
@@ -840,6 +883,7 @@ This is an automated security notification from ChatCreate.
                         </div>
                         ${replyPreviewHtml}
                         ${textHtml}
+                        ${callCardHtml}
                         ${gifHtml}
                         ${linkPreviewHtml}
                         ${reactionsHtml}
@@ -862,11 +906,13 @@ This is an automated security notification from ChatCreate.
                 }
             });
 
+            repaintCallCards();
+
             if (stickToBottom) {
                 scrollToBottom(container);
             }
         }
-        
+
         // Fetch link preview using web_fetch-like approach
         // Swaps a preview's contents in, keeping the reader pinned to the bottom
         // if that is where they already were — a preview growing from one line
@@ -2027,6 +2073,7 @@ This is an automated security notification from ChatCreate.
 
             // Set up new channel
             listenForMessages();
+            watchChannelCall(currentChannel);
             listenForMessageUpdates();
             setupPresence();
             listenForTyping();

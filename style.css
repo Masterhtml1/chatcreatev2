@@ -1458,6 +1458,250 @@ body.dark-theme .online-user {
     background: var(--accent-hover);
 }
 
+/* Call buttons in the chat header */
+.call-start-btn {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    border-radius: 50%;
+    background: var(--fill);
+    color: var(--text);
+    cursor: pointer;
+    transition: background var(--dur-fast) var(--ease), transform var(--dur-fast) var(--ease);
+}
+
+.call-start-btn:hover {
+    background: var(--fill-strong);
+    transform: scale(1.06);
+}
+
+/* The joinable card posted into the channel */
+.call-card {
+    display: flex;
+    align-items: center;
+    gap: var(--s-3);
+    margin-top: var(--s-1);
+    padding: 10px 12px;
+    border-radius: var(--r-md);
+    background: var(--fill);
+}
+
+.call-card.ended {
+    opacity: 0.65;
+}
+
+.call-card-icon {
+    flex-shrink: 0;
+    width: 34px;
+    height: 34px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: var(--surface);
+    font-size: 16px;
+}
+
+.call-card-body {
+    flex: 1;
+    min-width: 0;
+}
+
+.call-card-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text);
+}
+
+.call-card-status {
+    font-size: 12px;
+    color: var(--text-secondary);
+}
+
+.call-join-btn {
+    flex-shrink: 0;
+    padding: 7px 16px;
+    border: none;
+    border-radius: var(--r-pill);
+    background: var(--green);
+    color: #ffffff;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: filter var(--dur-fast) var(--ease);
+}
+
+.call-join-btn:hover:not(:disabled) {
+    filter: brightness(1.06);
+}
+
+.call-join-btn:disabled {
+    background: var(--fill-strong);
+    color: var(--text-secondary);
+    cursor: default;
+}
+
+.message.own .call-card {
+    background: rgba(255, 255, 255, 0.18);
+}
+
+.message.own .call-card-title,
+.message.own .call-card-status {
+    color: var(--text-on-accent);
+}
+
+.message.own .call-card-icon {
+    background: rgba(255, 255, 255, 0.28);
+}
+
+/* The in-call panel */
+.call-panel {
+    position: fixed;
+    right: var(--s-5);
+    bottom: var(--s-5);
+    width: min(420px, calc(100vw - 40px));
+    display: none;
+    flex-direction: column;
+    z-index: 2000;
+    background: var(--surface);
+    border: var(--hairline);
+    border-radius: var(--r-lg);
+    box-shadow: var(--shadow-pop);
+    overflow: hidden;
+}
+
+.call-panel.show {
+    display: flex;
+}
+
+.call-panel-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--s-3);
+    padding: var(--s-3) var(--s-4);
+    border-bottom: var(--hairline);
+}
+
+.call-panel-title {
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    color: var(--text);
+}
+
+.call-panel-count {
+    font-size: 12px;
+    color: var(--text-secondary);
+}
+
+.call-controls {
+    display: flex;
+    align-items: center;
+    gap: var(--s-2);
+}
+
+.call-ctrl {
+    height: 34px;
+    min-width: 34px;
+    padding: 0 10px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    border-radius: var(--r-pill);
+    background: var(--fill);
+    color: var(--text);
+    font-size: 14px;
+    cursor: pointer;
+    transition: background var(--dur-fast) var(--ease), opacity var(--dur-fast) var(--ease);
+}
+
+.call-ctrl:hover:not(:disabled) {
+    background: var(--fill-strong);
+}
+
+.call-ctrl.off {
+    background: var(--red-soft);
+    color: var(--red);
+}
+
+.call-ctrl.leave {
+    background: var(--red);
+    color: #ffffff;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.call-ctrl:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+}
+
+.call-tiles {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--s-2);
+    padding: var(--s-3);
+    max-height: 340px;
+    overflow-y: auto;
+}
+
+.call-tile {
+    position: relative;
+    aspect-ratio: 4 / 3;
+    border-radius: var(--r-md);
+    background: #000000;
+    overflow: hidden;
+}
+
+.call-tile video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.call-tile-avatar {
+    position: absolute;
+    inset: 0;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    background: var(--surface-3);
+    color: var(--text);
+    font-size: 24px;
+    font-weight: 600;
+}
+
+/* Audio-only participants get an initial instead of a black rectangle */
+.call-tile.audio-only video {
+    display: none;
+}
+
+.call-tile.audio-only .call-tile-avatar {
+    display: flex;
+}
+
+.call-tile-name {
+    position: absolute;
+    left: 6px;
+    bottom: 6px;
+    max-width: calc(100% - 12px);
+    padding: 2px 8px;
+    border-radius: var(--r-pill);
+    background: rgba(0, 0, 0, 0.55);
+    color: #ffffff;
+    font-size: 11px;
+    font-weight: 500;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
 /* GIF picker */
 .gif-btn {
     flex-shrink: 0;
