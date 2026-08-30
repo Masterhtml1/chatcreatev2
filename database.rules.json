@@ -1,0 +1,92 @@
+{
+  "rules": {
+    ".read": false,
+    ".write": false,
+
+    "admins": {
+      "$uid": {
+        ".read": "auth != null && auth.uid === $uid",
+        ".write": false
+      }
+    },
+
+    "channels": {
+      ".read": true,
+      ".write": "auth != null && root.child('admins').child(auth.uid).exists()",
+      "$channel": {
+        ".write": "auth != null && root.child('admins').child(auth.uid).exists()",
+        "messages": {
+          "$message": {
+            ".write": true,
+            ".validate": "!newData.exists() || (newData.hasChildren(['text', 'timestamp']) && newData.child('text').isString() && newData.child('text').val().length <= 4000)"
+          }
+        },
+        "typing": {
+          ".write": true
+        }
+      }
+    },
+
+    "presence": {
+      ".read": true,
+      ".write": true
+    },
+
+    "bannedUsers": {
+      ".read": true,
+      ".write": true
+    },
+
+    "bannedWords": {
+      ".read": true,
+      ".write": "auth != null && root.child('admins').child(auth.uid).exists()"
+    },
+
+    "approvedEmails": {
+      ".read": true,
+      ".write": "auth != null && root.child('admins').child(auth.uid).exists()"
+    },
+
+    "settings": {
+      ".read": true,
+      ".write": "auth != null && root.child('admins').child(auth.uid).exists()"
+    },
+
+    "modPasswords": {
+      ".read": true,
+      ".indexOn": ["password"],
+      ".write": "auth != null && root.child('admins').child(auth.uid).exists()",
+      "$id": {
+        "usageCount": { ".write": true },
+        "lastUsedAt": { ".write": true }
+      }
+    },
+
+    "modReports": {
+      ".read": true,
+      ".indexOn": ["timestamp", "reportedBy"],
+      ".write": "auth != null && root.child('admins').child(auth.uid).exists()",
+      "$id": {
+        ".write": true
+      }
+    },
+
+    "failedAttempts": {
+      ".read": "auth != null && root.child('admins').child(auth.uid).exists()",
+      ".write": "auth != null && root.child('admins').child(auth.uid).exists()",
+      ".indexOn": ["timestamp"],
+      "$id": {
+        ".write": true
+      }
+    },
+
+    "adminNotifications": {
+      ".read": "auth != null && root.child('admins').child(auth.uid).exists()",
+      ".write": "auth != null && root.child('admins').child(auth.uid).exists()",
+      ".indexOn": ["read"],
+      "$id": {
+        ".write": true
+      }
+    }
+  }
+}

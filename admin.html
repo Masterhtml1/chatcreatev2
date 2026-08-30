@@ -213,6 +213,8 @@
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="auth.js"></script>
 
     <script>
         // Firebase configuration
@@ -254,20 +256,44 @@
             });
         }
 
-        // Admin login
-        document.getElementById('adminLoginForm').addEventListener('submit', function(e) {
+        // Reveal the dashboard once an admin session exists
+        function openDashboard() {
+            document.getElementById('adminPassword').value = '';
+            document.getElementById('errorMessage').style.display = 'none';
+            document.getElementById('loginScreen').style.display = 'none';
+            document.getElementById('dashboardScreen').style.display = 'block';
+            testFirebaseConnection();
+            loadDashboard();
+        }
+
+        // Admin login — the password is checked by Firebase Authentication,
+        // never against a value stored in this page.
+        document.getElementById('adminLoginForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             const password = document.getElementById('adminPassword').value;
             const errorMsg = document.getElementById('errorMessage');
+            const button = this.querySelector('.login-btn');
 
-            if (password === 'skid') {
-                document.getElementById('loginScreen').style.display = 'none';
-                document.getElementById('dashboardScreen').style.display = 'block';
-                testFirebaseConnection();
-                loadDashboard();
-            } else {
-                errorMsg.textContent = 'Invalid password';
+            errorMsg.style.display = 'none';
+            button.disabled = true;
+            button.textContent = 'Signing in…';
+
+            try {
+                await signInAsAdmin(password);
+                openDashboard();
+            } catch (error) {
+                errorMsg.textContent = error.message;
                 errorMsg.style.display = 'block';
+            } finally {
+                button.disabled = false;
+                button.textContent = 'Login';
+            }
+        });
+
+        // Firebase keeps the session, so a reload lands straight in the dashboard
+        firebase.auth().onAuthStateChanged(async (user) => {
+            if (user && await isRegisteredAdmin(user)) {
+                openDashboard();
             }
         });
 
@@ -283,6 +309,7 @@
             loadAutoApproveSettings();
             loadBannedWordsFilterSettings();
             loadStats();
+            setTimeout(initializeBannedWords, 2000);
         }
 
         // Generate random mod password - REUSABLE VERSION
@@ -758,8 +785,9 @@
             });
         }
 
-        // Logout
+        // Logout — ends the Firebase session, not just the on-screen state
         function logout() {
+            signOutAdmin();
             document.getElementById('loginScreen').style.display = 'block';
             document.getElementById('dashboardScreen').style.display = 'none';
             document.getElementById('adminPassword').value = '';
@@ -932,8 +960,8 @@
             });
         }
 
-        // Call this when dashboard loads
-        setTimeout(initializeBannedWords, 2000);
+        // Runs only once an admin is signed in — the security rules reject
+        // this write from an unauthenticated page.
 
         // Load moderator reports
         function loadModReports() {

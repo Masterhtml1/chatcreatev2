@@ -184,6 +184,7 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="auth.js"></script>
 
     <script>
         // Your Firebase configuration
@@ -443,16 +444,19 @@
                 return;
             }
             
-            // Check for admin account
+            // Check for admin account — Firebase Authentication verifies the
+            // password; it is never compared against a value in this page.
             if (nickname.toLowerCase() === 'lebron') {
-                if (adminPassword !== 'skid') {
-                    errorMsg.textContent = 'Invalid admin password.';
+                try {
+                    await signInAsAdmin(adminPassword);
+                } catch (error) {
+                    errorMsg.textContent = error.message;
                     errorMsg.style.display = 'block';
                     return;
                 }
                 isAdmin = true;
                 isMod = false;
-            } 
+            }
             // Check for mod account
             else if (nickname.toLowerCase() === 'mod') {
                 if (!modPassword) {
@@ -1351,7 +1355,12 @@ This is an automated security notification from ChatCreate.
             
             const channelRef = database.ref('channels/' + currentChannel.substring(1) + '/messages');
             channelRef.off();
-            
+
+            // End any admin session along with the chat session
+            if (isAdmin) {
+                signOutAdmin();
+            }
+
             currentUser = null;
             currentChannel = null;
             termsAccepted = false;
